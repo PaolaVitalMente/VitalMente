@@ -822,7 +822,7 @@ export default function VitalMenteApp() {
     const targets = { water: 8, exercise: 1, mindfulness: 1, desayuno: 1, almuerzo: 1, cena: 1 }
     let completed = 0
     Object.entries(targets).forEach(([key, target]) => {
-      if (dailyProgress[key as keyof DailyProgress] >= target) completed++
+      if (Number(dailyProgress[key as keyof DailyProgress]) >= target) completed++
     })
     return Math.round((completed / 6) * 100)
   }
