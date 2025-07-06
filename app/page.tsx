@@ -1549,7 +1549,7 @@ Gracias!`
 
   const activeTips = globalTips.filter(tip => tip.is_active)
   const mindfulnessResources = globalResources.filter(r => r.type === 'mindfulness' && r.is_active)
-  const nutritionResources = globalResources.filter(r => r.type === 'nutrition' && r.is_active)
+  const nutritionResources = globalResources.filter(r => r.type === 'nutrition' && r.is_active);
 
   return (
     <div className="min-h-screen bg-gray-50">
