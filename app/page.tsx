@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from '@supabase/supabase-js'
+
+// ✅ IMPORTACIÓN ÚNICA Y CORREGIDA - ELIMINAR DUPLICADOS
 import {
   Button,
   Input,
@@ -23,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
   Textarea,
-} from "../components/ui"
+} from "../components/ui/button"
 
 import {
   Home,
@@ -520,6 +522,7 @@ const dbFunctions = {
     }
   }
 }
+
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
@@ -770,7 +773,7 @@ export default function VitalMenteApp() {
     return messages[goal] || messages.feel_good
   }
 
-  const updateProgress = async (field: string, id: 'user_id' | 'date', increment: number) => {
+  const updateProgress = async (field: keyof DailyProgress, increment: number) => {
     const newProgress = { ...dailyProgress, [field]: Math.max(0, (dailyProgress as any)[field] + increment) }
     setDailyProgress(newProgress)
     
@@ -819,7 +822,7 @@ export default function VitalMenteApp() {
     const targets = { water: 8, exercise: 1, mindfulness: 1, desayuno: 1, almuerzo: 1, cena: 1 }
     let completed = 0
     Object.entries(targets).forEach(([key, target]) => {
-      if (dailyProgress[key as "desayuno" | "almuerzo" | "cena" | "mindfulness" | "water" | "exercise"] >= target) completed++
+      if (dailyProgress[key as keyof DailyProgress] >= target) completed++
     })
     return Math.round((completed / 6) * 100)
   }
@@ -879,7 +882,8 @@ Gracias!`
     const whatsappUrl = `https://wa.me/573134852878?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, '_blank')
   }
-// Panel de administración
+
+  // Panel de administración
   const AdminPanel = () => {
     const [activeAdminTab, setActiveAdminTab] = useState("overview")
     const [showTipDialog, setShowTipDialog] = useState(false)
@@ -1552,10 +1556,6 @@ Gracias!`
   const nutritionResources = globalResources.filter(r => r.type === 'nutrition' && r.is_active);
 
   return (
-
-
-
- 
     <div className="min-h-screen bg-gray-50">
       <div className="pb-20">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -1769,11 +1769,15 @@ Gracias!`
                       <div>
                         <h4 className="font-semibold capitalize">{meal}</h4>
                         <p className="text-sm text-gray-600">
-                          {dailyProgress[meal as "desayuno" | "almuerzo" | "cena"]} alimento(s)
+                          {dailyProgress[meal as keyof DailyProgress]} alimento(s)
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        onClick={() => updateProgress(meal as "desayuno" | "almuerzo" | "cena" | "mindfulness" | "water" | "exercise", -1)}
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => updateProgress(meal as keyof DailyProgress, -1)}
+                        >
                           <Minus className="w-3 h-3" />
                         </Button>
                         <Button size="sm" onClick={() => {
