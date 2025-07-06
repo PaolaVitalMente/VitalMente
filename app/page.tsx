@@ -770,8 +770,8 @@ export default function VitalMenteApp() {
     return messages[goal] || messages.feel_good
   }
 
-  field: "desayuno" | "almuerzo" | "cena" | "mindfulness" | "water" | "exercise", id: 'user_id' | 'date', increment: number
-    const newProgress = { ...dailyProgress, [field]: Math.max(0, dailyProgress[field as "desayuno" | "almuerzo" | "cena" | "mindfulness" | "water" | "exercise"] + increment) }
+  const updateProgress = async (field: string, id: 'user_id' | 'date', increment: number) => {
+    const newProgress = { ...dailyProgress, [field]: Math.max(0, (dailyProgress as any)[field] + increment) }
     setDailyProgress(newProgress)
     
     if (currentUser) {
