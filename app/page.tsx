@@ -770,8 +770,8 @@ export default function VitalMenteApp() {
     return messages[goal] || messages.feel_good
   }
 
-  const updateProgress = async (field: keyof Omit<DailyProgress, 'id' | 'user_id' | 'date'>, increment: number) => {
-    const newProgress = { ...dailyProgress, [field]: Math.max(0, dailyProgress[field] + increment) }
+  field: "desayuno" | "almuerzo" | "cena" | "mindfulness" | "water" | "exercise", id: 'user_id' | 'date', increment: number
+    const newProgress = { ...dailyProgress, [field]: Math.max(0, dailyProgress[field as "desayuno" | "almuerzo" | "cena" | "mindfulness" | "water" | "exercise"] + increment) }
     setDailyProgress(newProgress)
     
     if (currentUser) {
@@ -819,7 +819,7 @@ export default function VitalMenteApp() {
     const targets = { water: 8, exercise: 1, mindfulness: 1, desayuno: 1, almuerzo: 1, cena: 1 }
     let completed = 0
     Object.entries(targets).forEach(([key, target]) => {
-      if (dailyProgress[key as keyof typeof targets] >= target) completed++
+      if (dailyProgress[key as "desayuno" | "almuerzo" | "cena" | "mindfulness" | "water" | "exercise"] >= target) completed++
     })
     return Math.round((completed / 6) * 100)
   }
