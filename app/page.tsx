@@ -818,14 +818,20 @@ export default function VitalMenteApp() {
     }
   }
 
-  const getProgressPercentage = () => {
-    const targets = { water: 8, exercise: 1, mindfulness: 1, desayuno: 1, almuerzo: 1, cena: 1 }
-    let completed = 0
-    Object.entries(targets).forEach(([key, target]) => {
-      if (dailyProgress[key as keyof DailyProgress] >= target) completed++
-    })
-    return Math.round((completed / 6) * 100)
-  }
+const getProgressPercentage = () => {
+  const targets = { water: 8, exercise: 1, mindfulness: 1, desayuno: 1, almuerzo: 1, cena: 1 }
+  let completed = 0
+  
+  // ✅ CORRECCIÓN: Solo usar propiedades numéricas
+  if (dailyProgress.water >= 8) completed++
+  if (dailyProgress.exercise >= 1) completed++
+  if (dailyProgress.mindfulness >= 1) completed++
+  if (dailyProgress.desayuno >= 1) completed++
+  if (dailyProgress.almuerzo >= 1) completed++
+  if (dailyProgress.cena >= 1) completed++
+  
+  return Math.round((completed / 6) * 100)
+}
 
   const addUserFood = async () => {
     if (!newFood.name || !selectedMeal || !currentUser) return
