@@ -1547,11 +1547,13 @@ Gracias!`
     )
   }
 
-  const activeTips = globalTips.filter(tip => tip.is_active)
-  const mindfulnessResources = globalResources.filter(r => r.type === 'mindfulness' && r.is_active)
-  const nutritionResources = globalResources.filter(r => r.type === 'nutrition' && r.is_active);
+const activeTips = globalTips.filter(tip => tip.is_active)
+const mindfulnessResources = globalResources.filter(r => r.type === 'mindfulness' && r.is_active)
+const nutritionResources = globalResources.filter(r => r.type === 'nutrition' && r.is_active);
 
-  return (
+return (
+
+ 
     <div className="min-h-screen bg-gray-50">
       <div className="pb-20">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
