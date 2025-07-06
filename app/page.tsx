@@ -1765,11 +1765,11 @@ Gracias!`
                       <div>
                         <h4 className="font-semibold capitalize">{meal}</h4>
                         <p className="text-sm text-gray-600">
-                          {dailyProgress[meal as keyof DailyProgress]} alimento(s)
+                          {dailyProgress[meal as "desayuno" | "almuerzo" | "cena"]} alimento(s)
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline" onClick={() => updateProgress(meal as keyof DailyProgress, -1)}>
+                        onClick={() => updateProgress(meal as "desayuno" | "almuerzo" | "cena" | "mindfulness" | "water" | "exercise", -1)}
                           <Minus className="w-3 h-3" />
                         </Button>
                         <Button size="sm" onClick={() => {
