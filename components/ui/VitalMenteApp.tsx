@@ -569,6 +569,13 @@ export default function VitalMenteApp() {
   const [selectedMeal, setSelectedMeal] = useState<'desayuno' | 'almuerzo' | 'cena' | null>(null)
   const [newFood, setNewFood] = useState({ name: "", calories: "", protein: "", carbs: "", fats: "" })
 
+  const [showMealModal, setShowMealModal] = useState(false)
+  const [selectedMealType, setSelectedMealType] = useState('')
+  const [mealCompositions, setMealCompositions] = useState([])
+  const openMealModal = (mealType) => {
+    setSelectedMealType(mealType)
+    setShowMealModal(true)
+}
   useEffect(() => {
     initializeApp()
   }, [])
@@ -1777,7 +1784,7 @@ Gracias!`
                         <Button 
                           size="sm" 
                           variant="outline" 
-                          onClick={() => updateProgress(meal as keyof DailyProgress, -1)}
+                          onClick={() => openMealModal(meal)}
                         >
                           <Minus className="w-3 h-3" />
                         </Button>
