@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
   Textarea,
-} from "@/components/ui"
+} from "@/components/ui/index"
 
 import {
   Home,
