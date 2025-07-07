@@ -2102,7 +2102,7 @@ Gracias!`
         </div>
       </div>
 
-      <Dialog open={showFoodDialog} onOpenChange={setShowFoodDialog}>
+     <Dialog open={false} onOpenChange={setShowFoodDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Agregar alimento - {selectedMeal}</DialogTitle>
