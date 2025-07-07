@@ -2230,33 +2230,18 @@ Gracias!`
 {showMealModal && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">
-          Seleccionar alimento - {selectedMealType}
-        </h3>
-        <button
-          onClick={() => setShowMealModal(false)}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          ✕
-        </button>
+      <h3 className="text-lg font-semibold mb-4">Seleccionar alimento - {selectedMealType}</h3>
+      
+      <div className="space-y-3">
+        {userFoods.map((food) => (
+          <div key={food.id} onClick={() => handleSelectFood(food)} className="border p-3 rounded-lg cursor-pointer hover:bg-gray-50">
+            <h4 className="font-semibold">{food.name}</h4>
+            <p className="text-sm text-gray-600">{food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g</p>
+          </div>
+        ))}
       </div>
       
-      <div className="space-y-3 max-h-60 overflow-y-auto">
-        {userFoods.length > 0 ? userFoods.map((food) => (
-          <div>
-            <div key={food.id} onClick={() => handleSelectFood(food)} className="border p-3 rounded-lg cursor-pointer hover:bg-gray-50">
-            <h4 className="font-semibold">{food.name}</h4>
-            <p className="text-sm text-gray-600">
-              {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
-            </p>
-          </div>
-        )) : (
-          <p className="text-gray-500 text-center py-4">
-            No tienes alimentos personalizados. Crea algunos primero.
-          </p>
-        )}
-      </div>
+      <button onClick={() => setShowMealModal(false)} className="mt-4 bg-gray-500 text-white px-4 py-2 rounded w-full">Cancelar</button>
     </div>
   </div>
 )}
@@ -2264,38 +2249,12 @@ Gracias!`
 {showQuantityModal && selectedFood && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-      <h3 className="text-lg font-semibold mb-4">
-        ¿Cuántos gramos de {selectedFood.name}?
-      </h3>
-      
-      <Input
-        type="number"
-        placeholder="Ejemplo: 100"
-        value={foodQuantity}
-        onChange={(e) => setFoodQuantity(e.target.value)}
-        className="mb-4"
-      />
-      
+      <h3 className="text-lg font-semibold mb-4">¿Cuántos gramos de {selectedFood.name}?</h3>
+      <input type="number" placeholder="100" value={foodQuantity} onChange={(e) => setFoodQuantity(e.target.value)} className="w-full p-2 border rounded mb-4" />
       <div className="flex gap-2">
-        <Button 
-          onClick={handleAddFoodToMeal}
-         
-          
-        >
-          Agregar a {selectedMealType}
-        </Button>
-        <Button 
-         
-          onClick={() => {
-            setShowQuantityModal(false)
-            setSelectedFood(null)
-            setFoodQuantity('')
-          }}
-        >
-          Cancelar
-        </Button>
+        <button onClick={handleAddFoodToMeal} className="flex-1 bg-green-600 text-white px-4 py-2 rounded">Agregar</button>
+        <button onClick={() => { setShowQuantityModal(false); setSelectedFood(null); setFoodQuantity(''); }} className="bg-gray-500 text-white px-4 py-2 rounded">Cancelar</button>
       </div>
     </div>
   </div>
 )}
-}
