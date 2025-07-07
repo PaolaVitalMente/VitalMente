@@ -571,7 +571,7 @@ export default function VitalMenteApp() {
     almuerzo: 0,
     cena: 0
   })
-const [selectedFood, setSelectedFood] = useState(null)
+const [selectedFood, setSelectedFood] = useState<UserFood | null>(null)
 const [foodQuantity, setFoodQuantity] = useState('')
 const [showQuantityModal, setShowQuantityModal] = useState(false)
   const [userFoods, setUserFoods] = useState<UserFood[]>([])
