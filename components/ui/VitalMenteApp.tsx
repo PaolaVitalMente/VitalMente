@@ -2244,11 +2244,8 @@ Gracias!`
       
       <div className="space-y-3 max-h-60 overflow-y-auto">
         {userFoods.length > 0 ? userFoods.map((food) => (
-          <div 
-            key={food.id} 
-            onClick={() => handleSelectFood(food)}
-            className="border p-3 rounded-lg cursor-pointer hover:bg-gray-50"
-          >
+          <div>
+            <div key={food.id} onClick={() => handleSelectFood(food)} className="border p-3 rounded-lg cursor-pointer hover:bg-gray-50">
             <h4 className="font-semibold">{food.name}</h4>
             <p className="text-sm text-gray-600">
               {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
