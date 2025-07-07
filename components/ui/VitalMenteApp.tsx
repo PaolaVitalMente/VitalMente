@@ -572,7 +572,7 @@ export default function VitalMenteApp() {
   const [showMealModal, setShowMealModal] = useState(false)
   const [selectedMealType, setSelectedMealType] = useState('')
   const [mealCompositions, setMealCompositions] = useState([])
-  const openMealModal = (mealType) => {
+  const openMealModal = (mealType: string) => {
     setSelectedMealType(mealType)
     setShowMealModal(true)
 }
