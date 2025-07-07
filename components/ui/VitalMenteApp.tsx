@@ -632,9 +632,13 @@ export default function VitalMenteApp() {
 
   // ✅ FUNCIÓN PARA ABRIR MODAL DE COMIDAS
   const openMealModal = (mealType: string) => {
-    setSelectedMealType(mealType)
-    setShowMealModal(true)
-  }
+  console.log('🔥 openMealModal ejecutado:', mealType)
+  console.log('🔥 showMealModal antes:', showMealModal)
+  console.log('🔥 showFoodDialog antes:', showFoodDialog)
+  setSelectedMealType(mealType)
+  setShowMealModal(true)
+  console.log('🔥 showMealModal después: true')
+}
 
   // ✅ FUNCIÓN PARA SELECCIONAR ALIMENTO
   const handleSelectFood = (food: UserFood) => {
