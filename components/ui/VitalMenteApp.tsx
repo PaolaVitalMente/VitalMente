@@ -108,21 +108,6 @@ interface UserFood {
   created_at: string
 }
 
-// ✅ NUEVO: Interface para meal_compositions
-interface MealComposition {
-  id: string
-  user_id: string
-  date: string
-  meal_type: 'desayuno' | 'almuerzo' | 'cena'
-  food_name: string
-  quantity_grams: number
-  calories_consumed: number
-  protein_consumed: number
-  carbs_consumed: number
-  fats_consumed: number
-  created_at: string
-}
-
 interface GlobalTip {
   id: string
   category: string
@@ -186,7 +171,7 @@ const GOALS = [
 ]
 
 // ============================================================================
-// FUNCIONES DE BASE DE DATOS - INCLUYE MEAL_COMPOSITIONS
+// FUNCIONES DE BASE DE DATOS
 // ============================================================================
 
 const dbFunctions = {
@@ -282,40 +267,6 @@ const dbFunctions = {
     
     if (error) throw new Error(error.message)
     return data as UserFood
-  },
-
-  // ✅ NUEVAS FUNCIONES PARA MEAL_COMPOSITIONS
-  async getTodayMealCompositions(userId: string): Promise<MealComposition[]> {
-    const today = new Date().toISOString().split('T')[0]
-    const { data, error } = await supabase
-      .from('meal_compositions')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('date', today)
-    
-    if (error) return []
-    return data as MealComposition[]
-  },
-
-  async addMealComposition(composition: Omit<MealComposition, 'id' | 'created_at'>): Promise<MealComposition> {
-    const { data, error } = await supabase
-      .from('meal_compositions')
-      .insert({
-        ...composition,
-        created_at: new Date().toISOString()
-      })
-      .select()
-      .single()
-    
-    if (error) throw new Error(error.message)
-    return data as MealComposition
-  },
-
-  async deleteMealComposition(id: string): Promise<void> {
-    await supabase
-      .from('meal_compositions')
-      .delete()
-      .eq('id', id)
   },
 
   async getActiveTips(): Promise<GlobalTip[]> {
@@ -603,10 +554,6 @@ export default function VitalMenteApp() {
   const [supplements, setSupplements] = useState<Supplement[]>([])
   const [currentTipIndex, setCurrentTipIndex] = useState(0)
 
-  // ✅ NUEVOS ESTADOS PARA MEAL_COMPOSITIONS
-  const [mealCompositions, setMealCompositions] = useState<MealComposition[]>([])
-  const [todayMacros, setTodayMacros] = useState({ calories: 0, protein: 0, carbs: 0, fats: 0 })
-
   const [logoClicks, setLogoClicks] = useState(0)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -618,122 +565,20 @@ export default function VitalMenteApp() {
     activityLevel: 1.375, goal: "feel_good"
   })
 
-  // ✅ ESTADOS ACTUALIZADOS PARA MODALS
   const [showFoodDialog, setShowFoodDialog] = useState(false)
   const [selectedMeal, setSelectedMeal] = useState<'desayuno' | 'almuerzo' | 'cena' | null>(null)
   const [newFood, setNewFood] = useState({ name: "", calories: "", protein: "", carbs: "", fats: "" })
 
-  // ✅ NUEVOS ESTADOS PARA CALCULADORA DE MACROS
   const [showMealModal, setShowMealModal] = useState(false)
   const [selectedMealType, setSelectedMealType] = useState('')
-  const [showQuantityModal, setShowQuantityModal] = useState(false)
-  const [selectedFood, setSelectedFood] = useState<UserFood | null>(null)
-  const [foodQuantity, setFoodQuantity] = useState("")
-
-  // ✅ FUNCIÓN PARA ABRIR MODAL DE COMIDAS
+  const [mealCompositions, setMealCompositions] = useState([])
   const openMealModal = (mealType: string) => {
-  console.log('🔥 openMealModal ejecutado:', mealType)
-  console.log('🔥 showMealModal antes:', showMealModal)
-  console.log('🔥 showFoodDialog antes:', showFoodDialog)
-  setSelectedMealType(mealType)
-  setShowMealModal(true)
-  console.log('🔥 showMealModal después: true')
-}
-
-  // ✅ FUNCIÓN PARA SELECCIONAR ALIMENTO
-  const handleSelectFood = (food: UserFood) => {
-    setSelectedFood(food)
-    setShowMealModal(false)
-    setShowQuantityModal(true)
-    setFoodQuantity("")
-  }
-
-  // ✅ FUNCIÓN PARA AGREGAR ALIMENTO CON CANTIDAD
-  const handleAddFoodToMeal = async () => {
-    if (!selectedFood || !foodQuantity || !currentUser || !selectedMealType) return
-
-    const quantity = parseFloat(foodQuantity)
-    if (quantity <= 0) {
-      alert("Por favor ingresa una cantidad válida")
-      return
-    }
-
-    try {
-      // Calcular macros proporcionales
-      const factor = quantity / 100 // Los valores nutricionales están por 100g
-      const calculatedMacros = {
-        calories_consumed: Math.round(selectedFood.calories * factor),
-        protein_consumed: Math.round(selectedFood.protein * factor * 10) / 10,
-        carbs_consumed: Math.round(selectedFood.carbs * factor * 10) / 10,
-        fats_consumed: Math.round(selectedFood.fats * factor * 10) / 10
-      }
-
-      // Guardar en meal_compositions
-      const composition = await dbFunctions.addMealComposition({
-        user_id: currentUser.id,
-        date: new Date().toISOString().split('T')[0],
-        meal_type: selectedMealType as 'desayuno' | 'almuerzo' | 'cena',
-        food_name: selectedFood.name,
-        quantity_grams: quantity,
-        ...calculatedMacros
-      })
-
-      // Actualizar estado local
-      setMealCompositions(prev => [...prev, composition])
-      
-      // Actualizar progreso de comidas
-      await updateProgress(selectedMealType as keyof DailyProgress, 1)
-
-      // Recalcular macros del día
-      await loadTodayMacros(currentUser.id)
-
-      // Cerrar modals
-      setShowQuantityModal(false)
-      setSelectedFood(null)
-      setFoodQuantity("")
-      setSelectedMealType("")
-
-      alert(`✅ Agregado: ${quantity}g de ${selectedFood.name} (${calculatedMacros.calories_consumed} cal)`)
-    } catch (error: any) {
-      console.error('Error adding food to meal:', error)
-      alert('Error al agregar alimento: ' + error.message)
-    }
-  }
-
-  // ✅ FUNCIÓN PARA CARGAR MACROS DEL DÍA
-  const loadTodayMacros = async (userId: string) => {
-    try {
-      const compositions = await dbFunctions.getTodayMealCompositions(userId)
-      setMealCompositions(compositions)
-      
-      const totalMacros = compositions.reduce((acc, comp) => ({
-        calories: acc.calories + comp.calories_consumed,
-        protein: acc.protein + comp.protein_consumed,
-        carbs: acc.carbs + comp.carbs_consumed,
-        fats: acc.fats + comp.fats_consumed
-      }), { calories: 0, protein: 0, carbs: 0, fats: 0 })
-      
-      setTodayMacros(totalMacros)
-    } catch (error) {
-      console.error('Error loading today macros:', error)
-    }
-  }
-
-  // ✅ FUNCIÓN PARA ELIMINAR ALIMENTO DE COMIDA
-  const removeFoodFromMeal = async (compositionId: string) => {
-    if (!confirm("¿Eliminar este alimento?")) return
-    
-    try {
-      await dbFunctions.deleteMealComposition(compositionId)
-      setMealCompositions(prev => prev.filter(comp => comp.id !== compositionId))
-      if (currentUser) {
-        await loadTodayMacros(currentUser.id)
-      }
-    } catch (error) {
-      console.error('Error removing food:', error)
-    }
-  }
-
+  console.log('openMealModal ejecutado:', mealType);
+  console.log('showMealModal antes:', showMealModal);
+  setSelectedMealType(mealType);
+  setShowMealModal(true);
+  console.log('showMealModal despues: true');
+};
   useEffect(() => {
     initializeApp()
   }, [])
@@ -782,7 +627,6 @@ export default function VitalMenteApp() {
       await dbFunctions.updateUserLastLogin(user.id)
       setCurrentUser(user)
       await loadUserData(user.id)
-      await loadTodayMacros(user.id) // ✅ CARGAR MACROS DEL DÍA
       calculateMacros(user)
       setAuthState('authenticated')
       setLoginForm({ phone: "", accessCode: "" })
@@ -886,8 +730,6 @@ export default function VitalMenteApp() {
     setUserFoods([])
     setProgressHistory([])
     setMacroResults(null)
-    setMealCompositions([]) // ✅ LIMPIAR MEAL COMPOSITIONS
-    setTodayMacros({ calories: 0, protein: 0, carbs: 0, fats: 0 }) // ✅ LIMPIAR MACROS
     setActiveTab("inicio")
   }
 
@@ -1010,10 +852,10 @@ export default function VitalMenteApp() {
       })
 
       setUserFoods(prev => [...prev, food])
+      await updateProgress(selectedMeal, 1)
       setNewFood({ name: "", calories: "", protein: "", carbs: "", fats: "" })
       setShowFoodDialog(false)
       setSelectedMeal(null)
-      alert("✅ Alimento agregado a tu lista personal")
     } catch (error: any) {
       console.error('Error adding food:', error)
       alert('Error al agregar alimento: ' + error.message)
@@ -1881,128 +1723,78 @@ Gracias!`
               </Card>
             )}
 
-            {/* ✅ RESUMEN DE MACROS DEL DÍA */}
-            {macroResults && (
+            {macroResults && currentUser && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    {macroResults.goalType === 'emotional' ? 'Tu progreso nutricional' : 'Progreso de macros'}
+                    {macroResults.goalType === 'emotional' ? 'Tu alimentación balanceada' : 'Tus macros diarios'}
                     <Badge variant="secondary">{macroResults.goalLabel}</Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center mb-4">
-                    <div className="text-2xl font-bold text-green-600">
-                      {todayMacros.calories}/{macroResults.calories}
+                    <div className="text-2xl font-bold text-green-600">{macroResults.calories}</div>
+                    <div className="text-sm text-gray-600">
+                      {macroResults.goalType === 'emotional' 
+                        ? 'calorías para sentirte bien' 
+                        : 'calorías por día'
+                      }
                     </div>
-                    <div className="text-sm text-gray-600">calorías consumidas hoy</div>
-                    <Progress 
-                      value={(todayMacros.calories / macroResults.calories) * 100} 
-                      className="mt-2" 
-                    />
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-4 text-sm">
+                  {macroResults.goalType === 'emotional' && (
+                    <div className="text-center mb-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
+                      <p className="text-sm text-purple-700">
+                        🌟 Alimentación balanceada para tu bienestar emocional
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">
-                        {Math.round(todayMacros.protein * 10) / 10}/{macroResults.protein}g
-                      </div>
-                      <div className="text-gray-600">Proteínas</div>
-                      <Progress 
-                        value={(todayMacros.protein / macroResults.protein) * 100} 
-                        className="mt-1 h-2" 
-                      />
+                      <div className="text-lg font-bold text-blue-600">{macroResults.protein}g</div>
+                      <div className="text-sm text-gray-600">Proteínas</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-green-600">
-                        {Math.round(todayMacros.carbs * 10) / 10}/{macroResults.carbs}g
-                      </div>
-                      <div className="text-gray-600">Carbohidratos</div>
-                      <Progress 
-                        value={(todayMacros.carbs / macroResults.carbs) * 100} 
-                        className="mt-1 h-2" 
-                      />
+                      <div className="text-lg font-bold text-green-600">{macroResults.carbs}g</div>
+                      <div className="text-sm text-gray-600">Carbohidratos</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-yellow-600">
-                        {Math.round(todayMacros.fats * 10) / 10}/{macroResults.fats}g
-                      </div>
-                      <div className="text-gray-600">Grasas</div>
-                      <Progress 
-                        value={(todayMacros.fats / macroResults.fats) * 100} 
-                        className="mt-1 h-2" 
-                      />
+                      <div className="text-lg font-bold text-yellow-600">{macroResults.fats}g</div>
+                      <div className="text-sm text-gray-600">Grasas</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* ✅ REGISTRO DE COMIDAS CON CALCULADORA */}
             <Card>
               <CardHeader>
                 <CardTitle>Registro del día</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {['desayuno', 'almuerzo', 'cena'].map(meal => {
-                    const mealComps = mealCompositions.filter(comp => comp.meal_type === meal)
-                    const mealCals = mealComps.reduce((sum, comp) => sum + comp.calories_consumed, 0)
-                    
-                    return (
-                      <div key={meal} className="border rounded-lg p-3">
-                        <div className="flex justify-between items-center mb-2">
-                          <div>
-                            <h4 className="font-semibold capitalize">{meal}</h4>
-                            <p className="text-sm text-gray-600">
-                              {mealCals} calorías • {mealComps.length} alimento(s)
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => openMealModal(meal)}
-                            >
-                              <Plus className="w-3 h-3" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              onClick={() => {
-                                setSelectedMeal(meal as 'desayuno' | 'almuerzo' | 'cena')
-                                setShowFoodDialog(true)
-                              }}
-                            >
-                              <ChefHat className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        {/* ✅ LISTA DE ALIMENTOS CONSUMIDOS */}
-                        {mealComps.length > 0 && (
-                          <div className="space-y-1 mt-2">
-                            {mealComps.map(comp => (
-                              <div key={comp.id} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded">
-                                <span>{comp.food_name} ({comp.quantity_grams}g)</span>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">{comp.calories_consumed} cal</span>
-                                  <Button 
-                                    size="sm" 
-                                    variant="ghost" 
-                                    onClick={() => removeFoodFromMeal(comp.id)}
-                                    className="h-6 w-6 p-0"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                  {['desayuno', 'almuerzo', 'cena'].map(meal => (
+                    <div key={meal} className="flex justify-between items-center p-3 border rounded-lg">
+                      <div>
+                        <h4 className="font-semibold capitalize">{meal}</h4>
+                        <p className="text-sm text-gray-600">
+                          {dailyProgress[meal as keyof DailyProgress]} alimento(s)
+                        </p>
                       </div>
-                    )
-                  })}
+                      <div className="flex items-center gap-2">
+                        {/* ✅ CORRECCIÓN 2: Button correctamente formateado */}
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => openMealModal(meal)}
+                        >
+                          <Minus className="w-3 h-3" />
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -2256,7 +2048,6 @@ Gracias!`
         </Tabs>
       </div>
 
-      {/* ✅ BARRA DE NAVEGACIÓN INFERIOR */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="grid grid-cols-5 h-16">
           <button
@@ -2311,116 +2102,12 @@ Gracias!`
         </div>
       </div>
 
-      {/* ✅ MODAL PARA SELECCIONAR ALIMENTOS DE COMIDA */}
-      <Dialog open={showMealModal} onOpenChange={setShowMealModal}>
+     <Dialog open={false} onOpenChange={setShowFoodDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Agregar alimento - {selectedMealType}</DialogTitle>
+            <DialogTitle>Agregar alimento - {selectedMeal}</DialogTitle>
             <DialogDescription>
-              Selecciona un alimento de tu lista personal
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {userFoods.length > 0 ? (
-              userFoods.map(food => (
-                <div key={food.id} className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer" onClick={() => handleSelectFood(food)}>
-                  <h4 className="font-semibold">{food.name}</h4>
-                  <p className="text-sm text-gray-600">
-                    {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
-                  </p>
-                  <Badge variant="outline" className="mt-1 text-xs">{food.category}</Badge>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500 mb-4">No tienes alimentos personalizados aún</p>
-                <Button onClick={() => {
-                  setShowMealModal(false)
-                  setSelectedMeal(selectedMealType as 'desayuno' | 'almuerzo' | 'cena')
-                  setShowFoodDialog(true)
-                }}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Crear primer alimento
-                </Button>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* ✅ MODAL PARA ESPECIFICAR CANTIDAD */}
-      <Dialog open={showQuantityModal} onOpenChange={setShowQuantityModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cantidad de {selectedFood?.name}</DialogTitle>
-            <DialogDescription>
-              Especifica cuántos gramos vas a consumir
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            {selectedFood && (
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <h4 className="font-semibold">{selectedFood.name}</h4>
-                <p className="text-sm text-gray-600">
-                  Por 100g: {selectedFood.calories} cal | P: {selectedFood.protein}g | C: {selectedFood.carbs}g | G: {selectedFood.fats}g
-                </p>
-              </div>
-            )}
-            
-            <div>
-              <Label htmlFor="quantity">Cantidad en gramos</Label>
-              <Input
-                id="quantity"
-                type="number"
-                placeholder="100"
-                value={foodQuantity}
-                onChange={(e) => setFoodQuantity(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-
-            {/* ✅ PREVIEW DE MACROS CALCULADOS */}
-            {selectedFood && foodQuantity && parseFloat(foodQuantity) > 0 && (
-              <div className="bg-green-50 p-3 rounded-lg">
-                <h5 className="font-semibold text-green-800 mb-2">
-                  Macros calculados para {foodQuantity}g:
-                </h5>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="font-medium">Calorías:</span> {Math.round(selectedFood.calories * parseFloat(foodQuantity) / 100)}
-                  </div>
-                  <div>
-                    <span className="font-medium">Proteínas:</span> {Math.round(selectedFood.protein * parseFloat(foodQuantity) / 100 * 10) / 10}g
-                  </div>
-                  <div>
-                    <span className="font-medium">Carbohidratos:</span> {Math.round(selectedFood.carbs * parseFloat(foodQuantity) / 100 * 10) / 10}g
-                  </div>
-                  <div>
-                    <span className="font-medium">Grasas:</span> {Math.round(selectedFood.fats * parseFloat(foodQuantity) / 100 * 10) / 10}g
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="flex gap-2">
-              <Button onClick={handleAddFoodToMeal} className="flex-1" disabled={!foodQuantity || parseFloat(foodQuantity) <= 0}>
-                Agregar a {selectedMealType}
-              </Button>
-              <Button variant="outline" onClick={() => setShowQuantityModal(false)}>
-                Cancelar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* ✅ MODAL PARA CREAR NUEVOS ALIMENTOS */}
-      <Dialog open={showFoodDialog} onOpenChange={setShowFoodDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Crear alimento personalizado</DialogTitle>
-            <DialogDescription>
-              Agrega un nuevo alimento con sus valores nutricionales por 100g
+              Registra un alimento personalizado con sus valores nutricionales
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -2431,7 +2118,7 @@ Gracias!`
             />
             <div className="grid grid-cols-2 gap-4">
               <Input
-                placeholder="Calorías (por 100g)"
+                placeholder="Calorías"
                 type="number"
                 value={newFood.calories}
                 onChange={(e) => setNewFood(prev => ({ ...prev, calories: e.target.value }))}
@@ -2457,19 +2144,60 @@ Gracias!`
                 onChange={(e) => setNewFood(prev => ({ ...prev, fats: e.target.value }))}
               />
             </div>
-            
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <p className="text-sm text-blue-700">
-                💡 Tip: Los valores nutricionales deben ser por 100 gramos del alimento.
-              </p>
+            <div className="flex gap-2">
+              <Button onClick={addUserFood} className="flex-1">
+                Agregar alimento
+              </Button>
+              <Button variant="outline" onClick={() => {
+                updateProgress(selectedMeal!, 1)
+                setShowFoodDialog(false)
+                setSelectedMeal(null)
+              }}>
+                Solo contar
+              </Button>
             </div>
-
-            <Button onClick={addUserFood} className="w-full" disabled={!newFood.name}>
-              Crear alimento
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
+      {/* Modal para agregar alimentos a comidas */}
+{showMealModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <h3 className="text-lg font-semibold mb-4">
+        Agregar alimento - {selectedMealType}
+      </h3>
+      
+      <div className="space-y-4">
+        <p className="text-gray-600">Selecciona un alimento de tu lista personal:</p>
+        
+        {userFoods.map((food) => (
+          <div key={food.id} className="border p-3 rounded-lg">
+            <h4 className="font-semibold">{food.name}</h4>
+            <p className="text-sm text-gray-600">
+              {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
+            </p>
+            <button
+              onClick={() => {
+                console.log('Alimento seleccionado:', food.name)
+                setShowMealModal(false)
+              }}
+              className="mt-2 bg-green-600 text-white px-4 py-2 rounded"
+            >
+              Agregar a {selectedMealType}
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      <button
+        onClick={() => setShowMealModal(false)}
+        className="mt-4 bg-gray-500 text-white px-4 py-2 rounded w-full"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
+)}
     </div>
   )
 }
