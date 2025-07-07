@@ -573,8 +573,11 @@ export default function VitalMenteApp() {
   const [selectedMealType, setSelectedMealType] = useState('')
   const [mealCompositions, setMealCompositions] = useState([])
   const openMealModal = (mealType: string) => {
-    setSelectedMealType(mealType)
-    setShowMealModal(true)
+  console.log('openMealModal ejecutado:', mealType)
+  console.log('showMealModal antes:', showMealModal)
+  setSelectedMealType(mealType)
+  setShowMealModal(true)
+  console.log('showMealModal después: true')
 }
   useEffect(() => {
     initializeApp()
@@ -1787,11 +1790,6 @@ Gracias!`
                           onClick={() => openMealModal(meal)}
                         >
                           <Minus className="w-3 h-3" />
-                        </Button>
-                        <Button size="sm" onClick={() => {
-                          setSelectedMeal(meal as 'desayuno' | 'almuerzo' | 'cena')
-                          setShowFoodDialog(true)
-                        }}>
                           <Plus className="w-3 h-3" />
                         </Button>
                       </div>
