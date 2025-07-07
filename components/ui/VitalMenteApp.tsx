@@ -2282,13 +2282,13 @@ Gracias!`
       <div className="flex gap-2">
         <Button 
           onClick={handleAddFoodToMeal}
-          className="flex-1"
-          disabled={!foodQuantity}
+         
+          
         >
           Agregar a {selectedMealType}
         </Button>
         <Button 
-          variant="outline"
+         
           onClick={() => {
             setShowQuantityModal(false)
             setSelectedFood(null)
