@@ -636,7 +636,7 @@ const handleAddFoodToMeal = async () => {
       date: new Date().toISOString().split('T')[0]
     })
     
-    await updateProgress(selectedMealType, 1)
+    await updateProgress(selectedMealType as keyof DailyProgress, 1)
     setShowQuantityModal(false)
     setSelectedFood(null)
     setFoodQuantity('')
