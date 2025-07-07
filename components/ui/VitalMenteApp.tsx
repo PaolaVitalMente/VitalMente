@@ -606,7 +606,7 @@ const [showQuantityModal, setShowQuantityModal] = useState(false)
   setShowMealModal(true);
   console.log('showMealModal despues: true');
 };
-  const handleSelectFood = (food) => {
+  const handleSelectFood = (food: UserFood) => {
   console.log('Alimento seleccionado:', food.name)
   setSelectedFood(food)
   setShowMealModal(false)
