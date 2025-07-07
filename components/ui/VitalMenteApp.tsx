@@ -573,12 +573,12 @@ export default function VitalMenteApp() {
   const [selectedMealType, setSelectedMealType] = useState('')
   const [mealCompositions, setMealCompositions] = useState([])
   const openMealModal = (mealType: string) => {
-  console.log('openMealModal ejecutado:', mealType)
-  console.log('showMealModal antes:', showMealModal)
-  setSelectedMealType(mealType)
-  setShowMealModal(true)
-  console.log('showMealModal después: true')
-}
+  console.log('openMealModal ejecutado:', mealType);
+  console.log('showMealModal antes:', showMealModal);
+  setSelectedMealType(mealType);
+  setShowMealModal(true);
+  console.log('showMealModal despues: true');
+};
   useEffect(() => {
     initializeApp()
   }, [])
