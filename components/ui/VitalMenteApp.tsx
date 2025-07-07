@@ -522,32 +522,7 @@ const dbFunctions = {
     }
   }
 }
-const mealFunctions = {
-  async getMealCompositions(userId: string, date: string): Promise<any[]> {
-    const { data, error } = await supabase
-      .from('meal_compositions')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('date', date)
-    
-    if (error) return []
-    return data || []
-  },
 
-  async addMealComposition(composition: any): Promise<any> {
-    const { data, error } = await supabase
-      .from('meal_compositions')
-      .insert({
-        ...composition,
-        created_at: new Date().toISOString()
-      })
-      .select()
-      .single()
-    
-    if (error) throw new Error(error.message)
-    return data
-  }
-}
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
@@ -571,9 +546,7 @@ export default function VitalMenteApp() {
     almuerzo: 0,
     cena: 0
   })
-const [selectedFood, setSelectedFood] = useState<UserFood | null>(null)
-const [foodQuantity, setFoodQuantity] = useState('')
-const [showQuantityModal, setShowQuantityModal] = useState(false)
+
   const [userFoods, setUserFoods] = useState<UserFood[]>([])
   const [progressHistory, setProgressHistory] = useState<DailyProgress[]>([])
   const [globalTips, setGlobalTips] = useState<GlobalTip[]>([])
@@ -606,46 +579,6 @@ const [showQuantityModal, setShowQuantityModal] = useState(false)
   setShowMealModal(true);
   console.log('showMealModal despues: true');
 };
-  const handleSelectFood = (food: UserFood) => {
-  console.log('Alimento seleccionado:', food.name)
-  setSelectedFood(food)
-  setShowMealModal(false)
-  setShowQuantityModal(true)
-}
-
-const handleAddFoodToMeal = async () => {
-  if (!selectedFood || !foodQuantity || !currentUser) return
-  
-  try {
-    const quantity = parseFloat(foodQuantity)
-    const calories = (selectedFood.calories * quantity) / 100
-    const protein = (selectedFood.protein * quantity) / 100
-    const carbs = (selectedFood.carbs * quantity) / 100
-    const fats = (selectedFood.fats * quantity) / 100
-    
-    await mealFunctions.addMealComposition({
-      user_id: currentUser.id,
-      meal_type: selectedMealType,
-      food_id: selectedFood.id,
-      food_name: selectedFood.name,
-      quantity_grams: quantity,
-      calories: calories,
-      protein: protein,
-      carbs: carbs,
-      fats: fats,
-      date: new Date().toISOString().split('T')[0]
-    })
-    
-    await updateProgress(selectedMealType as keyof DailyProgress, 1)
-    setShowQuantityModal(false)
-    setSelectedFood(null)
-    setFoodQuantity('')
-    console.log('Alimento agregado exitosamente')
-  } catch (error) {
-    console.error('Error agregando alimento:', error)
-    alert('Error al agregar alimento')
-  }
-}
   useEffect(() => {
     initializeApp()
   }, [])
@@ -2230,33 +2163,41 @@ Gracias!`
 {showMealModal && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-      <h3 className="text-lg font-semibold mb-4">Seleccionar alimento - {selectedMealType}</h3>
+      <h3 className="text-lg font-semibold mb-4">
+        Agregar alimento - {selectedMealType}
+      </h3>
       
-      <div className="space-y-3">
+      <div className="space-y-4">
+        <p className="text-gray-600">Selecciona un alimento de tu lista personal:</p>
+        
         {userFoods.map((food) => (
-          <div key={food.id} onClick={() => handleSelectFood(food)} className="border p-3 rounded-lg cursor-pointer hover:bg-gray-50">
+          <div key={food.id} className="border p-3 rounded-lg">
             <h4 className="font-semibold">{food.name}</h4>
-            <p className="text-sm text-gray-600">{food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g</p>
+            <p className="text-sm text-gray-600">
+              {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
+            </p>
+            <button
+              onClick={() => {
+                console.log('Alimento seleccionado:', food.name)
+                setShowMealModal(false)
+              }}
+              className="mt-2 bg-green-600 text-white px-4 py-2 rounded"
+            >
+              Agregar a {selectedMealType}
+            </button>
           </div>
         ))}
       </div>
       
-      <button onClick={() => setShowMealModal(false)} className="mt-4 bg-gray-500 text-white px-4 py-2 rounded w-full">Cancelar</button>
+      <button
+        onClick={() => setShowMealModal(false)}
+        className="mt-4 bg-gray-500 text-white px-4 py-2 rounded w-full"
+      >
+        Cancelar
+      </button>
     </div>
   </div>
 )}
-
-{showQuantityModal && selectedFood && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-      <h3 className="text-lg font-semibold mb-4">¿Cuántos gramos de {selectedFood.name}?</h3>
-      <input type="number" placeholder="100" value={foodQuantity} onChange={(e) => setFoodQuantity(e.target.value)} className="w-full p-2 border rounded mb-4" />
-      <div className="flex gap-2">
-        <button onClick={handleAddFoodToMeal} className="flex-1 bg-green-600 text-white px-4 py-2 rounded">Agregar</button>
-        <button onClick={() => { setShowQuantityModal(false); setSelectedFood(null); setFoodQuantity(''); }} className="bg-gray-500 text-white px-4 py-2 rounded">Cancelar</button>
-      </div>
     </div>
-  </div>
-)}
-</div>
-    </div>
+  )
+}
