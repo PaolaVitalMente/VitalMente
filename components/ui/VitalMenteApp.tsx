@@ -2161,6 +2161,45 @@ Gracias!`
           </div>
         </DialogContent>
       </Dialog>
+      {/* Modal para agregar alimentos a comidas */}
+{showMealModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <h3 className="text-lg font-semibold mb-4">
+        Agregar alimento - {selectedMealType}
+      </h3>
+      
+      <div className="space-y-4">
+        <p className="text-gray-600">Selecciona un alimento de tu lista personal:</p>
+        
+        {userFoods.map((food) => (
+          <div key={food.id} className="border p-3 rounded-lg">
+            <h4 className="font-semibold">{food.name}</h4>
+            <p className="text-sm text-gray-600">
+              {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
+            </p>
+            <button
+              onClick={() => {
+                console.log('Alimento seleccionado:', food.name)
+                setShowMealModal(false)
+              }}
+              className="mt-2 bg-green-600 text-white px-4 py-2 rounded"
+            >
+              Agregar a {selectedMealType}
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      <button
+        onClick={() => setShowMealModal(false)}
+        className="mt-4 bg-gray-500 text-white px-4 py-2 rounded w-full"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
+)}
     </div>
   )
 }
