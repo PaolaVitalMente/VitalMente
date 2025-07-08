@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { createClient } from '@supabase/supabase-js'
 
-// ✅ CORRECCIÓN 1: Importaciones de componentes UI corregidas
+// ✅ CORRECCIÓN 1: Importaciones de componentes UI corregidas 
 import {
   Button,
   Input,
