@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
   Textarea,
-} from "./index"
+} from "./button"
 
 import {
   Home,
