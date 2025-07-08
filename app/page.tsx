@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { createClient } from '@supabase/supabase-js'
 
-// ✅ IMPORTACIÓN ÚNICA Y CORREGIDA - ELIMINAR DUPLICADOS
+// ✅ CORRECCIÓN 1: Importaciones de componentes UI corregidas
 import {
   Button,
   Input,
@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
   Textarea,
-} from "../components/ui/button"
+} from "./index"
 
 import {
   Home,
@@ -54,7 +54,8 @@ import {
   UserPlus,
   Calendar,
   Package,
-  Loader2
+  Loader2,
+  Calculator
 } from "lucide-react"
 
 // ============================================================================
@@ -108,6 +109,22 @@ interface UserFood {
   created_at: string
 }
 
+// 🆕 NUEVA INTERFAZ: Composición de comidas para la calculadora
+interface MealComposition {
+  id: string
+  user_id: string
+  date: string
+  meal_type: 'desayuno' | 'almuerzo' | 'cena'
+  food_id: string
+  food_name: string
+  quantity_grams: number
+  calories_consumed: number
+  protein_consumed: number
+  carbs_consumed: number
+  fats_consumed: number
+  created_at: string
+}
+
 interface GlobalTip {
   id: string
   category: string
@@ -149,6 +166,14 @@ interface MacroResult {
   goalLabel: string
 }
 
+// 🆕 NUEVA INTERFAZ: Progreso de macros consumidos
+interface ConsumedMacros {
+  calories: number
+  protein: number
+  carbs: number
+  fats: number
+}
+
 const ACTIVITY_LEVELS = [
   { value: 1.2, label: "Sedentario", desc: "Poco ejercicio" },
   { value: 1.375, label: "Ligero", desc: "1-3 días/semana" },
@@ -171,7 +196,7 @@ const GOALS = [
 ]
 
 // ============================================================================
-// FUNCIONES DE BASE DE DATOS
+// FUNCIONES DE BASE DE DATOS EXTENDIDAS
 // ============================================================================
 
 const dbFunctions = {
@@ -267,6 +292,43 @@ const dbFunctions = {
     
     if (error) throw new Error(error.message)
     return data as UserFood
+  },
+
+  // 🆕 NUEVAS FUNCIONES: Manejo de composiciones de comidas
+  async getTodayMealCompositions(userId: string): Promise<MealComposition[]> {
+    const today = new Date().toISOString().split('T')[0]
+    const { data, error } = await supabase
+      .from('meal_compositions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('date', today)
+      .order('created_at', { ascending: true })
+    
+    if (error) return []
+    return data as MealComposition[]
+  },
+
+  async addMealComposition(composition: Omit<MealComposition, 'id' | 'created_at'>): Promise<MealComposition> {
+    const { data, error } = await supabase
+      .from('meal_compositions')
+      .insert({
+        ...composition,
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+    
+    if (error) throw new Error(error.message)
+    return data as MealComposition
+  },
+
+  async deleteMealComposition(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('meal_compositions')
+      .delete()
+      .eq('id', id)
+    
+    if (error) throw new Error(error.message)
   },
 
   async getActiveTips(): Promise<GlobalTip[]> {
@@ -554,6 +616,16 @@ export default function VitalMenteApp() {
   const [supplements, setSupplements] = useState<Supplement[]>([])
   const [currentTipIndex, setCurrentTipIndex] = useState(0)
 
+  // 🆕 ESTADOS PARA LA CALCULADORA DE MACROS
+  const [mealCompositions, setMealCompositions] = useState<MealComposition[]>([])
+  const [consumedMacros, setConsumedMacros] = useState<ConsumedMacros>({
+    calories: 0, protein: 0, carbs: 0, fats: 0
+  })
+  const [showMealCalculator, setShowMealCalculator] = useState(false)
+  const [selectedMealType, setSelectedMealType] = useState<'desayuno' | 'almuerzo' | 'cena'>('desayuno')
+  const [selectedFood, setSelectedFood] = useState<UserFood | null>(null)
+  const [foodQuantity, setFoodQuantity] = useState<string>('100')
+
   const [logoClicks, setLogoClicks] = useState(0)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -699,15 +771,34 @@ export default function VitalMenteApp() {
         setDailyProgress(prev => ({ ...prev, user_id: userId }))
       }
 
-      const [foods, history] = await Promise.all([
+      const [foods, history, compositions] = await Promise.all([
         dbFunctions.getUserFoods(userId),
-        dbFunctions.getProgressHistory(userId)
+        dbFunctions.getProgressHistory(userId),
+        dbFunctions.getTodayMealCompositions(userId) // 🆕 NUEVA LÍNEA
       ])
       setUserFoods(foods)
       setProgressHistory(history)
+      setMealCompositions(compositions) // 🆕 NUEVA LÍNEA
+      
+      // 🆕 CALCULAR MACROS CONSUMIDOS
+      calculateConsumedMacros(compositions)
     } catch (error) {
       console.error('Error loading user data:', error)
     }
+  }
+
+  // 🆕 NUEVA FUNCIÓN: Calcular macros consumidos del día
+  const calculateConsumedMacros = (compositions: MealComposition[]) => {
+    const totals = compositions.reduce(
+      (acc, comp) => ({
+        calories: acc.calories + comp.calories_consumed,
+        protein: acc.protein + comp.protein_consumed,
+        carbs: acc.carbs + comp.carbs_consumed,
+        fats: acc.fats + comp.fats_consumed
+      }),
+      { calories: 0, protein: 0, carbs: 0, fats: 0 }
+    )
+    setConsumedMacros(totals)
   }
 
   const handleLogout = () => {
@@ -721,6 +812,9 @@ export default function VitalMenteApp() {
     setProgressHistory([])
     setMacroResults(null)
     setActiveTab("inicio")
+    // 🆕 LIMPIAR ESTADOS DE CALCULADORA
+    setMealCompositions([])
+    setConsumedMacros({ calories: 0, protein: 0, carbs: 0, fats: 0 })
   }
 
   const handleLogoClick = () => {
@@ -818,20 +912,14 @@ export default function VitalMenteApp() {
     }
   }
 
-const getProgressPercentage = () => {
-  const targets = { water: 8, exercise: 1, mindfulness: 1, desayuno: 1, almuerzo: 1, cena: 1 }
-  let completed = 0
-  
-  // ✅ CORRECCIÓN: Solo usar propiedades numéricas
-  if (dailyProgress.water >= 8) completed++
-  if (dailyProgress.exercise >= 1) completed++
-  if (dailyProgress.mindfulness >= 1) completed++
-  if (dailyProgress.desayuno >= 1) completed++
-  if (dailyProgress.almuerzo >= 1) completed++
-  if (dailyProgress.cena >= 1) completed++
-  
-  return Math.round((completed / 6) * 100)
-}
+  const getProgressPercentage = () => {
+    const targets = { water: 8, exercise: 1, mindfulness: 1, desayuno: 1, almuerzo: 1, cena: 1 }
+    let completed = 0
+    Object.entries(targets).forEach(([key, target]) => {
+      if (Number(dailyProgress[key as keyof DailyProgress]) >= target) completed++
+    })
+    return Math.round((completed / 6) * 100)
+  }
 
   const addUserFood = async () => {
     if (!newFood.name || !selectedMeal || !currentUser) return
@@ -855,6 +943,79 @@ const getProgressPercentage = () => {
     } catch (error: any) {
       console.error('Error adding food:', error)
       alert('Error al agregar alimento: ' + error.message)
+    }
+  }
+
+  // 🆕 NUEVA FUNCIÓN: Abrir calculadora de macros
+  const openMealCalculator = (mealType: 'desayuno' | 'almuerzo' | 'cena') => {
+    setSelectedMealType(mealType)
+    setShowMealCalculator(true)
+    setSelectedFood(null)
+    setFoodQuantity('100')
+  }
+
+  // 🆕 NUEVA FUNCIÓN: Agregar alimento con cantidad específica
+  const addFoodToMeal = async () => {
+    if (!selectedFood || !currentUser || !foodQuantity) return
+
+    try {
+      const quantity = parseInt(foodQuantity)
+      const ratio = quantity / 100 // Los valores nutricionales están por 100g
+
+      const composition: Omit<MealComposition, 'id' | 'created_at'> = {
+        user_id: currentUser.id,
+        date: new Date().toISOString().split('T')[0],
+        meal_type: selectedMealType,
+        food_id: selectedFood.id,
+        food_name: selectedFood.name,
+        quantity_grams: quantity,
+        calories_consumed: Math.round(selectedFood.calories * ratio),
+        protein_consumed: Math.round(selectedFood.protein * ratio),
+        carbs_consumed: Math.round(selectedFood.carbs * ratio),
+        fats_consumed: Math.round(selectedFood.fats * ratio)
+      }
+
+      const newComposition = await dbFunctions.addMealComposition(composition)
+      setMealCompositions(prev => [...prev, newComposition])
+      
+      // Recalcular macros consumidos
+      calculateConsumedMacros([...mealCompositions, newComposition])
+      
+      // Actualizar progreso de la comida
+      await updateProgress(selectedMealType, 1)
+      
+      setShowMealCalculator(false)
+      setSelectedFood(null)
+      setFoodQuantity('100')
+    } catch (error: any) {
+      console.error('Error adding food to meal:', error)
+      alert('Error al agregar alimento: ' + error.message)
+    }
+  }
+
+  // 🆕 NUEVA FUNCIÓN: Remover alimento de comida
+  const removeFoodFromMeal = async (compositionId: string) => {
+    try {
+      await dbFunctions.deleteMealComposition(compositionId)
+      const updatedCompositions = mealCompositions.filter(c => c.id !== compositionId)
+      setMealCompositions(updatedCompositions)
+      calculateConsumedMacros(updatedCompositions)
+    } catch (error: any) {
+      console.error('Error removing food:', error)
+      alert('Error al remover alimento: ' + error.message)
+    }
+  }
+
+  // 🆕 NUEVA FUNCIÓN: Obtener progreso de calorías
+  const getCaloriesProgress = () => {
+    if (!macroResults) return { consumed: 0, target: 0, percentage: 0 }
+    
+    const percentage = macroResults.calories > 0 ? Math.round((consumedMacros.calories / macroResults.calories) * 100) : 0
+    
+    return {
+      consumed: consumedMacros.calories,
+      target: macroResults.calories,
+      percentage: Math.min(percentage, 100) // Limitar a 100%
     }
   }
 
@@ -889,7 +1050,7 @@ Gracias!`
     window.open(whatsappUrl, '_blank')
   }
 
-  // Panel de administración
+  // Panel de administración (sin cambios)
   const AdminPanel = () => {
     const [activeAdminTab, setActiveAdminTab] = useState("overview")
     const [showTipDialog, setShowTipDialog] = useState(false)
@@ -1560,6 +1721,7 @@ Gracias!`
   const activeTips = globalTips.filter(tip => tip.is_active)
   const mindfulnessResources = globalResources.filter(r => r.type === 'mindfulness' && r.is_active)
   const nutritionResources = globalResources.filter(r => r.type === 'nutrition' && r.is_active);
+  const caloriesProgress = getCaloriesProgress() // 🆕 NUEVA LÍNEA
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1588,11 +1750,35 @@ Gracias!`
               </div>
             </div>
 
+            {/* 🆕 NUEVO: Progreso de calorías destacado */}
+            {macroResults && (
+              <Card className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Calculator className="w-5 h-5" />
+                      <span className="font-semibold">Calorías consumidas</span>
+                    </div>
+                    <span className="text-lg font-bold">
+                      {caloriesProgress.consumed}/{caloriesProgress.target}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={caloriesProgress.percentage} 
+                    className="mb-2 bg-white/20"
+                  />
+                  <p className="text-sm text-center">
+                    {caloriesProgress.percentage}% de tu objetivo diario
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             <Card>
               <CardContent className="p-6">
                 <div className="text-center mb-4">
                   <div className="text-3xl font-bold text-green-600">{getProgressPercentage()}%</div>
-                  <p className="text-sm text-gray-600">Progreso diario</p>
+                  <p className="text-sm text-gray-600">Progreso diario general</p>
                 </div>
                 <Progress value={getProgressPercentage()} className="mb-4" />
                 
@@ -1728,14 +1914,23 @@ Gracias!`
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center mb-4">
-                    <div className="text-2xl font-bold text-green-600">{macroResults.calories}</div>
-                    <div className="text-sm text-gray-600">
-                      {macroResults.goalType === 'emotional' 
-                        ? 'calorías para sentirte bien' 
-                        : 'calorías por día'
-                      }
+                  {/* 🆕 NUEVA SECCIÓN: Progreso de macros vs objetivo */}
+                  <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg mb-4">
+                    <h4 className="font-semibold mb-3 text-center">Progreso vs Objetivo</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">{consumedMacros.calories}</div>
+                        <div className="text-sm text-gray-600">Consumidas</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">{macroResults.calories}</div>
+                        <div className="text-sm text-gray-600">Objetivo</div>
+                      </div>
                     </div>
+                    <Progress value={caloriesProgress.percentage} className="mt-3" />
+                    <p className="text-center text-sm text-gray-600 mt-2">
+                      {caloriesProgress.percentage}% del objetivo diario
+                    </p>
                   </div>
                   
                   {macroResults.goalType === 'emotional' && (
@@ -1749,15 +1944,24 @@ Gracias!`
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">
                       <div className="text-lg font-bold text-blue-600">{macroResults.protein}g</div>
-                      <div className="text-sm text-gray-600">Proteínas</div>
+                      <div className="text-xs text-gray-600">Objetivo</div>
+                      <div className="text-sm font-medium text-blue-800">{consumedMacros.protein}g</div>
+                      <div className="text-xs text-gray-600">Consumido</div>
+                      <div className="text-xs">Proteínas</div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg font-bold text-green-600">{macroResults.carbs}g</div>
-                      <div className="text-sm text-gray-600">Carbohidratos</div>
+                      <div className="text-xs text-gray-600">Objetivo</div>
+                      <div className="text-sm font-medium text-green-800">{consumedMacros.carbs}g</div>
+                      <div className="text-xs text-gray-600">Consumido</div>
+                      <div className="text-xs">Carbohidratos</div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg font-bold text-yellow-600">{macroResults.fats}g</div>
-                      <div className="text-sm text-gray-600">Grasas</div>
+                      <div className="text-xs text-gray-600">Objetivo</div>
+                      <div className="text-sm font-medium text-yellow-800">{consumedMacros.fats}g</div>
+                      <div className="text-xs text-gray-600">Consumido</div>
+                      <div className="text-xs">Grasas</div>
                     </div>
                   </div>
                 </CardContent>
@@ -1771,28 +1975,53 @@ Gracias!`
               <CardContent>
                 <div className="space-y-4">
                   {['desayuno', 'almuerzo', 'cena'].map(meal => (
-                    <div key={meal} className="flex justify-between items-center p-3 border rounded-lg">
-                      <div>
-                        <h4 className="font-semibold capitalize">{meal}</h4>
-                        <p className="text-sm text-gray-600">
-                          {dailyProgress[meal as keyof DailyProgress]} alimento(s)
-                        </p>
+                    <div key={meal} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <div>
+                          <h4 className="font-semibold capitalize">{meal}</h4>
+                          <p className="text-sm text-gray-600">
+                            {dailyProgress[meal as keyof DailyProgress]} registro(s)
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => openMealCalculator(meal as 'desayuno' | 'almuerzo' | 'cena')}
+                          >
+                            <Calculator className="w-3 h-3 mr-1" />
+                            Agregar
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => updateProgress(meal as keyof DailyProgress, -1)}
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-                        <Button size="sm" onClick={() => {
-                          setSelectedMeal(meal as 'desayuno' | 'almuerzo' | 'cena')
-                          setShowFoodDialog(true)
-                        }}>
-                          <Plus className="w-3 h-3" />
-                        </Button>
-                      </div>
+
+                      {/* 🆕 NUEVA SECCIÓN: Mostrar alimentos consumidos en esta comida */}
+                      {mealCompositions.filter(comp => comp.meal_type === meal).length > 0 && (
+                        <div className="space-y-2">
+                          <h5 className="text-sm font-medium text-gray-700">Alimentos consumidos:</h5>
+                          {mealCompositions
+                            .filter(comp => comp.meal_type === meal)
+                            .map(comp => (
+                              <div key={comp.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                <div>
+                                  <span className="font-medium">{comp.food_name}</span>
+                                  <span className="text-sm text-gray-600 ml-2">({comp.quantity_grams}g)</span>
+                                  <div className="text-xs text-gray-500">
+                                    {comp.calories_consumed} cal | P: {comp.protein_consumed}g | C: {comp.carbs_consumed}g | G: {comp.fats_consumed}g
+                                  </div>
+                                </div>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  onClick={() => removeFoodFromMeal(comp.id)}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            ))
+                          }
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1819,6 +2048,24 @@ Gracias!`
                 </CardContent>
               </Card>
             )}
+
+            {/* 🆕 NUEVA SECCIÓN: Botón para agregar alimentos personalizados */}
+            <Card>
+              <CardContent className="p-4 text-center">
+                <h4 className="font-semibold mb-2">¿No encuentras tu alimento?</h4>
+                <p className="text-sm text-gray-600 mb-3">Crea tu propio alimento personalizado</p>
+                <Button 
+                  onClick={() => {
+                    setSelectedMeal('desayuno')
+                    setShowFoodDialog(true)
+                  }}
+                  variant="outline"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Crear alimento personalizado
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="ejercicio" className="p-4 space-y-6">
@@ -2048,6 +2295,7 @@ Gracias!`
         </Tabs>
       </div>
 
+      {/* 🆕 NAVEGACIÓN INFERIOR */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="grid grid-cols-5 h-16">
           <button
@@ -2102,12 +2350,185 @@ Gracias!`
         </div>
       </div>
 
+      {/* 🆕 MODAL DE CALCULADORA DE MACROS */}
+      <Dialog open={showMealCalculator} onOpenChange={setShowMealCalculator}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calculator className="w-5 h-5" />
+              Calculadora de macros - {selectedMealType}
+            </DialogTitle>
+            <DialogDescription>
+              Selecciona un alimento y especifica la cantidad para calcular los macros automáticamente
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {!selectedFood ? (
+              <div>
+                <h4 className="font-semibold mb-3">Selecciona un alimento:</h4>
+                <div className="max-h-60 overflow-y-auto space-y-2">
+                  {userFoods.length > 0 ? (
+                    userFoods.map(food => (
+                      <div 
+                        key={food.id} 
+                        className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                        onClick={() => setSelectedFood(food)}
+                      >
+                        <h5 className="font-semibold">{food.name}</h5>
+                        <p className="text-sm text-gray-600">
+                          {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
+                          <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-600 mb-3">No tienes alimentos personalizados aún</p>
+                      <Button 
+                        onClick={() => {
+                          setShowMealCalculator(false)
+                          setSelectedMeal(selectedMealType)
+                          setShowFoodDialog(true)
+                        }}
+                        variant="outline"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Crear primer alimento
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h4 className="font-semibold">{selectedFood.name}</h4>
+                    <p className="text-sm text-gray-600">Valores por 100g</p>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setSelectedFood(null)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                  <div className="grid grid-cols-4 gap-2 text-center text-sm">
+                    <div>
+                      <div className="font-bold">{selectedFood.calories}</div>
+                      <div className="text-gray-600">cal</div>
+                    </div>
+                    <div>
+                      <div className="font-bold text-blue-600">{selectedFood.protein}g</div>
+                      <div className="text-gray-600">Proteína</div>
+                    </div>
+                    <div>
+                      <div className="font-bold text-green-600">{selectedFood.carbs}g</div>
+                      <div className="text-gray-600">Carbos</div>
+                    </div>
+                    <div>
+                      <div className="font-bold text-yellow-600">{selectedFood.fats}g</div>
+                      <div className="text-gray-600">Grasas</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="quantity">Cantidad consumida (gramos):</Label>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFoodQuantity(prev => Math.max(10, parseInt(prev) - 10).toString())}
+                    >
+                      <Minus className="w-3 h-3" />
+                    </Button>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      value={foodQuantity}
+                      onChange={(e) => setFoodQuantity(e.target.value)}
+                      className="text-center font-bold"
+                      min="1"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFoodQuantity(prev => (parseInt(prev) + 10).toString())}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setFoodQuantity('50')}>50g</Button>
+                    <Button variant="outline" size="sm" onClick={() => setFoodQuantity('100')}>100g</Button>
+                    <Button variant="outline" size="sm" onClick={() => setFoodQuantity('150')}>150g</Button>
+                    <Button variant="outline" size="sm" onClick={() => setFoodQuantity('200')}>200g</Button>
+                  </div>
+                </div>
+
+                {parseInt(foodQuantity) > 0 && (
+                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+                    <h5 className="font-semibold mb-2 text-center">Macros calculados para {foodQuantity}g:</h5>
+                    <div className="grid grid-cols-4 gap-2 text-center">
+                      <div>
+                        <div className="text-lg font-bold text-green-600">
+                          {Math.round(selectedFood.calories * parseInt(foodQuantity) / 100)}
+                        </div>
+                        <div className="text-xs text-gray-600">calorías</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-blue-600">
+                          {Math.round(selectedFood.protein * parseInt(foodQuantity) / 100)}g
+                        </div>
+                        <div className="text-xs text-gray-600">proteína</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-green-600">
+                          {Math.round(selectedFood.carbs * parseInt(foodQuantity) / 100)}g
+                        </div>
+                        <div className="text-xs text-gray-600">carbos</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-yellow-600">
+                          {Math.round(selectedFood.fats * parseInt(foodQuantity) / 100)}g
+                        </div>
+                        <div className="text-xs text-gray-600">grasas</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-4">
+                  <Button onClick={() => setSelectedFood(null)} variant="outline" className="flex-1">
+                    Cambiar alimento
+                  </Button>
+                  <Button 
+                    onClick={addFoodToMeal} 
+                    className="flex-1"
+                    disabled={!parseInt(foodQuantity) || parseInt(foodQuantity) <= 0}
+                  >
+                    Agregar a {selectedMealType}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL PARA AGREGAR ALIMENTOS PERSONALIZADOS */}
       <Dialog open={showFoodDialog} onOpenChange={setShowFoodDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Agregar alimento - {selectedMeal}</DialogTitle>
+            <DialogTitle>Agregar alimento personalizado</DialogTitle>
             <DialogDescription>
-              Registra un alimento personalizado con sus valores nutricionales
+              Crea un alimento con sus valores nutricionales por 100g
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -2118,7 +2539,7 @@ Gracias!`
             />
             <div className="grid grid-cols-2 gap-4">
               <Input
-                placeholder="Calorías"
+                placeholder="Calorías (por 100g)"
                 type="number"
                 value={newFood.calories}
                 onChange={(e) => setNewFood(prev => ({ ...prev, calories: e.target.value }))}
@@ -2144,18 +2565,36 @@ Gracias!`
                 onChange={(e) => setNewFood(prev => ({ ...prev, fats: e.target.value }))}
               />
             </div>
-            <div className="flex gap-2">
-              <Button onClick={addUserFood} className="flex-1">
-                Agregar alimento
-              </Button>
-              <Button variant="outline" onClick={() => {
-                updateProgress(selectedMeal!, 1)
-                setShowFoodDialog(false)
-                setSelectedMeal(null)
-              }}>
-                Solo contar
-              </Button>
+            
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <p className="text-sm text-blue-700">
+                💡 <strong>Tip:</strong> Todos los valores deben ser por 100g del alimento. 
+                La calculadora ajustará automáticamente según la cantidad que consumas.
+              </p>
             </div>
+
+            <Button onClick={addUserFood} className="w-full" disabled={!newFood.name}>
+              <Plus className="w-4 h-4 mr-2" />
+              Crear alimento
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* DIALOG DE LOGIN ADMIN */}
+      <Dialog open={showAdminLogin} onOpenChange={setShowAdminLogin}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Acceso Administrador</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              type="password"
+              placeholder="Código de acceso"
+              value={adminCode}
+              onChange={(e) => setAdminCode(e.target.value)}
+            />
+            <Button onClick={handleAdminLogin} className="w-full">Ingresar</Button>
           </div>
         </DialogContent>
       </Dialog>
