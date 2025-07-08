@@ -1271,10 +1271,544 @@ Gracias!`
     )
   }
 
-  // Panel de administración COMPLETO (MANTENIDO IGUAL)
+  // Panel de administración COMPLETO (RESTAURADO)
   const AdminPanel = () => {
-    // ... [mismo código del panel de administración] ...
-    return <div>Panel Admin aquí (mantenido igual por brevedad)</div>
+    const [activeAdminTab, setActiveAdminTab] = useState("overview")
+    const [showTipDialog, setShowTipDialog] = useState(false)
+    const [showResourceDialog, setShowResourceDialog] = useState(false)
+    const [showSupplementDialog, setShowSupplementDialog] = useState(false)
+    const [resourceType, setResourceType] = useState<'mindfulness' | 'nutrition'>('mindfulness')
+    const [adminStats, setAdminStats] = useState({ totalUsers: 0, activeToday: 0 })
+
+    const [newTip, setNewTip] = useState({ category: "", title: "", content: "", icon: "💡" })
+    const [newResource, setNewResource] = useState({ title: "", description: "", url: "" })
+    const [newSupplement, setNewSupplement] = useState({
+      name: "", description: "", benefits: "", price: "", image_url: "", whatsapp_message: ""
+    })
+
+    const [allTips, setAllTips] = useState<GlobalTip[]>([])
+    const [allResources, setAllResources] = useState<GlobalResource[]>([])
+    const [allSupplements, setAllSupplements] = useState<Supplement[]>([])
+
+    useEffect(() => {
+      if (isAdmin) loadAdminData()
+    }, [isAdmin])
+
+    const loadAdminData = async () => {
+      try {
+        const [tips, resources, supplements, stats] = await Promise.all([
+          dbFunctions.getAllTips(),
+          dbFunctions.getAllResources(),
+          dbFunctions.getAllSupplements(),
+          dbFunctions.getStats()
+        ])
+        setAllTips(tips)
+        setAllResources(resources)
+        setAllSupplements(supplements)
+        setAdminStats(stats)
+      } catch (error) {
+        console.error('Error loading admin data:', error)
+      }
+    }
+
+    const addGlobalTip = async () => {
+      if (!newTip.title || !newTip.content) {
+        alert("Por favor completa título y contenido")
+        return
+      }
+
+      try {
+        await dbFunctions.addTip({
+          category: newTip.category || "General",
+          title: newTip.title,
+          content: newTip.content,
+          icon: newTip.icon || "💡",
+          is_active: true
+        })
+
+        setNewTip({ category: "", title: "", content: "", icon: "💡" })
+        setShowTipDialog(false)
+        loadAdminData()
+        loadGlobalContent()
+      } catch (error: any) {
+        console.error('Error adding tip:', error)
+        alert('Error al agregar tip: ' + error.message)
+      }
+    }
+
+    const addGlobalResource = async () => {
+      if (!newResource.title || !newResource.url) {
+        alert("Por favor completa título y URL")
+        return
+      }
+
+      try {
+        await dbFunctions.addResource({
+          type: resourceType,
+          title: newResource.title,
+          description: newResource.description,
+          url: newResource.url,
+          is_active: true
+        })
+
+        setNewResource({ title: "", description: "", url: "" })
+        setShowResourceDialog(false)
+        loadAdminData()
+        loadGlobalContent()
+      } catch (error: any) {
+        console.error('Error adding resource:', error)
+        alert('Error al agregar recurso: ' + error.message)
+      }
+    }
+
+    const addSupplementAdmin = async () => {
+      if (!newSupplement.name || !newSupplement.description || !newSupplement.price) {
+        alert("Por favor completa nombre, descripción y precio")
+        return
+      }
+
+      try {
+        const benefits = newSupplement.benefits.split(',').map(b => b.trim()).filter(b => b)
+        
+        await dbFunctions.addSupplement({
+          name: newSupplement.name,
+          description: newSupplement.description,
+          benefits,
+          price: parseInt(newSupplement.price),
+          image_url: newSupplement.image_url || "/placeholder.svg?height=200&width=200",
+          is_active: true,
+          whatsapp_message: newSupplement.whatsapp_message
+        })
+
+        setNewSupplement({
+          name: "", description: "", benefits: "", price: "", image_url: "", whatsapp_message: ""
+        })
+        setShowSupplementDialog(false)
+        loadAdminData()
+        loadGlobalContent()
+      } catch (error: any) {
+        console.error('Error adding supplement:', error)
+        alert('Error al agregar suplemento: ' + error.message)
+      }
+    }
+
+    const toggleTipStatus = async (id: string) => {
+      try {
+        const tip = allTips.find(t => t.id === id)
+        if (tip) {
+          await dbFunctions.updateTip(id, { is_active: !tip.is_active })
+          loadAdminData()
+          loadGlobalContent()
+        }
+      } catch (error) {
+        console.error('Error updating tip:', error)
+      }
+    }
+
+    const deleteTip = async (id: string) => {
+      if (confirm("¿Estás seguro de eliminar este tip?")) {
+        try {
+          await dbFunctions.deleteTip(id)
+          loadAdminData()
+          loadGlobalContent()
+        } catch (error) {
+          console.error('Error deleting tip:', error)
+        }
+      }
+    }
+
+    const toggleSupplementStatus = async (id: string) => {
+      try {
+        const supplement = allSupplements.find(s => s.id === id)
+        if (supplement) {
+          await dbFunctions.updateSupplement(id, { is_active: !supplement.is_active })
+          loadAdminData()
+          loadGlobalContent()
+        }
+      } catch (error) {
+        console.error('Error updating supplement:', error)
+      }
+    }
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="border-b bg-white">
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Panel de Administración</h1>
+                <p className="text-gray-600">Gestiona el contenido global de VitalMente</p>
+                <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">🌐 Conectado a Supabase</span>
+              </div>
+              <button 
+                onClick={() => setIsAdmin(false)} 
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+              >
+                <span>{Icons.LogOut()}</span>
+                Salir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          {/* Tabs para admin */}
+          <div className="border-b border-gray-200 mb-6">
+            <nav className="flex space-x-8">
+              {['overview', 'tips', 'resources', 'supplements'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveAdminTab(tab)}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm capitalize ${
+                    activeAdminTab === tab
+                      ? 'border-green-500 text-green-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab === 'overview' ? 'Resumen' : tab === 'tips' ? 'Tips' : tab === 'resources' ? 'Recursos' : 'Suplementos'}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {activeAdminTab === 'overview' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Tips Activos</p>
+                      <p className="text-2xl font-bold text-green-600">{allTips.filter(t => t.is_active).length}</p>
+                    </div>
+                    <span className="text-2xl">{Icons.MessageSquare()}</span>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Recursos Activos</p>
+                      <p className="text-2xl font-bold text-blue-600">{allResources.filter(r => r.is_active).length}</p>
+                    </div>
+                    <span className="text-2xl">{Icons.Link()}</span>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Suplementos Activos</p>
+                      <p className="text-2xl font-bold text-amber-600">{allSupplements.filter(s => s.is_active).length}</p>
+                    </div>
+                    <span className="text-2xl">{Icons.Package()}</span>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Usuarios Registrados</p>
+                      <p className="text-2xl font-bold text-purple-600">{adminStats.totalUsers}</p>
+                    </div>
+                    <span className="text-2xl">{Icons.Users()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeAdminTab === 'tips' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Tips de Bienestar</h2>
+                <button 
+                  onClick={() => setShowTipDialog(true)}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+                >
+                  <span>{Icons.Plus()}</span>
+                  Nuevo Tip
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {allTips.map(tip => (
+                  <div key={tip.id} className="bg-white rounded-lg shadow p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{tip.icon}</span>
+                        <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">{tip.category}</span>
+                        <span className={`px-2 py-1 text-xs rounded ${tip.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {tip.is_active ? "Activo" : "Inactivo"}
+                        </span>
+                      </div>
+                      <div className="flex gap-1">
+                        <button 
+                          onClick={() => toggleTipStatus(tip.id)}
+                          className="p-1 text-gray-400 hover:text-gray-600"
+                        >
+                          {Icons.Eye()}
+                        </button>
+                        <button 
+                          onClick={() => deleteTip(tip.id)}
+                          className="p-1 text-gray-400 hover:text-red-600"
+                        >
+                          {Icons.Trash2()}
+                        </button>
+                      </div>
+                    </div>
+                    <h3 className="font-semibold mb-2">{tip.title}</h3>
+                    <p className="text-sm text-gray-600">{tip.content}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeAdminTab === 'resources' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Recursos y Enlaces</h2>
+                <button 
+                  onClick={() => setShowResourceDialog(true)}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+                >
+                  <span>{Icons.Plus()}</span>
+                  Nuevo Recurso
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {allResources.map(resource => (
+                  <div key={resource.id} className="bg-white rounded-lg shadow p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-semibold">{resource.title}</h4>
+                        <p className="text-sm text-gray-600">{resource.description}</p>
+                        <div className="flex gap-2 mt-2">
+                          <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">{resource.type}</span>
+                          <span className={`px-2 py-1 text-xs rounded ${resource.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                            {resource.is_active ? "Activo" : "Inactivo"}
+                          </span>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => window.open(resource.url, '_blank')}
+                        className="p-2 text-gray-400 hover:text-gray-600"
+                      >
+                        {Icons.ExternalLink()}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeAdminTab === 'supplements' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Gestión de Suplementos</h2>
+                <button 
+                  onClick={() => setShowSupplementDialog(true)}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+                >
+                  <span>{Icons.Plus()}</span>
+                  Nuevo Suplemento
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                {allSupplements.map(supplement => (
+                  <div key={supplement.id} className="bg-white rounded-lg shadow p-4">
+                    <img
+                      src={supplement.image_url}
+                      alt={supplement.name}
+                      className="w-full h-32 object-cover rounded-lg mb-3 bg-gray-100"
+                    />
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h4 className="font-semibold">{supplement.name}</h4>
+                        <p className="text-lg font-bold text-green-600">${supplement.price.toLocaleString()}</p>
+                      </div>
+                      <button 
+                        onClick={() => toggleSupplementStatus(supplement.id)}
+                        className="p-1 text-gray-400 hover:text-gray-600"
+                      >
+                        {Icons.Eye()}
+                      </button>
+                    </div>
+                    <span className={`inline-block px-2 py-1 text-xs rounded mb-2 ${supplement.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {supplement.is_active ? "Activo" : "Inactivo"}
+                    </span>
+                    <p className="text-sm text-gray-600 mb-2">{supplement.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Dialogs de administración */}
+        {showTipDialog && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Nuevo Tip</h3>
+              <div className="space-y-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Categoría"
+                  value={newTip.category}
+                  onChange={(e) => setNewTip(prev => ({ ...prev, category: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Título"
+                  value={newTip.title}
+                  onChange={(e) => setNewTip(prev => ({ ...prev, title: e.target.value }))}
+                />
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg h-24"
+                  placeholder="Contenido"
+                  value={newTip.content}
+                  onChange={(e) => setNewTip(prev => ({ ...prev, content: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Emoji"
+                  value={newTip.icon}
+                  onChange={(e) => setNewTip(prev => ({ ...prev, icon: e.target.value }))}
+                />
+                <div className="flex gap-2">
+                  <button 
+                    onClick={addGlobalTip} 
+                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
+                  >
+                    Agregar Tip
+                  </button>
+                  <button 
+                    onClick={() => setShowTipDialog(false)}
+                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showResourceDialog && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Recurso</h3>
+              <div className="space-y-4">
+                <select 
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  value={resourceType}
+                  onChange={(e) => setResourceType(e.target.value as 'mindfulness' | 'nutrition')}
+                >
+                  <option value="mindfulness">Mindfulness</option>
+                  <option value="nutrition">Nutrición</option>
+                </select>
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Título"
+                  value={newResource.title}
+                  onChange={(e) => setNewResource(prev => ({ ...prev, title: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Descripción"
+                  value={newResource.description}
+                  onChange={(e) => setNewResource(prev => ({ ...prev, description: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="URL"
+                  value={newResource.url}
+                  onChange={(e) => setNewResource(prev => ({ ...prev, url: e.target.value }))}
+                />
+                <div className="flex gap-2">
+                  <button 
+                    onClick={addGlobalResource} 
+                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
+                  >
+                    Agregar
+                  </button>
+                  <button 
+                    onClick={() => setShowResourceDialog(false)}
+                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showSupplementDialog && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Suplemento</h3>
+              <div className="space-y-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Nombre"
+                  value={newSupplement.name}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, name: e.target.value }))}
+                />
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg h-20"
+                  placeholder="Descripción"
+                  value={newSupplement.description}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, description: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Beneficios (separados por comas)"
+                  value={newSupplement.benefits}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, benefits: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Precio"
+                  type="number"
+                  value={newSupplement.price}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, price: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="URL imagen"
+                  value={newSupplement.image_url}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, image_url: e.target.value }))}
+                />
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg h-20"
+                  placeholder="Mensaje WhatsApp personalizado"
+                  value={newSupplement.whatsapp_message}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, whatsapp_message: e.target.value }))}
+                />
+                <div className="flex gap-2">
+                  <button 
+                    onClick={addSupplementAdmin} 
+                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
+                  >
+                    Agregar
+                  </button>
+                  <button 
+                    onClick={() => setShowSupplementDialog(false)}
+                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )
   }
 
   if (isAdmin) {
