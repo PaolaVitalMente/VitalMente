@@ -3,60 +3,41 @@
 import { useState, useEffect } from "react"
 import { createClient } from '@supabase/supabase-js'
 
-// ✅ CORRECCIÓN 1: Importaciones de componentes UI corregidas 
-import {
-  Button,
-  Input,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Badge,
-  Progress,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Label,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  Textarea,
-} from "./button"
+// ✅ CORRECCIÓN: Reemplazamos los imports problemáticos con HTML + Tailwind CSS
+// ❌ import { Button, Input, Card... } from "./index"
+// ✅ Usaremos elementos HTML nativos con clases Tailwind
 
-import {
-  Home,
-  UtensilsCrossed,
-  Activity,
-  Brain,
-  ChevronLeft,
-  ChevronRight,
-  Lightbulb,
-  Droplets,
-  Plus,
-  Minus,
-  RotateCcw,
-  X,
-  ExternalLink,
-  Edit,
-  Trash2,
-  LogOut,
-  Users,
-  MessageSquare,
-  Link,
-  ChefHat,
-  Globe,
-  Eye,
-  Phone,
-  UserPlus,
-  Calendar,
-  Package,
-  Loader2,
-  Calculator
-} from "lucide-react"
+// Iconos simples como emojis en lugar de lucide-react
+const Icons = {
+  Home: () => '🏠',
+  UtensilsCrossed: () => '🍽️',
+  Activity: () => '💪',
+  Brain: () => '🧠',
+  ChevronLeft: () => '◀️',
+  ChevronRight: () => '▶️',
+  Lightbulb: () => '💡',
+  Droplets: () => '💧',
+  Plus: () => '+',
+  Minus: () => '-',
+  RotateCcw: () => '🔄',
+  X: () => '✖️',
+  ExternalLink: () => '🔗',
+  Edit: () => '✏️',
+  Trash2: () => '🗑️',
+  LogOut: () => '🚪',
+  Users: () => '👥',
+  MessageSquare: () => '💬',
+  Link: () => '🔗',
+  ChefHat: () => '👨‍🍳',
+  Globe: () => '🌍',
+  Eye: () => '👁️',
+  Phone: () => '📞',
+  UserPlus: () => '👤+',
+  Calendar: () => '📅',
+  Package: () => '📦',
+  Loader2: () => '⏳',
+  Calculator: () => '🧮'
+}
 
 // ============================================================================
 // CONFIGURACIÓN DE SUPABASE REAL
@@ -68,7 +49,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // ============================================================================
-// TIPOS Y DATOS INICIALES
+// TIPOS Y DATOS INICIALES (MANTENIDOS COMPLETOS)
 // ============================================================================
 
 interface UserProfile {
@@ -196,7 +177,7 @@ const GOALS = [
 ]
 
 // ============================================================================
-// FUNCIONES DE BASE DE DATOS EXTENDIDAS
+// FUNCIONES DE BASE DE DATOS COMPLETAS (MANTENIDAS)
 // ============================================================================
 
 const dbFunctions = {
@@ -586,7 +567,7 @@ const dbFunctions = {
 }
 
 // ============================================================================
-// COMPONENTE PRINCIPAL
+// COMPONENTE PRINCIPAL (MANTENIDO COMPLETO)
 // ============================================================================
 
 export default function VitalMenteApp() {
@@ -1050,7 +1031,7 @@ Gracias!`
     window.open(whatsappUrl, '_blank')
   }
 
-  // Panel de administración (sin cambios)
+  // Panel de administración COMPLETO (MANTENIDO)
   const AdminPanel = () => {
     const [activeAdminTab, setActiveAdminTab] = useState("overview")
     const [showTipDialog, setShowTipDialog] = useState(false)
@@ -1217,295 +1198,375 @@ Gracias!`
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Panel de Administración</h1>
                 <p className="text-gray-600">Gestiona el contenido global de VitalMente</p>
-                <Badge variant="outline" className="mt-1">🌐 Conectado a Supabase</Badge>
+                <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">🌐 Conectado a Supabase</span>
               </div>
-              <Button onClick={() => setIsAdmin(false)} variant="outline">
-                <LogOut className="w-4 h-4 mr-2" />
+              <button 
+                onClick={() => setIsAdmin(false)} 
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+              >
+                <span>{Icons.LogOut()}</span>
                 Salir
-              </Button>
+              </button>
             </div>
           </div>
         </div>
 
         <div className="max-w-6xl mx-auto px-4 py-6">
-          <Tabs value={activeAdminTab} onValueChange={setActiveAdminTab}>
-            <TabsList className="mb-6">
-              <TabsTrigger value="overview">Resumen</TabsTrigger>
-              <TabsTrigger value="tips">Tips</TabsTrigger>
-              <TabsTrigger value="resources">Recursos</TabsTrigger>
-              <TabsTrigger value="supplements">Suplementos</TabsTrigger>
-            </TabsList>
+          {/* Tabs para admin */}
+          <div className="border-b border-gray-200 mb-6">
+            <nav className="flex space-x-8">
+              {['overview', 'tips', 'resources', 'supplements'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveAdminTab(tab)}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm capitalize ${
+                    activeAdminTab === tab
+                      ? 'border-green-500 text-green-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab === 'overview' ? 'Resumen' : tab === 'tips' ? 'Tips' : tab === 'resources' ? 'Recursos' : 'Suplementos'}
+                </button>
+              ))}
+            </nav>
+          </div>
 
-            <TabsContent value="overview" className="space-y-6">
+          {activeAdminTab === 'overview' && (
+            <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Tips Activos</p>
-                        <p className="text-2xl font-bold text-green-600">{allTips.filter(t => t.is_active).length}</p>
-                      </div>
-                      <MessageSquare className="w-8 h-8 text-green-600" />
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Tips Activos</p>
+                      <p className="text-2xl font-bold text-green-600">{allTips.filter(t => t.is_active).length}</p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <span className="text-2xl">{Icons.MessageSquare()}</span>
+                  </div>
+                </div>
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Recursos Activos</p>
-                        <p className="text-2xl font-bold text-blue-600">{allResources.filter(r => r.is_active).length}</p>
-                      </div>
-                      <Link className="w-8 h-8 text-blue-600" />
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Recursos Activos</p>
+                      <p className="text-2xl font-bold text-blue-600">{allResources.filter(r => r.is_active).length}</p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <span className="text-2xl">{Icons.Link()}</span>
+                  </div>
+                </div>
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Suplementos Activos</p>
-                        <p className="text-2xl font-bold text-amber-600">{allSupplements.filter(s => s.is_active).length}</p>
-                      </div>
-                      <Package className="w-8 h-8 text-amber-600" />
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Suplementos Activos</p>
+                      <p className="text-2xl font-bold text-amber-600">{allSupplements.filter(s => s.is_active).length}</p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <span className="text-2xl">{Icons.Package()}</span>
+                  </div>
+                </div>
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Usuarios Registrados</p>
-                        <p className="text-2xl font-bold text-purple-600">{adminStats.totalUsers}</p>
-                      </div>
-                      <Users className="w-8 h-8 text-purple-600" />
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Usuarios Registrados</p>
+                      <p className="text-2xl font-bold text-purple-600">{adminStats.totalUsers}</p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <span className="text-2xl">{Icons.Users()}</span>
+                  </div>
+                </div>
               </div>
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="tips" className="space-y-6">
+          {activeAdminTab === 'tips' && (
+            <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Tips de Bienestar</h2>
-                <Button onClick={() => setShowTipDialog(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
+                <button 
+                  onClick={() => setShowTipDialog(true)}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+                >
+                  <span>{Icons.Plus()}</span>
                   Nuevo Tip
-                </Button>
+                </button>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {allTips.map(tip => (
-                  <Card key={tip.id}>
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">{tip.icon}</span>
-                          <Badge variant="outline">{tip.category}</Badge>
-                          <Badge variant={tip.is_active ? "default" : "secondary"}>
-                            {tip.is_active ? "Activo" : "Inactivo"}
-                          </Badge>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button size="sm" variant="outline" onClick={() => toggleTipStatus(tip.id)}>
-                            <Eye className="w-3 h-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => deleteTip(tip.id)}>
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
+                  <div key={tip.id} className="bg-white rounded-lg shadow p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{tip.icon}</span>
+                        <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">{tip.category}</span>
+                        <span className={`px-2 py-1 text-xs rounded ${tip.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {tip.is_active ? "Activo" : "Inactivo"}
+                        </span>
                       </div>
-                      <h3 className="font-semibold mb-2">{tip.title}</h3>
-                      <p className="text-sm text-gray-600">{tip.content}</p>
-                    </CardContent>
-                  </Card>
+                      <div className="flex gap-1">
+                        <button 
+                          onClick={() => toggleTipStatus(tip.id)}
+                          className="p-1 text-gray-400 hover:text-gray-600"
+                        >
+                          {Icons.Eye()}
+                        </button>
+                        <button 
+                          onClick={() => deleteTip(tip.id)}
+                          className="p-1 text-gray-400 hover:text-red-600"
+                        >
+                          {Icons.Trash2()}
+                        </button>
+                      </div>
+                    </div>
+                    <h3 className="font-semibold mb-2">{tip.title}</h3>
+                    <p className="text-sm text-gray-600">{tip.content}</p>
+                  </div>
                 ))}
               </div>
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="resources" className="space-y-6">
+          {activeAdminTab === 'resources' && (
+            <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Recursos y Enlaces</h2>
-                <Button onClick={() => setShowResourceDialog(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
+                <button 
+                  onClick={() => setShowResourceDialog(true)}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+                >
+                  <span>{Icons.Plus()}</span>
                   Nuevo Recurso
-                </Button>
+                </button>
               </div>
 
               <div className="space-y-4">
                 {allResources.map(resource => (
-                  <Card key={resource.id}>
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-semibold">{resource.title}</h4>
-                          <p className="text-sm text-gray-600">{resource.description}</p>
-                          <div className="flex gap-2 mt-2">
-                            <Badge variant="outline">{resource.type}</Badge>
-                            <Badge variant={resource.is_active ? "default" : "secondary"}>
-                              {resource.is_active ? "Activo" : "Inactivo"}
-                            </Badge>
-                          </div>
+                  <div key={resource.id} className="bg-white rounded-lg shadow p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-semibold">{resource.title}</h4>
+                        <p className="text-sm text-gray-600">{resource.description}</p>
+                        <div className="flex gap-2 mt-2">
+                          <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">{resource.type}</span>
+                          <span className={`px-2 py-1 text-xs rounded ${resource.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                            {resource.is_active ? "Activo" : "Inactivo"}
+                          </span>
                         </div>
-                        <Button size="sm" variant="outline" onClick={() => window.open(resource.url, '_blank')}>
-                          <ExternalLink className="w-3 h-3" />
-                        </Button>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <button 
+                        onClick={() => window.open(resource.url, '_blank')}
+                        className="p-2 text-gray-400 hover:text-gray-600"
+                      >
+                        {Icons.ExternalLink()}
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="supplements" className="space-y-6">
+          {activeAdminTab === 'supplements' && (
+            <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Gestión de Suplementos</h2>
-                <Button onClick={() => setShowSupplementDialog(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
+                <button 
+                  onClick={() => setShowSupplementDialog(true)}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+                >
+                  <span>{Icons.Plus()}</span>
                   Nuevo Suplemento
-                </Button>
+                </button>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {allSupplements.map(supplement => (
-                  <Card key={supplement.id}>
-                    <CardContent className="p-4">
-                      <img
-                        src={supplement.image_url}
-                        alt={supplement.name}
-                        className="w-full h-32 object-cover rounded-lg mb-3 bg-gray-100"
-                      />
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="font-semibold">{supplement.name}</h4>
-                          <p className="text-lg font-bold text-green-600">${supplement.price.toLocaleString()}</p>
-                        </div>
-                        <Button size="sm" variant="outline" onClick={() => toggleSupplementStatus(supplement.id)}>
-                          <Eye className="w-3 h-3" />
-                        </Button>
+                  <div key={supplement.id} className="bg-white rounded-lg shadow p-4">
+                    <img
+                      src={supplement.image_url}
+                      alt={supplement.name}
+                      className="w-full h-32 object-cover rounded-lg mb-3 bg-gray-100"
+                    />
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h4 className="font-semibold">{supplement.name}</h4>
+                        <p className="text-lg font-bold text-green-600">${supplement.price.toLocaleString()}</p>
                       </div>
-                      <Badge variant={supplement.is_active ? "default" : "secondary"} className="mb-2">
-                        {supplement.is_active ? "Activo" : "Inactivo"}
-                      </Badge>
-                      <p className="text-sm text-gray-600 mb-2">{supplement.description}</p>
-                    </CardContent>
-                  </Card>
+                      <button 
+                        onClick={() => toggleSupplementStatus(supplement.id)}
+                        className="p-1 text-gray-400 hover:text-gray-600"
+                      >
+                        {Icons.Eye()}
+                      </button>
+                    </div>
+                    <span className={`inline-block px-2 py-1 text-xs rounded mb-2 ${supplement.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {supplement.is_active ? "Activo" : "Inactivo"}
+                    </span>
+                    <p className="text-sm text-gray-600 mb-2">{supplement.description}</p>
+                  </div>
                 ))}
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+          )}
         </div>
 
-        {/* Dialogs */}
-        <Dialog open={showTipDialog} onOpenChange={setShowTipDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Agregar Nuevo Tip</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Input
-                placeholder="Categoría"
-                value={newTip.category}
-                onChange={(e) => setNewTip(prev => ({ ...prev, category: e.target.value }))}
-              />
-              <Input
-                placeholder="Título"
-                value={newTip.title}
-                onChange={(e) => setNewTip(prev => ({ ...prev, title: e.target.value }))}
-              />
-              <Textarea
-                placeholder="Contenido"
-                value={newTip.content}
-                onChange={(e) => setNewTip(prev => ({ ...prev, content: e.target.value }))}
-              />
-              <Input
-                placeholder="Emoji"
-                value={newTip.icon}
-                onChange={(e) => setNewTip(prev => ({ ...prev, icon: e.target.value }))}
-              />
-              <Button onClick={addGlobalTip} className="w-full">Agregar Tip</Button>
+        {/* Dialogs de administración */}
+        {showTipDialog && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Nuevo Tip</h3>
+              <div className="space-y-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Categoría"
+                  value={newTip.category}
+                  onChange={(e) => setNewTip(prev => ({ ...prev, category: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Título"
+                  value={newTip.title}
+                  onChange={(e) => setNewTip(prev => ({ ...prev, title: e.target.value }))}
+                />
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg h-24"
+                  placeholder="Contenido"
+                  value={newTip.content}
+                  onChange={(e) => setNewTip(prev => ({ ...prev, content: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Emoji"
+                  value={newTip.icon}
+                  onChange={(e) => setNewTip(prev => ({ ...prev, icon: e.target.value }))}
+                />
+                <div className="flex gap-2">
+                  <button 
+                    onClick={addGlobalTip} 
+                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
+                  >
+                    Agregar Tip
+                  </button>
+                  <button 
+                    onClick={() => setShowTipDialog(false)}
+                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        )}
 
-        <Dialog open={showResourceDialog} onOpenChange={setShowResourceDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Agregar Recurso</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <select 
-                className="w-full p-2 border rounded-lg"
-                value={resourceType}
-                onChange={(e) => setResourceType(e.target.value as 'mindfulness' | 'nutrition')}
-              >
-                <option value="mindfulness">Mindfulness</option>
-                <option value="nutrition">Nutrición</option>
-              </select>
-              <Input
-                placeholder="Título"
-                value={newResource.title}
-                onChange={(e) => setNewResource(prev => ({ ...prev, title: e.target.value }))}
-              />
-              <Input
-                placeholder="Descripción"
-                value={newResource.description}
-                onChange={(e) => setNewResource(prev => ({ ...prev, description: e.target.value }))}
-              />
-              <Input
-                placeholder="URL"
-                value={newResource.url}
-                onChange={(e) => setNewResource(prev => ({ ...prev, url: e.target.value }))}
-              />
-              <Button onClick={addGlobalResource} className="w-full">Agregar</Button>
+        {showResourceDialog && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Recurso</h3>
+              <div className="space-y-4">
+                <select 
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  value={resourceType}
+                  onChange={(e) => setResourceType(e.target.value as 'mindfulness' | 'nutrition')}
+                >
+                  <option value="mindfulness">Mindfulness</option>
+                  <option value="nutrition">Nutrición</option>
+                </select>
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Título"
+                  value={newResource.title}
+                  onChange={(e) => setNewResource(prev => ({ ...prev, title: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Descripción"
+                  value={newResource.description}
+                  onChange={(e) => setNewResource(prev => ({ ...prev, description: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="URL"
+                  value={newResource.url}
+                  onChange={(e) => setNewResource(prev => ({ ...prev, url: e.target.value }))}
+                />
+                <div className="flex gap-2">
+                  <button 
+                    onClick={addGlobalResource} 
+                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
+                  >
+                    Agregar
+                  </button>
+                  <button 
+                    onClick={() => setShowResourceDialog(false)}
+                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        )}
 
-        <Dialog open={showSupplementDialog} onOpenChange={setShowSupplementDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Agregar Suplemento</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Input
-                placeholder="Nombre"
-                value={newSupplement.name}
-                onChange={(e) => setNewSupplement(prev => ({ ...prev, name: e.target.value }))}
-              />
-              <Textarea
-                placeholder="Descripción"
-                value={newSupplement.description}
-                onChange={(e) => setNewSupplement(prev => ({ ...prev, description: e.target.value }))}
-              />
-              <Input
-                placeholder="Beneficios (separados por comas)"
-                value={newSupplement.benefits}
-                onChange={(e) => setNewSupplement(prev => ({ ...prev, benefits: e.target.value }))}
-              />
-              <Input
-                placeholder="Precio"
-                type="number"
-                value={newSupplement.price}
-                onChange={(e) => setNewSupplement(prev => ({ ...prev, price: e.target.value }))}
-              />
-              <Input
-                placeholder="URL imagen"
-                value={newSupplement.image_url}
-                onChange={(e) => setNewSupplement(prev => ({ ...prev, image_url: e.target.value }))}
-              />
-              <Textarea
-                placeholder="Mensaje WhatsApp personalizado"
-                value={newSupplement.whatsapp_message}
-                onChange={(e) => setNewSupplement(prev => ({ ...prev, whatsapp_message: e.target.value }))}
-              />
-              <Button onClick={addSupplementAdmin} className="w-full">Agregar</Button>
+        {showSupplementDialog && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Suplemento</h3>
+              <div className="space-y-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Nombre"
+                  value={newSupplement.name}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, name: e.target.value }))}
+                />
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg h-20"
+                  placeholder="Descripción"
+                  value={newSupplement.description}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, description: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Beneficios (separados por comas)"
+                  value={newSupplement.benefits}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, benefits: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="Precio"
+                  type="number"
+                  value={newSupplement.price}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, price: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="URL imagen"
+                  value={newSupplement.image_url}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, image_url: e.target.value }))}
+                />
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg h-20"
+                  placeholder="Mensaje WhatsApp personalizado"
+                  value={newSupplement.whatsapp_message}
+                  onChange={(e) => setNewSupplement(prev => ({ ...prev, whatsapp_message: e.target.value }))}
+                />
+                <div className="flex gap-2">
+                  <button 
+                    onClick={addSupplementAdmin} 
+                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
+                  >
+                    Agregar
+                  </button>
+                  <button 
+                    onClick={() => setShowSupplementDialog(false)}
+                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        )}
       </div>
     )
   }
@@ -1517,13 +1578,11 @@ Gracias!`
   if (connectionStatus === 'connecting') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8 text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Conectando con Supabase</h3>
-            <p className="text-gray-600">Inicializando base de datos...</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md text-center">
+          <div className="text-4xl mb-4">{Icons.Loader2()}</div>
+          <h3 className="text-lg font-semibold mb-2">Conectando con Supabase</h3>
+          <p className="text-gray-600">Inicializando base de datos...</p>
+        </div>
       </div>
     )
   }
@@ -1531,14 +1590,17 @@ Gracias!`
   if (connectionStatus === 'error') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-8 text-center">
-            <X className="w-8 h-8 mx-auto mb-4 text-red-500" />
-            <h3 className="text-lg font-semibold mb-2">Error de conexión</h3>
-            <p className="text-gray-600 mb-4">No se pudo conectar con la base de datos</p>
-            <Button onClick={() => window.location.reload()}>Reintentar</Button>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md text-center">
+          <div className="text-4xl mb-4 text-red-500">{Icons.X()}</div>
+          <h3 className="text-lg font-semibold mb-2">Error de conexión</h3>
+          <p className="text-gray-600 mb-4">No se pudo conectar con la base de datos</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+          >
+            Reintentar
+          </button>
+        </div>
       </div>
     )
   }
@@ -1546,16 +1608,16 @@ Gracias!`
   if (authState !== 'authenticated') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
+        <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+          <div className="text-center mb-6">
             <div onClick={handleLogoClick} className="cursor-pointer">
-              <CardTitle className="text-2xl font-bold text-green-600">VitalMente</CardTitle>
-              <CardDescription>Tu compañero de bienestar personalizado</CardDescription>
-              <Badge variant="outline" className="mt-2">🌐 Conectado a Supabase</Badge>
+              <h1 className="text-2xl font-bold text-green-600">VitalMente</h1>
+              <p className="text-gray-600">Tu compañero de bienestar personalizado</p>
+              <span className="inline-block mt-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">🌐 Conectado a Supabase</span>
             </div>
-          </CardHeader>
+          </div>
           
-          <CardContent className="space-y-6">
+          <div className="space-y-6">
             <div className="flex rounded-lg bg-gray-100 p-1">
               <button
                 onClick={() => setAuthState('login')}
@@ -1577,48 +1639,57 @@ Gracias!`
 
             {authState === 'login' && (
               <div className="space-y-4">
-                <Input
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="+57 300 123 4567"
                   value={loginForm.phone}
                   onChange={(e) => setLoginForm(prev => ({ ...prev, phone: e.target.value }))}
                 />
-                <Input
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   type="password"
                   placeholder="Código de 10 dígitos"
                   maxLength={10}
                   value={loginForm.accessCode}
                   onChange={(e) => setLoginForm(prev => ({ ...prev, accessCode: e.target.value }))}
                 />
-                <Button onClick={handleLogin} className="w-full" disabled={isLoading}>
+                <button 
+                  onClick={handleLogin} 
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <span>{Icons.Loader2()}</span>
                       Ingresando...
                     </>
                   ) : (
                     "Ingresar"
                   )}
-                </Button>
+                </button>
               </div>
             )}
 
             {authState === 'register' && (
               <div className="space-y-4">
-                <Input
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="+57 300 123 4567"
                   value={registerForm.phone}
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, phone: e.target.value }))}
                 />
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <Input
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     type="password"
                     placeholder="Código 10 dígitos"
                     maxLength={10}
                     value={registerForm.accessCode}
                     onChange={(e) => setRegisterForm(prev => ({ ...prev, accessCode: e.target.value }))}
                   />
-                  <Input
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     type="password"
                     placeholder="Confirmar"
                     maxLength={10}
@@ -1627,26 +1698,30 @@ Gracias!`
                   />
                 </div>
 
-                <Input
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="Nombre completo"
                   value={registerForm.name}
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, name: e.target.value }))}
                 />
                 
                 <div className="grid grid-cols-3 gap-4">
-                  <Input
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="Edad"
                     type="number"
                     value={registerForm.age}
                     onChange={(e) => setRegisterForm(prev => ({ ...prev, age: e.target.value }))}
                   />
-                  <Input
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="Peso kg"
                     type="number"
                     value={registerForm.weight}
                     onChange={(e) => setRegisterForm(prev => ({ ...prev, weight: e.target.value }))}
                   />
-                  <Input
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="Altura cm"
                     type="number"
                     value={registerForm.height}
@@ -1655,7 +1730,7 @@ Gracias!`
                 </div>
                 
                 <select 
-                  className="w-full p-2 border rounded-lg"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   value={registerForm.activityLevel}
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, activityLevel: parseFloat(e.target.value) }))}
                 >
@@ -1667,7 +1742,7 @@ Gracias!`
                 </select>
 
                 <select 
-                  className="w-full p-2 border rounded-lg"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   value={registerForm.goal}
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, goal: e.target.value }))}
                 >
@@ -1683,37 +1758,55 @@ Gracias!`
                   </optgroup>
                 </select>
 
-                <Button onClick={handleRegister} className="w-full" disabled={isLoading}>
+                <button 
+                  onClick={handleRegister} 
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <span>{Icons.Loader2()}</span>
                       Creando...
                     </>
                   ) : (
                     "Crear cuenta"
                   )}
-                </Button>
+                </button>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Dialog open={showAdminLogin} onOpenChange={setShowAdminLogin}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Acceso Administrador</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Input
-                type="password"
-                placeholder="Código de acceso"
-                value={adminCode}
-                onChange={(e) => setAdminCode(e.target.value)}
-              />
-              <Button onClick={handleAdminLogin} className="w-full">Ingresar</Button>
+        {showAdminLogin && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-80 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Acceso Administrador</h3>
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg mb-4"
+                  type="password"
+                  placeholder="Código de acceso"
+                  value={adminCode}
+                  onChange={(e) => setAdminCode(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <button 
+                    onClick={handleAdminLogin} 
+                    className="flex-1 bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
+                  >
+                    Ingresar
+                  </button>
+                  <button 
+                    onClick={() => setShowAdminLogin(false)}
+                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        )}
       </div>
     )
   }
@@ -1726,138 +1819,187 @@ Gracias!`
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="pb-20">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          
-          <TabsContent value="inicio" className="p-4 space-y-6">
-            <div className="flex justify-between items-center">
-              <div className="text-center flex-1">
-                <h2 className="text-2xl font-bold text-gray-800">¡Hola {currentUser?.name}! 👋</h2>
-                <p className="text-gray-600">Tu progreso de hoy</p>
-                <p className="text-sm text-green-600 font-medium mt-1">
-                  {getMotivationalMessage(currentUser?.goal || "")}
-                </p>
-                {getStreakDays() > 0 && (
-                  <Badge variant="outline" className="mt-1">🔥 {getStreakDays()} días consecutivos</Badge>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={() => resetProgress('all')} variant="outline" size="sm">
-                  <RotateCcw className="w-4 h-4" />
-                </Button>
-                <Button onClick={handleLogout} variant="outline" size="sm">
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+        {/* Aquí iría todo el contenido de tabs pero con HTML + Tailwind en lugar de componentes */}
+        {/* Por brevedad, continúo con la misma estructura pero usando elementos HTML nativos */}
+        
+        {/* Navegación de tabs */}
+        <div className="bg-white border-b">
+          <div className="flex">
+            {['inicio', 'nutricion', 'ejercicio', 'mindfulness', 'suplementos'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 py-4 px-2 text-sm font-medium capitalize ${
+                  activeTab === tab
+                    ? 'text-green-600 border-b-2 border-green-500'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <div className="flex flex-col items-center space-y-1">
+                  <span className="text-lg">
+                    {tab === 'inicio' && Icons.Home()}
+                    {tab === 'nutricion' && Icons.UtensilsCrossed()}
+                    {tab === 'ejercicio' && Icons.Activity()}
+                    {tab === 'mindfulness' && Icons.Brain()}
+                    {tab === 'suplementos' && Icons.Package()}
+                  </span>
+                  <span className="text-xs">{tab === 'nutricion' ? 'Nutrición' : tab}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
 
-            {/* 🆕 NUEVO: Progreso de calorías destacado */}
-            {macroResults && (
-              <Card className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
-                <CardContent className="p-4">
+        <div className="p-4">
+          {/* TAB INICIO */}
+          {activeTab === 'inicio' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div className="text-center flex-1">
+                  <h2 className="text-2xl font-bold text-gray-800">¡Hola {currentUser?.name}! 👋</h2>
+                  <p className="text-gray-600">Tu progreso de hoy</p>
+                  <p className="text-sm text-green-600 font-medium mt-1">
+                    {getMotivationalMessage(currentUser?.goal || "")}
+                  </p>
+                  {getStreakDays() > 0 && (
+                    <span className="inline-block mt-1 px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded">🔥 {getStreakDays()} días consecutivos</span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => resetProgress('all')} 
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    {Icons.RotateCcw()}
+                  </button>
+                  <button 
+                    onClick={handleLogout} 
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    {Icons.LogOut()}
+                  </button>
+                </div>
+              </div>
+
+              {/* 🆕 NUEVO: Progreso de calorías destacado */}
+              {macroResults && (
+                <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Calculator className="w-5 h-5" />
+                      <span className="text-xl">{Icons.Calculator()}</span>
                       <span className="font-semibold">Calorías consumidas</span>
                     </div>
                     <span className="text-lg font-bold">
                       {caloriesProgress.consumed}/{caloriesProgress.target}
                     </span>
                   </div>
-                  <Progress 
-                    value={caloriesProgress.percentage} 
-                    className="mb-2 bg-white/20"
-                  />
+                  <div className="w-full bg-white/20 rounded-full h-2 mb-2">
+                    <div 
+                      className="bg-white h-2 rounded-full transition-all duration-300" 
+                      style={{width: `${caloriesProgress.percentage}%`}}
+                    ></div>
+                  </div>
                   <p className="text-sm text-center">
                     {caloriesProgress.percentage}% de tu objetivo diario
                   </p>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              )}
 
-            <Card>
-              <CardContent className="p-6">
+              {/* Resto del contenido de inicio... */}
+              <div className="bg-white rounded-lg shadow p-6">
                 <div className="text-center mb-4">
                   <div className="text-3xl font-bold text-green-600">{getProgressPercentage()}%</div>
                   <p className="text-sm text-gray-600">Progreso diario general</p>
                 </div>
-                <Progress value={getProgressPercentage()} className="mb-4" />
+                <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+                  <div 
+                    className="bg-green-500 h-3 rounded-full transition-all duration-300" 
+                    style={{width: `${getProgressPercentage()}%`}}
+                  ></div>
+                </div>
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className={`p-3 rounded-lg ${dailyProgress.water >= 8 ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    <Droplets className="w-5 h-5 mb-1 mx-auto" />
                     <div className="text-center">
+                      <span className="text-xl">{Icons.Droplets()}</span>
                       <div className="font-bold">{dailyProgress.water}/8</div>
                       <div>Vasos de agua</div>
                     </div>
                   </div>
                   
                   <div className={`p-3 rounded-lg ${dailyProgress.exercise >= 1 ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    <Activity className="w-5 h-5 mb-1 mx-auto" />
                     <div className="text-center">
+                      <span className="text-xl">{Icons.Activity()}</span>
                       <div className="font-bold">{dailyProgress.exercise}</div>
                       <div>Ejercicios</div>
                     </div>
                   </div>
                   
                   <div className={`p-3 rounded-lg ${dailyProgress.mindfulness >= 1 ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    <Brain className="w-5 h-5 mb-1 mx-auto" />
                     <div className="text-center">
+                      <span className="text-xl">{Icons.Brain()}</span>
                       <div className="font-bold">{dailyProgress.mindfulness}</div>
                       <div>Mindfulness</div>
                     </div>
                   </div>
                   
                   <div className={`p-3 rounded-lg ${(dailyProgress.desayuno + dailyProgress.almuerzo + dailyProgress.cena) >= 3 ? 'bg-green-100' : 'bg-gray-100'}`}>
-                    <UtensilsCrossed className="w-5 h-5 mb-1 mx-auto" />
                     <div className="text-center">
+                      <span className="text-xl">{Icons.UtensilsCrossed()}</span>
                       <div className="font-bold">{dailyProgress.desayuno + dailyProgress.almuerzo + dailyProgress.cena}/3</div>
                       <div>Comidas</div>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <Droplets className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-                  <div className="flex justify-center items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => updateProgress('water', -1)}>
-                      <Minus className="w-3 h-3" />
-                    </Button>
+              {/* Controles rápidos */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white rounded-lg shadow p-4 text-center">
+                  <span className="text-2xl">{Icons.Droplets()}</span>
+                  <div className="flex justify-center items-center gap-2 mt-2">
+                    <button 
+                      onClick={() => updateProgress('water', -1)}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                    >
+                      {Icons.Minus()}
+                    </button>
                     <span className="font-bold text-lg">{dailyProgress.water}</span>
-                    <Button size="sm" variant="outline" onClick={() => updateProgress('water', 1)}>
-                      <Plus className="w-3 h-3" />
-                    </Button>
+                    <button 
+                      onClick={() => updateProgress('water', 1)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                    >
+                      {Icons.Plus()}
+                    </button>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">Vasos de agua</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <Activity className="w-8 h-8 mx-auto mb-2 text-green-500" />
-                  <div className="flex justify-center items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => updateProgress('exercise', -1)}>
-                      <Minus className="w-3 h-3" />
-                    </Button>
+                </div>
+                
+                <div className="bg-white rounded-lg shadow p-4 text-center">
+                  <span className="text-2xl">{Icons.Activity()}</span>
+                  <div className="flex justify-center items-center gap-2 mt-2">
+                    <button 
+                      onClick={() => updateProgress('exercise', -1)}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                    >
+                      {Icons.Minus()}
+                    </button>
                     <span className="font-bold text-lg">{dailyProgress.exercise}</span>
-                    <Button size="sm" variant="outline" onClick={() => updateProgress('exercise', 1)}>
-                      <Plus className="w-3 h-3" />
-                    </Button>
+                    <button 
+                      onClick={() => updateProgress('exercise', 1)}
+                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                    >
+                      {Icons.Plus()}
+                    </button>
                   </div>
                   <p className="text-xs text-gray-600 mt-1">Ejercicios</p>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </div>
 
-            {progressHistory.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Progreso reciente</CardTitle>
-                </CardHeader>
-                <CardContent>
+              {/* Historial de progreso */}
+              {progressHistory.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="font-semibold mb-3">Progreso reciente</h3>
                   <div className="space-y-2">
                     {progressHistory.slice(0, 5).map(progress => {
                       const date = new Date(progress.date).toLocaleDateString()
@@ -1871,49 +2013,57 @@ Gracias!`
                       )
                     })}
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="nutricion" className="p-4 space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">🍽 Nutrición</h2>
-              <Button onClick={() => resetProgress('meals')} variant="outline" size="sm">
-                <RotateCcw className="w-4 h-4" />
-              </Button>
+                </div>
+              )}
             </div>
+          )}
 
-            {nutritionResources.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recursos recomendados</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {nutritionResources.map(resource => (
-                    <div key={resource.id} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <div>
-                        <h4 className="font-semibold">{resource.title}</h4>
-                        <p className="text-sm text-gray-600">{resource.description}</p>
+          {/* TAB NUTRICIÓN */}
+          {activeTab === 'nutricion' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">🍽 Nutrición</h2>
+                <button 
+                  onClick={() => resetProgress('meals')} 
+                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  {Icons.RotateCcw()}
+                </button>
+              </div>
+
+              {/* Recursos de nutrición */}
+              {nutritionResources.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="font-semibold mb-3">Recursos recomendados</h3>
+                  <div className="space-y-3">
+                    {nutritionResources.map(resource => (
+                      <div key={resource.id} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <div>
+                          <h4 className="font-semibold">{resource.title}</h4>
+                          <p className="text-sm text-gray-600">{resource.description}</p>
+                        </div>
+                        <button 
+                          onClick={() => window.open(resource.url, '_blank')}
+                          className="p-2 text-gray-400 hover:text-gray-600"
+                        >
+                          {Icons.ExternalLink()}
+                        </button>
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => window.open(resource.url, '_blank')}>
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            {macroResults && currentUser && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    {macroResults.goalType === 'emotional' ? 'Tu alimentación balanceada' : 'Tus macros diarios'}
-                    <Badge variant="secondary">{macroResults.goalLabel}</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+              {/* Progreso de macros */}
+              {macroResults && currentUser && (
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold">
+                      {macroResults.goalType === 'emotional' ? 'Tu alimentación balanceada' : 'Tus macros diarios'}
+                    </h3>
+                    <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">{macroResults.goalLabel}</span>
+                  </div>
+                  
                   {/* 🆕 NUEVA SECCIÓN: Progreso de macros vs objetivo */}
                   <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg mb-4">
                     <h4 className="font-semibold mb-3 text-center">Progreso vs Objetivo</h4>
@@ -1927,7 +2077,12 @@ Gracias!`
                         <div className="text-sm text-gray-600">Objetivo</div>
                       </div>
                     </div>
-                    <Progress value={caloriesProgress.percentage} className="mt-3" />
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                        style={{width: `${caloriesProgress.percentage}%`}}
+                      ></div>
+                    </div>
                     <p className="text-center text-sm text-gray-600 mt-2">
                       {caloriesProgress.percentage}% del objetivo diario
                     </p>
@@ -1964,15 +2119,12 @@ Gracias!`
                       <div className="text-xs">Grasas</div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Registro del día</CardTitle>
-              </CardHeader>
-              <CardContent>
+              {/* Registro de comidas con calculadora */}
+              <div className="bg-white rounded-lg shadow p-4">
+                <h3 className="font-semibold mb-4">Registro del día</h3>
                 <div className="space-y-4">
                   {['desayuno', 'almuerzo', 'cena'].map(meal => (
                     <div key={meal} className="border rounded-lg p-4">
@@ -1984,14 +2136,13 @@ Gracias!`
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
+                          <button 
                             onClick={() => openMealCalculator(meal as 'desayuno' | 'almuerzo' | 'cena')}
+                            className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 flex items-center gap-1"
                           >
-                            <Calculator className="w-3 h-3 mr-1" />
-                            Agregar
-                          </Button>
+                            <span>{Icons.Calculator()}</span>
+                            <span className="text-sm">Agregar</span>
+                          </button>
                         </div>
                       </div>
 
@@ -2010,13 +2161,12 @@ Gracias!`
                                     {comp.calories_consumed} cal | P: {comp.protein_consumed}g | C: {comp.carbs_consumed}g | G: {comp.fats_consumed}g
                                   </div>
                                 </div>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
+                                <button 
                                   onClick={() => removeFoodFromMeal(comp.id)}
+                                  className="p-1 text-red-400 hover:text-red-600"
                                 >
-                                  <X className="w-3 h-3" />
-                                </Button>
+                                  {Icons.X()}
+                                </button>
                               </div>
                             ))
                           }
@@ -2025,15 +2175,12 @@ Gracias!`
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            {userFoods.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Mis alimentos personalizados</CardTitle>
-                </CardHeader>
-                <CardContent>
+              {/* Lista de alimentos personalizados */}
+              {userFoods.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="font-semibold mb-4">Mis alimentos personalizados</h3>
                   <div className="space-y-2">
                     {userFoods.map(food => (
                       <div key={food.id} className="p-3 border rounded-lg">
@@ -2041,90 +2188,101 @@ Gracias!`
                         <p className="text-sm text-gray-600">
                           {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
                         </p>
-                        <Badge variant="outline" className="mt-1 text-xs">{food.category}</Badge>
+                        <span className="inline-block mt-1 px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">{food.category}</span>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              )}
 
-            {/* 🆕 NUEVA SECCIÓN: Botón para agregar alimentos personalizados */}
-            <Card>
-              <CardContent className="p-4 text-center">
+              {/* 🆕 NUEVA SECCIÓN: Botón para agregar alimentos personalizados */}
+              <div className="bg-white rounded-lg shadow p-4 text-center">
                 <h4 className="font-semibold mb-2">¿No encuentras tu alimento?</h4>
                 <p className="text-sm text-gray-600 mb-3">Crea tu propio alimento personalizado</p>
-                <Button 
+                <button 
                   onClick={() => {
                     setSelectedMeal('desayuno')
                     setShowFoodDialog(true)
                   }}
-                  variant="outline"
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2 mx-auto"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <span>{Icons.Plus()}</span>
                   Crear alimento personalizado
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="ejercicio" className="p-4 space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">💪 Ejercicio</h2>
-              <Button onClick={() => resetProgress('exercise')} variant="outline" size="sm">
-                <RotateCcw className="w-4 h-4" />
-              </Button>
+                </button>
+              </div>
             </div>
+          )}
 
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Activity className="w-16 h-16 mx-auto mb-4 text-green-600" />
-                <h3 className="text-xl font-bold mb-2">Ejercicios completados</h3>
+          {/* TAB EJERCICIO */}
+          {activeTab === 'ejercicio' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">💪 Ejercicio</h2>
+                <button 
+                  onClick={() => resetProgress('exercise')} 
+                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  {Icons.RotateCcw()}
+                </button>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6 text-center">
+                <span className="text-4xl">{Icons.Activity()}</span>
+                <h3 className="text-xl font-bold mb-2 mt-4">Ejercicios completados</h3>
                 <div className="text-3xl font-bold text-green-600 mb-4">{dailyProgress.exercise}</div>
                 
                 <div className="flex justify-center items-center gap-4">
-                  <Button variant="outline" onClick={() => updateProgress('exercise', -1)}>
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <Button onClick={() => updateProgress('exercise', 1)}>
+                  <button 
+                    onClick={() => updateProgress('exercise', -1)}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                  >
+                    {Icons.Minus()}
+                  </button>
+                  <button 
+                    onClick={() => updateProgress('exercise', 1)}
+                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                  >
                     Agregar ejercicio
-                  </Button>
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Ejercicios sugeridos</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <h4 className="font-semibold">Caminar 15 min</h4>
-                  <p className="text-sm text-gray-600">Ideal para comenzar el día</p>
+              <div className="bg-white rounded-lg shadow p-4">
+                <h3 className="font-semibold mb-4">Ejercicios sugeridos</h3>
+                <div className="space-y-3">
+                  <div className="p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-semibold">Caminar 15 min</h4>
+                    <p className="text-sm text-gray-600">Ideal para comenzar el día</p>
+                  </div>
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <h4 className="font-semibold">Estiramientos</h4>
+                    <p className="text-sm text-gray-600">Perfecto para cualquier momento</p>
+                  </div>
+                  <div className="p-3 bg-purple-50 rounded-lg">
+                    <h4 className="font-semibold">Ejercicios de fuerza</h4>
+                    <p className="text-sm text-gray-600">20 min, sin equipamiento</p>
+                  </div>
                 </div>
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <h4 className="font-semibold">Estiramientos</h4>
-                  <p className="text-sm text-gray-600">Perfecto para cualquier momento</p>
-                </div>
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <h4 className="font-semibold">Ejercicios de fuerza</h4>
-                  <p className="text-sm text-gray-600">20 min, sin equipamiento</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="mindfulness" className="p-4 space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">🧘‍♀️ Mindfulness</h2>
-              <Button onClick={() => resetProgress('mindfulness')} variant="outline" size="sm">
-                <RotateCcw className="w-4 h-4" />
-              </Button>
+              </div>
             </div>
+          )}
 
-            {currentUser && GOALS.find(g => g.id === currentUser.goal)?.type === 'emotional' && (
-              <Card className="bg-gradient-to-r from-purple-100 to-pink-100">
-                <CardContent className="p-4 text-center">
+          {/* TAB MINDFULNESS */}
+          {activeTab === 'mindfulness' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">🧘‍♀️ Mindfulness</h2>
+                <button 
+                  onClick={() => resetProgress('mindfulness')} 
+                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  {Icons.RotateCcw()}
+                </button>
+              </div>
+
+              {/* Mensaje especial para objetivos emocionales */}
+              {currentUser && GOALS.find(g => g.id === currentUser.goal)?.type === 'emotional' && (
+                <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-4 text-center">
                   <h3 className="font-bold text-purple-800 mb-1">
                     ¡Perfecto para tu objetivo!
                   </h3>
@@ -2134,106 +2292,110 @@ Gracias!`
                     {currentUser.goal === 'feel_good' && "Estas sesiones te harán sentir increíble ✨"}
                     {currentUser.goal === 'vitalmente' && "¡El mindfulness es esencial para sentirte VitalMente! 🌟"}
                   </p>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              )}
 
-            {mindfulnessResources.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recursos de mindfulness</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {mindfulnessResources.map(resource => (
-                    <div key={resource.id} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                      <div>
-                        <h4 className="font-semibold">{resource.title}</h4>
-                        <p className="text-sm text-gray-600">{resource.description}</p>
+              {/* Recursos de mindfulness */}
+              {mindfulnessResources.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="font-semibold mb-4">Recursos de mindfulness</h3>
+                  <div className="space-y-3">
+                    {mindfulnessResources.map(resource => (
+                      <div key={resource.id} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                        <div>
+                          <h4 className="font-semibold">{resource.title}</h4>
+                          <p className="text-sm text-gray-600">{resource.description}</p>
+                        </div>
+                        <button 
+                          onClick={() => window.open(resource.url, '_blank')}
+                          className="p-2 text-gray-400 hover:text-gray-600"
+                        >
+                          {Icons.ExternalLink()}
+                        </button>
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => window.open(resource.url, '_blank')}>
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Brain className="w-16 h-16 mx-auto mb-4 text-purple-600" />
-                <h3 className="text-xl font-bold mb-2">Sesiones completadas</h3>
+              {/* Contador de sesiones */}
+              <div className="bg-white rounded-lg shadow p-6 text-center">
+                <span className="text-4xl">{Icons.Brain()}</span>
+                <h3 className="text-xl font-bold mb-2 mt-4">Sesiones completadas</h3>
                 <div className="text-3xl font-bold text-purple-600 mb-4">{dailyProgress.mindfulness}</div>
                 
                 <div className="flex justify-center items-center gap-4">
-                  <Button variant="outline" onClick={() => updateProgress('mindfulness', -1)}>
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <Button onClick={() => updateProgress('mindfulness', 1)}>
+                  <button 
+                    onClick={() => updateProgress('mindfulness', -1)}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                  >
+                    {Icons.Minus()}
+                  </button>
+                  <button 
+                    onClick={() => updateProgress('mindfulness', 1)}
+                    className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600"
+                  >
                     Completar sesión
-                  </Button>
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            {activeTips.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Tips de bienestar</span>
-                    <Lightbulb className="w-5 h-5" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+              {/* Tips de bienestar */}
+              {activeTips.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <span>Tips de bienestar</span>
+                      <span>{Icons.Lightbulb()}</span>
+                    </h3>
+                  </div>
+                  
                   <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 rounded-lg">
                     <div className="text-2xl mb-2">{activeTips[currentTipIndex]?.icon}</div>
                     <h3 className="font-bold mb-2">{activeTips[currentTipIndex]?.title}</h3>
                     <p className="text-sm mb-4">{activeTips[currentTipIndex]?.content}</p>
-                    <Badge variant="secondary" className="text-purple-800">
+                    <span className="inline-block px-2 py-1 text-xs bg-white/20 rounded">
                       {activeTips[currentTipIndex]?.category}
-                    </Badge>
+                    </span>
                   </div>
                   
                   <div className="flex justify-between items-center mt-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
+                    <button
                       onClick={() => setCurrentTipIndex(prev => prev > 0 ? prev - 1 : activeTips.length - 1)}
+                      className="p-2 text-gray-400 hover:text-gray-600"
                     >
-                      <ChevronLeft className="w-4 h-4" />
-                    </Button>
+                      {Icons.ChevronLeft()}
+                    </button>
                     <span className="text-sm text-gray-500">
                       {currentTipIndex + 1} / {activeTips.length}
                     </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
+                    <button
                       onClick={() => setCurrentTipIndex(prev => prev < activeTips.length - 1 ? prev + 1 : 0)}
+                      className="p-2 text-gray-400 hover:text-gray-600"
                     >
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
+                      {Icons.ChevronRight()}
+                    </button>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
+                </div>
+              )}
+            </div>
+          )}
 
-          <TabsContent value="suplementos" className="p-4 space-y-6">
-            <h2 className="text-2xl font-bold text-center">💊 Suplementos Recomendados</h2>
+          {/* TAB SUPLEMENTOS */}
+          {activeTab === 'suplementos' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-center">💊 Suplementos Recomendados</h2>
 
-            <Card className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
-              <CardContent className="p-4 text-center">
-                <Package className="w-8 h-8 mx-auto mb-2" />
-                <h3 className="font-bold mb-1">Productos Premium</h3>
+              <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg p-4 text-center">
+                <span className="text-2xl">{Icons.Package()}</span>
+                <h3 className="font-bold mb-1 mt-2">Productos Premium</h3>
                 <p className="text-sm">Suplementos seleccionados para potenciar tu bienestar</p>
-              </CardContent>
-            </Card>
+              </div>
 
-            {supplements.length > 0 ? (
-              <div className="space-y-4">
-                {supplements.map(supplement => (
-                  <Card key={supplement.id}>
-                    <CardContent className="p-4">
+              {supplements.length > 0 ? (
+                <div className="space-y-4">
+                  {supplements.map(supplement => (
+                    <div key={supplement.id} className="bg-white rounded-lg shadow p-4">
                       <div className="flex gap-4">
                         <img
                           src={supplement.image_url}
@@ -2246,358 +2408,340 @@ Gracias!`
                               <h3 className="font-bold text-lg">{supplement.name}</h3>
                               <p className="text-2xl font-bold text-green-600">${supplement.price.toLocaleString()}</p>
                             </div>
-                            <Button size="sm" onClick={() => handleSupplementContact(supplement)} className="bg-green-600 hover:bg-green-700">
-                              <Phone className="w-3 h-3 mr-1" />
-                              Contactar
-                            </Button>
+                            <button 
+                              onClick={() => handleSupplementContact(supplement)} 
+                              className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 flex items-center gap-1"
+                            >
+                              <span>{Icons.Phone()}</span>
+                              <span className="text-sm">Contactar</span>
+                            </button>
                           </div>
                           <p className="text-sm text-gray-600 mb-3">{supplement.description}</p>
                           <div className="flex flex-wrap gap-1">
                             {supplement.benefits.map((benefit, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
+                              <span key={index} className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">
                                 {benefit}
-                              </Badge>
+                              </span>
                             ))}
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <Package className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-semibold mb-2">Próximamente</h3>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg shadow p-6 text-center">
+                  <span className="text-4xl text-gray-400">{Icons.Package()}</span>
+                  <h3 className="text-lg font-semibold mb-2 mt-4">Próximamente</h3>
                   <p className="text-gray-600">Estamos preparando una selección especial de suplementos para ti.</p>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              )}
 
-            <Card className="bg-gray-50">
-              <CardContent className="p-4">
+              <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="font-semibold mb-2">💬 ¿Tienes dudas?</h4>
                 <p className="text-sm text-gray-600 mb-3">
                   Nuestro equipo está listo para asesorarte sobre el suplemento ideal para tus objetivos.
                 </p>
-                <Button variant="outline" className="w-full" onClick={() => {
-                  const whatsappUrl = `https://wa.me/573134852878?text=${encodeURIComponent("Hola! Me gustaría recibir asesoría sobre suplementos desde VitalMente. ¿Podrían ayudarme?")}`
-                  window.open(whatsappUrl, '_blank')
-                }}>
-                  <Phone className="w-4 h-4 mr-2" />
+                <button 
+                  onClick={() => {
+                    const whatsappUrl = `https://wa.me/573134852878?text=${encodeURIComponent("Hola! Me gustaría recibir asesoría sobre suplementos desde VitalMente. ¿Podrían ayudarme?")}`
+                    window.open(whatsappUrl, '_blank')
+                  }}
+                  className="w-full bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2"
+                >
+                  <span>{Icons.Phone()}</span>
                   Asesoría personalizada
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-        </Tabs>
-      </div>
-
-      {/* 🆕 NAVEGACIÓN INFERIOR */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="grid grid-cols-5 h-16">
-          <button
-            onClick={() => setActiveTab("inicio")}
-            className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === "inicio" ? "text-green-600" : "text-gray-400"
-            }`}
-          >
-            <Home className="w-5 h-5" />
-            <span className="text-xs">Inicio</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("nutricion")}
-            className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === "nutricion" ? "text-green-600" : "text-gray-400"
-            }`}
-          >
-            <UtensilsCrossed className="w-5 h-5" />
-            <span className="text-xs">Nutrición</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("ejercicio")}
-            className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === "ejercicio" ? "text-green-600" : "text-gray-400"
-            }`}
-          >
-            <Activity className="w-5 h-5" />
-            <span className="text-xs">Ejercicio</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("mindfulness")}
-            className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === "mindfulness" ? "text-green-600" : "text-gray-400"
-            }`}
-          >
-            <Brain className="w-5 h-5" />
-            <span className="text-xs">Mindfulness</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("suplementos")}
-            className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === "suplementos" ? "text-green-600" : "text-gray-400"
-            }`}
-          >
-            <Package className="w-4 h-4" />
-            <span className="text-xs">Suplementos</span>
-          </button>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* 🆕 MODAL DE CALCULADORA DE MACROS */}
-      <Dialog open={showMealCalculator} onOpenChange={setShowMealCalculator}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Calculator className="w-5 h-5" />
-              Calculadora de macros - {selectedMealType}
-            </DialogTitle>
-            <DialogDescription>
+      {showMealCalculator && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                <span>{Icons.Calculator()}</span>
+                Calculadora de macros - {selectedMealType}
+              </h3>
+              <button 
+                onClick={() => setShowMealCalculator(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                {Icons.X()}
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
               Selecciona un alimento y especifica la cantidad para calcular los macros automáticamente
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {!selectedFood ? (
-              <div>
-                <h4 className="font-semibold mb-3">Selecciona un alimento:</h4>
-                <div className="max-h-60 overflow-y-auto space-y-2">
-                  {userFoods.length > 0 ? (
-                    userFoods.map(food => (
-                      <div 
-                        key={food.id} 
-                        className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                        onClick={() => setSelectedFood(food)}
-                      >
-                        <h5 className="font-semibold">{food.name}</h5>
-                        <p className="text-sm text-gray-600">
-                          {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
-                          <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
-                        </p>
+            </p>
+            
+            <div className="space-y-4">
+              {!selectedFood ? (
+                <div>
+                  <h4 className="font-semibold mb-3">Selecciona un alimento:</h4>
+                  <div className="max-h-60 overflow-y-auto space-y-2">
+                    {userFoods.length > 0 ? (
+                      userFoods.map(food => (
+                        <div 
+                          key={food.id} 
+                          className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                          onClick={() => setSelectedFood(food)}
+                        >
+                          <h5 className="font-semibold">{food.name}</h5>
+                          <p className="text-sm text-gray-600">
+                            {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
+                            <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-gray-600 mb-3">No tienes alimentos personalizados aún</p>
+                        <button 
+                          onClick={() => {
+                            setShowMealCalculator(false)
+                            setSelectedMeal(selectedMealType)
+                            setShowFoodDialog(true)
+                          }}
+                          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2 mx-auto"
+                        >
+                          <span>{Icons.Plus()}</span>
+                          Crear primer alimento
+                        </button>
                       </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-600 mb-3">No tienes alimentos personalizados aún</p>
-                      <Button 
-                        onClick={() => {
-                          setShowMealCalculator(false)
-                          setSelectedMeal(selectedMealType)
-                          setShowFoodDialog(true)
-                        }}
-                        variant="outline"
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <h4 className="font-semibold">{selectedFood.name}</h4>
+                      <p className="text-sm text-gray-600">Valores por 100g</p>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedFood(null)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      {Icons.X()}
+                    </button>
+                  </div>
+
+                  <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                    <div className="grid grid-cols-4 gap-2 text-center text-sm">
+                      <div>
+                        <div className="font-bold">{selectedFood.calories}</div>
+                        <div className="text-gray-600">cal</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-blue-600">{selectedFood.protein}g</div>
+                        <div className="text-gray-600">Proteína</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-green-600">{selectedFood.carbs}g</div>
+                        <div className="text-gray-600">Carbos</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-yellow-600">{selectedFood.fats}g</div>
+                        <div className="text-gray-600">Grasas</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700">Cantidad consumida (gramos):</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setFoodQuantity(prev => Math.max(10, parseInt(prev) - 10).toString())}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                       >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Crear primer alimento
-                      </Button>
+                        {Icons.Minus()}
+                      </button>
+                      <input
+                        type="number"
+                        value={foodQuantity}
+                        onChange={(e) => setFoodQuantity(e.target.value)}
+                        className="flex-1 p-2 border border-gray-300 rounded-lg text-center font-bold focus:outline-none focus:ring-2 focus:ring-green-500"
+                        min="1"
+                      />
+                      <button
+                        onClick={() => setFoodQuantity(prev => (parseInt(prev) + 10).toString())}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                      >
+                        {Icons.Plus()}
+                      </button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <button onClick={() => setFoodQuantity('50')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">50g</button>
+                      <button onClick={() => setFoodQuantity('100')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">100g</button>
+                      <button onClick={() => setFoodQuantity('150')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">150g</button>
+                      <button onClick={() => setFoodQuantity('200')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">200g</button>
+                    </div>
+                  </div>
+
+                  {parseInt(foodQuantity) > 0 && (
+                    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+                      <h5 className="font-semibold mb-2 text-center">Macros calculados para {foodQuantity}g:</h5>
+                      <div className="grid grid-cols-4 gap-2 text-center">
+                        <div>
+                          <div className="text-lg font-bold text-green-600">
+                            {Math.round(selectedFood.calories * parseInt(foodQuantity) / 100)}
+                          </div>
+                          <div className="text-xs text-gray-600">calorías</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-blue-600">
+                            {Math.round(selectedFood.protein * parseInt(foodQuantity) / 100)}g
+                          </div>
+                          <div className="text-xs text-gray-600">proteína</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-green-600">
+                            {Math.round(selectedFood.carbs * parseInt(foodQuantity) / 100)}g
+                          </div>
+                          <div className="text-xs text-gray-600">carbos</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-yellow-600">
+                            {Math.round(selectedFood.fats * parseInt(foodQuantity) / 100)}g
+                          </div>
+                          <div className="text-xs text-gray-600">grasas</div>
+                        </div>
+                      </div>
                     </div>
                   )}
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <h4 className="font-semibold">{selectedFood.name}</h4>
-                    <p className="text-sm text-gray-600">Valores por 100g</p>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setSelectedFood(null)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
 
-                <div className="bg-gray-50 p-3 rounded-lg mb-4">
-                  <div className="grid grid-cols-4 gap-2 text-center text-sm">
-                    <div>
-                      <div className="font-bold">{selectedFood.calories}</div>
-                      <div className="text-gray-600">cal</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-blue-600">{selectedFood.protein}g</div>
-                      <div className="text-gray-600">Proteína</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-green-600">{selectedFood.carbs}g</div>
-                      <div className="text-gray-600">Carbos</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-yellow-600">{selectedFood.fats}g</div>
-                      <div className="text-gray-600">Grasas</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Label htmlFor="quantity">Cantidad consumida (gramos):</Label>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setFoodQuantity(prev => Math.max(10, parseInt(prev) - 10).toString())}
+                  <div className="flex gap-2 pt-4">
+                    <button 
+                      onClick={() => setSelectedFood(null)} 
+                      className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
                     >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    <Input
-                      id="quantity"
-                      type="number"
-                      value={foodQuantity}
-                      onChange={(e) => setFoodQuantity(e.target.value)}
-                      className="text-center font-bold"
-                      min="1"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setFoodQuantity(prev => (parseInt(prev) + 10).toString())}
+                      Cambiar alimento
+                    </button>
+                    <button 
+                      onClick={addFoodToMeal} 
+                      className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
+                      disabled={!parseInt(foodQuantity) || parseInt(foodQuantity) <= 0}
                     >
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setFoodQuantity('50')}>50g</Button>
-                    <Button variant="outline" size="sm" onClick={() => setFoodQuantity('100')}>100g</Button>
-                    <Button variant="outline" size="sm" onClick={() => setFoodQuantity('150')}>150g</Button>
-                    <Button variant="outline" size="sm" onClick={() => setFoodQuantity('200')}>200g</Button>
+                      Agregar a {selectedMealType}
+                    </button>
                   </div>
                 </div>
-
-                {parseInt(foodQuantity) > 0 && (
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
-                    <h5 className="font-semibold mb-2 text-center">Macros calculados para {foodQuantity}g:</h5>
-                    <div className="grid grid-cols-4 gap-2 text-center">
-                      <div>
-                        <div className="text-lg font-bold text-green-600">
-                          {Math.round(selectedFood.calories * parseInt(foodQuantity) / 100)}
-                        </div>
-                        <div className="text-xs text-gray-600">calorías</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-bold text-blue-600">
-                          {Math.round(selectedFood.protein * parseInt(foodQuantity) / 100)}g
-                        </div>
-                        <div className="text-xs text-gray-600">proteína</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-bold text-green-600">
-                          {Math.round(selectedFood.carbs * parseInt(foodQuantity) / 100)}g
-                        </div>
-                        <div className="text-xs text-gray-600">carbos</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-bold text-yellow-600">
-                          {Math.round(selectedFood.fats * parseInt(foodQuantity) / 100)}g
-                        </div>
-                        <div className="text-xs text-gray-600">grasas</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-2 pt-4">
-                  <Button onClick={() => setSelectedFood(null)} variant="outline" className="flex-1">
-                    Cambiar alimento
-                  </Button>
-                  <Button 
-                    onClick={addFoodToMeal} 
-                    className="flex-1"
-                    disabled={!parseInt(foodQuantity) || parseInt(foodQuantity) <= 0}
-                  >
-                    Agregar a {selectedMealType}
-                  </Button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
       {/* MODAL PARA AGREGAR ALIMENTOS PERSONALIZADOS */}
-      <Dialog open={showFoodDialog} onOpenChange={setShowFoodDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Agregar alimento personalizado</DialogTitle>
-            <DialogDescription>
+      {showFoodDialog && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Agregar alimento personalizado</h3>
+            <p className="text-sm text-gray-600 mb-4">
               Crea un alimento con sus valores nutricionales por 100g
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              placeholder="Nombre del alimento"
-              value={newFood.name}
-              onChange={(e) => setNewFood(prev => ({ ...prev, name: e.target.value }))}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                placeholder="Calorías (por 100g)"
-                type="number"
-                value={newFood.calories}
-                onChange={(e) => setNewFood(prev => ({ ...prev, calories: e.target.value }))}
+            </p>
+            <div className="space-y-4">
+              <input
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Nombre del alimento"
+                value={newFood.name}
+                onChange={(e) => setNewFood(prev => ({ ...prev, name: e.target.value }))}
               />
-              <Input
-                placeholder="Proteínas (g)"
-                type="number"
-                value={newFood.protein}
-                onChange={(e) => setNewFood(prev => ({ ...prev, protein: e.target.value }))}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                placeholder="Carbohidratos (g)"
-                type="number"
-                value={newFood.carbs}
-                onChange={(e) => setNewFood(prev => ({ ...prev, carbs: e.target.value }))}
-              />
-              <Input
-                placeholder="Grasas (g)"
-                type="number"
-                value={newFood.fats}
-                onChange={(e) => setNewFood(prev => ({ ...prev, fats: e.target.value }))}
-              />
-            </div>
-            
-            <div className="bg-blue-50 p-3 rounded-lg">
-              <p className="text-sm text-blue-700">
-                💡 <strong>Tip:</strong> Todos los valores deben ser por 100g del alimento. 
-                La calculadora ajustará automáticamente según la cantidad que consumas.
-              </p>
-            </div>
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Calorías (por 100g)"
+                  type="number"
+                  value={newFood.calories}
+                  onChange={(e) => setNewFood(prev => ({ ...prev, calories: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Proteínas (g)"
+                  type="number"
+                  value={newFood.protein}
+                  onChange={(e) => setNewFood(prev => ({ ...prev, protein: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Carbohidratos (g)"
+                  type="number"
+                  value={newFood.carbs}
+                  onChange={(e) => setNewFood(prev => ({ ...prev, carbs: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Grasas (g)"
+                  type="number"
+                  value={newFood.fats}
+                  onChange={(e) => setNewFood(prev => ({ ...prev, fats: e.target.value }))}
+                />
+              </div>
+              
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  💡 <strong>Tip:</strong> Todos los valores deben ser por 100g del alimento. 
+                  La calculadora ajustará automáticamente según la cantidad que consumas.
+                </p>
+              </div>
 
-            <Button onClick={addUserFood} className="w-full" disabled={!newFood.name}>
-              <Plus className="w-4 h-4 mr-2" />
-              Crear alimento
-            </Button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={addUserFood} 
+                  className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
+                  disabled={!newFood.name}
+                >
+                  <span>{Icons.Plus()}</span>
+                  Crear alimento
+                </button>
+                <button 
+                  onClick={() => setShowFoodDialog(false)}
+                  className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
       {/* DIALOG DE LOGIN ADMIN */}
-      <Dialog open={showAdminLogin} onOpenChange={setShowAdminLogin}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Acceso Administrador</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
+      {showAdminLogin && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-80 shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Acceso Administrador</h3>
+            <input
+              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
               type="password"
               placeholder="Código de acceso"
               value={adminCode}
               onChange={(e) => setAdminCode(e.target.value)}
             />
-            <Button onClick={handleAdminLogin} className="w-full">Ingresar</Button>
+            <div className="flex gap-2">
+              <button 
+                onClick={handleAdminLogin} 
+                className="flex-1 bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
+              >
+                Ingresar
+              </button>
+              <button 
+                onClick={() => setShowAdminLogin(false)}
+                className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   )
 }
