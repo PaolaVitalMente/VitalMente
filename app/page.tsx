@@ -2110,6 +2110,128 @@ Gracias!`
   }
 
   const activeTips = globalTips.filter(tip => tip.is_active)
+  
+  // 🔧 NUEVO: Componente Floating Action Buttons
+  const FloatingActionButtons = ({ currentProgress }: { currentProgress: DailyProgress }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    
+    const quickActions = [
+      {
+        id: 'agua',
+        icon: '💧',
+        label: `Agua (${currentProgress.water || 0}/8)`,
+        color: 'bg-blue-500 hover:bg-blue-600',
+        action: () => quickLog('water', 1),
+      },
+      {
+        id: 'ejercicio', 
+        icon: '💪',
+        label: `Ejercicio (${currentProgress.exercise || 0})`,
+        color: 'bg-orange-500 hover:bg-orange-600',
+        action: () => quickLog('exercise', 1),
+      },
+      {
+        id: 'mindfulness',
+        icon: '🧠',
+        label: `Mindfulness (${currentProgress.mindfulness || 0})`,
+        color: 'bg-purple-500 hover:bg-purple-600',
+        action: () => quickLog('mindfulness', 1),
+      },
+      {
+        id: 'desayuno',
+        icon: '☕',
+        label: currentProgress.desayuno ? '✅ Desayuno' : 'Desayuno',
+        color: currentProgress.desayuno ? 'bg-green-600' : 'bg-yellow-500 hover:bg-yellow-600',
+        action: () => quickLog('desayuno', 1),
+        disabled: currentProgress.desayuno > 0
+      },
+      {
+        id: 'almuerzo',
+        icon: '🍽️',
+        label: currentProgress.almuerzo ? '✅ Almuerzo' : 'Almuerzo',
+        color: currentProgress.almuerzo ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600',
+        action: () => quickLog('almuerzo', 1),
+        disabled: currentProgress.almuerzo > 0
+      },
+      {
+        id: 'cena', 
+        icon: '🌙',
+        label: currentProgress.cena ? '✅ Cena' : 'Cena',
+        color: currentProgress.cena ? 'bg-green-600' : 'bg-indigo-500 hover:bg-indigo-600',
+        action: () => quickLog('cena', 1),
+        disabled: currentProgress.cena > 0
+      }
+    ];
+
+    const quickLog = async (field: keyof DailyProgress, increment: number) => {
+      try {
+        await updateProgress(field, increment);
+        setIsExpanded(false);
+        
+        // Toast visual usando tu sistema existente
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-[9999] transition-all duration-300';
+        toast.textContent = `✅ ${field} +${increment}`;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => document.body.removeChild(toast), 300);
+        }, 2000);
+        
+      } catch (error) {
+        console.error('Error en quick log:', error);
+        
+        const errorToast = document.createElement('div');
+        errorToast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-[9999]';
+        errorToast.textContent = '❌ Error al actualizar';
+        document.body.appendChild(errorToast);
+        
+        setTimeout(() => document.body.removeChild(errorToast), 3000);
+      }
+    };
+
+    return (
+      <div className="fixed bottom-6 right-6 z-50">
+        {isExpanded && (
+          <div className="flex flex-col gap-3 mb-4">
+            {quickActions.map((action, index) => (
+              <div
+                key={action.id}
+                className="flex items-center gap-3 animate-in slide-in-from-right duration-200"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <span className="bg-white px-3 py-1 rounded-lg shadow-lg text-sm font-medium text-gray-700 whitespace-nowrap">
+                  {action.label}
+                </span>
+                
+                <button
+                  onClick={action.action}
+                  disabled={action.disabled}
+                  className={`w-12 h-12 rounded-full ${action.color} text-white shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 ${
+                    action.disabled ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <span className="text-lg">{action.icon}</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
+            isExpanded 
+              ? 'bg-red-500 hover:bg-red-600 rotate-45' 
+              : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
+          } text-white`}
+        >
+          <span className="text-2xl">{isExpanded ? '✖️' : '+'}</span>
+        </button>
+      </div>
+    );
+  };
   const mindfulnessResources = globalResources.filter(r => r.type === 'mindfulness' && r.is_active)
   const nutritionResources = globalResources.filter(r => r.type === 'nutrition' && r.is_active);
   const caloriesProgress = getCaloriesProgress()
@@ -3095,5 +3217,7 @@ Gracias!`
         </div>
       )}
     </div>
+    {/* Floating Action Buttons */}
+        <FloatingActionButtons currentProgress={dailyProgress} />
   )
 }
