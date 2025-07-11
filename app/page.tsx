@@ -2286,7 +2286,7 @@ const FloatingActionButtons = ({ currentProgress, updateProgressFn }: any) => {
     }
   ];
 
-  const handleQuickLog = async (field) => {
+  const handleQuickLog = async (field: any) => {
     try {
       await updateProgressFn(field, 1);
       setIsExpanded(false);
