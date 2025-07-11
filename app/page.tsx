@@ -2112,7 +2112,7 @@ Gracias!`
   const activeTips = globalTips.filter(tip => tip.is_active)
   
   // 🔧 NUEVO: Componente Floating Action Buttons
-  const FloatingActionButtons = ({ currentProgress }: { currentProgress: DailyProgress }) => {
+  const FloatingActionButtons = ({ currentProgress }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     
     const quickActions = [
