@@ -2111,58 +2111,6 @@ Gracias!`
 
   const activeTips = globalTips.filter(tip => tip.is_active)
   
-  // 🔧 NUEVO: Componente Floating Action Buttons
-  const FloatingActionButtons = ({ currentProgress }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    
-    const quickActions = [
-      {
-        id: 'agua',
-        icon: '💧',
-        label: `Agua (${currentProgress.water || 0}/8)`,
-        color: 'bg-blue-500 hover:bg-blue-600',
-        action: () => quickLog('water', 1),
-      },
-      {
-        id: 'ejercicio', 
-        icon: '💪',
-        label: `Ejercicio (${currentProgress.exercise || 0})`,
-        color: 'bg-orange-500 hover:bg-orange-600',
-        action: () => quickLog('exercise', 1),
-      },
-      {
-        id: 'mindfulness',
-        icon: '🧠',
-        label: `Mindfulness (${currentProgress.mindfulness || 0})`,
-        color: 'bg-purple-500 hover:bg-purple-600',
-        action: () => quickLog('mindfulness', 1),
-      },
-      {
-        id: 'desayuno',
-        icon: '☕',
-        label: currentProgress.desayuno ? '✅ Desayuno' : 'Desayuno',
-        color: currentProgress.desayuno ? 'bg-green-600' : 'bg-yellow-500 hover:bg-yellow-600',
-        action: () => quickLog('desayuno', 1),
-        disabled: currentProgress.desayuno > 0
-      },
-      {
-        id: 'almuerzo',
-        icon: '🍽️',
-        label: currentProgress.almuerzo ? '✅ Almuerzo' : 'Almuerzo',
-        color: currentProgress.almuerzo ? 'bg-green-600' : 'bg-green-500 hover:bg-green-600',
-        action: () => quickLog('almuerzo', 1),
-        disabled: currentProgress.almuerzo > 0
-      },
-      {
-        id: 'cena', 
-        icon: '🌙',
-        label: currentProgress.cena ? '✅ Cena' : 'Cena',
-        color: currentProgress.cena ? 'bg-green-600' : 'bg-indigo-500 hover:bg-indigo-600',
-        action: () => quickLog('cena', 1),
-        disabled: currentProgress.cena > 0
-      }
-    ];
-
     const quickLog = async (field: keyof DailyProgress, increment: number) => {
       try {
         await updateProgress(field, increment);
