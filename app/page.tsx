@@ -25,7 +25,7 @@ const Icons = {
   Users: () => '👥',
   MessageSquare: () => '💬',
   Link: () => '🔗',
-  ChefHat: () => '👨🍳',
+  ChefHat: () => '👨‍🍳',
   Globe: () => '🌍',
   Eye: () => '👁️',
   Phone: () => '📞',
@@ -638,14 +638,14 @@ const dbFunctions = {
             category: "Ejercicio",
             title: "Micro movimientos",
             content: "Haz 10 sentadillas cada hora para mantener tu cuerpo activo durante el día laboral.",
-            icon: "🏃♂️",
+            icon: "🏃‍♂️",
             is_active: true
           },
           {
             category: "Mindfulness",
             title: "Respiración 4-7-8",
             content: "Inhala 4 seg, mantén 7 seg, exhala 8 seg. Repite 4 veces para reducir estrés instantáneamente.",
-            icon: "🧘♀️",
+            icon: "🧘‍♀️",
             is_active: true
           }
         ]
@@ -768,7 +768,7 @@ export default function VitalMenteApp() {
   })
   const [showMealCalculator, setShowMealCalculator] = useState(false)
   const [selectedMealType, setSelectedMealType] = useState<'desayuno' | 'almuerzo' | 'cena'>('desayuno')
-  const [selectedFood, setSelectedFood] = useState<UserFood | null>(null)
+  const [selectedFood, setSelectedFood] = useState<UserFood | GlobalFood | null>(null) // 🔧 CORREGIDO
   const [foodQuantity, setFoodQuantity] = useState<string>('100')
 
   const [logoClicks, setLogoClicks] = useState(0)
@@ -1203,10 +1203,10 @@ export default function VitalMenteApp() {
         food_id: selectedFood.id,
         food_name: selectedFood.name,
         quantity_grams: quantity,
-        calories_consumed: Math.round(selectedFood.calories * ratio),
-        protein_consumed: Math.round(selectedFood.protein * ratio),
-        carbs_consumed: Math.round(selectedFood.carbs * ratio),
-        fats_consumed: Math.round(selectedFood.fats * ratio)
+        calories_consumed: Math.round(Number(selectedFood.calories) * ratio),
+        protein_consumed: Math.round(Number(selectedFood.protein) * ratio),
+        carbs_consumed: Math.round(Number(selectedFood.carbs) * ratio),
+        fats_consumed: Math.round(Number(selectedFood.fats) * ratio)
       }
 
       const newComposition = await dbFunctions.addMealComposition(composition)
@@ -2580,7 +2580,7 @@ Gracias!`
           {activeTab === 'mindfulness' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">🧘♀️ Mindfulness</h2>
+                <h2 className="text-2xl font-bold">🧘‍♀️ Mindfulness</h2>
                 <button 
                   onClick={() => resetProgress('mindfulness')} 
                   className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -2809,11 +2809,11 @@ Gracias!`
                               <div 
                                 key={food.id} 
                                 className="p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
-                                onClick={() => selectFood(food)}
+                                onClick={() => setSelectedFood(food)}
                               >
                                 <h6 className="font-semibold">{food.name}</h6>
                                 <p className="text-sm text-gray-600">
-                                  {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
+                                  {Number(food.calories)} cal | P: {Number(food.protein)}g | C: {Number(food.carbs)}g | G: {Number(food.fats)}g
                                   <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
                                 </p>
                               </div>
@@ -2827,7 +2827,7 @@ Gracias!`
                     {userFoods.length > 0 && (
                       <div>
                         <h5 className="font-semibold text-sm flex items-center gap-2 mb-2 px-2 py-1 bg-green-100 rounded">
-                          <span>👨🍳</span>
+                          <span>👨‍🍳</span>
                           Mis Alimentos Personalizados
                         </h5>
                         <div className="space-y-1 ml-2">
@@ -2835,11 +2835,11 @@ Gracias!`
                             <div 
                               key={food.id} 
                               className="p-3 border border-green-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors"
-                              onClick={() => selectFood(food)}
+                              onClick={() => setSelectedFood(food)}
                             >
                               <h6 className="font-semibold">{food.name}</h6>
                               <p className="text-sm text-gray-600">
-                                {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
+                                {Number(food.calories)} cal | P: {Number(food.protein)}g | C: {Number(food.carbs)}g | G: {Number(food.fats)}g
                                 <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
                               </p>
                             </div>
@@ -2885,19 +2885,19 @@ Gracias!`
                   <div className="bg-gray-50 p-3 rounded-lg mb-4">
                     <div className="grid grid-cols-4 gap-2 text-center text-sm">
                       <div>
-                        <div className="font-bold">{selectedFood.calories}</div>
+                        <div className="font-bold">{Number(selectedFood.calories)}</div>
                         <div className="text-gray-600">cal</div>
                       </div>
                       <div>
-                        <div className="font-bold text-blue-600">{selectedFood.protein}g</div>
+                        <div className="font-bold text-blue-600">{Number(selectedFood.protein)}g</div>
                         <div className="text-gray-600">Proteína</div>
                       </div>
                       <div>
-                        <div className="font-bold text-green-600">{selectedFood.carbs}g</div>
+                        <div className="font-bold text-green-600">{Number(selectedFood.carbs)}g</div>
                         <div className="text-gray-600">Carbos</div>
                       </div>
                       <div>
-                        <div className="font-bold text-yellow-600">{selectedFood.fats}g</div>
+                        <div className="font-bold text-yellow-600">{Number(selectedFood.fats)}g</div>
                         <div className="text-gray-600">Grasas</div>
                       </div>
                     </div>
@@ -2941,25 +2941,25 @@ Gracias!`
                       <div className="grid grid-cols-4 gap-2 text-center">
                         <div>
                           <div className="text-lg font-bold text-green-600">
-                            {Math.round(selectedFood.calories * parseInt(foodQuantity) / 100)}
+                            {Math.round(Number(selectedFood.calories) * parseInt(foodQuantity) / 100)}
                           </div>
                           <div className="text-xs text-gray-600">calorías</div>
                         </div>
                         <div>
                           <div className="text-lg font-bold text-blue-600">
-                            {Math.round(selectedFood.protein * parseInt(foodQuantity) / 100)}g
+                            {Math.round(Number(selectedFood.protein) * parseInt(foodQuantity) / 100)}g
                           </div>
                           <div className="text-xs text-gray-600">proteína</div>
                         </div>
                         <div>
                           <div className="text-lg font-bold text-green-600">
-                            {Math.round(selectedFood.carbs * parseInt(foodQuantity) / 100)}g
+                            {Math.round(Number(selectedFood.carbs) * parseInt(foodQuantity) / 100)}g
                           </div>
                           <div className="text-xs text-gray-600">carbos</div>
                         </div>
                         <div>
                           <div className="text-lg font-bold text-yellow-600">
-                            {Math.round(selectedFood.fats * parseInt(foodQuantity) / 100)}g
+                            {Math.round(Number(selectedFood.fats) * parseInt(foodQuantity) / 100)}g
                           </div>
                           <div className="text-xs text-gray-600">grasas</div>
                         </div>
