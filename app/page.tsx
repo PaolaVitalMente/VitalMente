@@ -2235,7 +2235,7 @@ Gracias!`
 
 
   // 🆕 COMPONENTE FLOATING BUTTONS SIMPLE - AGREGAR ANTES DE export default function VitalMenteApp()
-const FloatingActionButtons = ({ currentProgress, updateProgressFn }) => {
+const FloatingActionButtons = ({ currentProgress, updateProgressFn }: any) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
   const quickActions = [
