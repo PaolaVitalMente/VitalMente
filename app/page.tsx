@@ -89,6 +89,21 @@ interface UserFood {
   created_at: string
 }
 
+// 🆕 NUEVA INTERFAZ: Alimentos globales precargados
+interface GlobalFood {
+  id: string
+  name: string
+  calories: number
+  protein: number
+  carbs: number
+  fats: number
+  category: string
+  common_portion_size: number
+  common_portion_name: string
+  is_active: boolean
+  created_at: string
+}
+
 // 🆕 NUEVA INTERFAZ: Composición de comidas para la calculadora
 interface MealComposition {
   id: string
@@ -357,6 +372,25 @@ const dbFunctions = {
       return data as UserFood[]
     } catch (error) {
       console.error('Error loading user foods:', error)
+      return []
+    }
+  },
+
+  // 🆕 NUEVA FUNCIÓN: Cargar alimentos globales precargados
+  async getGlobalFoods(): Promise<GlobalFood[]> {
+    try {
+      const { data, error } = await supabase
+        .from('global_foods')
+        .select('*')
+        .eq('is_active', true)
+        .order('category', { ascending: true })
+        .order('name', { ascending: true })
+      
+      if (error) throw error
+      console.log('✅ Alimentos globales cargados:', data?.length || 0)
+      return data as GlobalFood[]
+    } catch (error) {
+      console.error('Error loading global foods:', error)
       return []
     }
   },
@@ -720,6 +754,7 @@ export default function VitalMenteApp() {
   })
 
   const [userFoods, setUserFoods] = useState<UserFood[]>([])
+  const [globalFoods, setGlobalFoods] = useState<GlobalFood[]>([]) // 🆕 NUEVO ESTADO
   const [progressHistory, setProgressHistory] = useState<DailyProgress[]>([])
   const [globalTips, setGlobalTips] = useState<GlobalTip[]>([])
   const [globalResources, setGlobalResources] = useState<GlobalResource[]>([])
@@ -769,14 +804,16 @@ export default function VitalMenteApp() {
 
   const loadGlobalContent = async () => {
     try {
-      const [tips, resources, activeSupplements] = await Promise.all([
+      const [tips, resources, activeSupplements, globalFoodsList] = await Promise.all([
         dbFunctions.getActiveTips(),
         dbFunctions.getActiveResources(),
-        dbFunctions.getActiveSupplements()
+        dbFunctions.getActiveSupplements(),
+        dbFunctions.getGlobalFoods() // 🆕 NUEVA LÍNEA
       ])
       setGlobalTips(tips)
       setGlobalResources(resources)
       setSupplements(activeSupplements)
+      setGlobalFoods(globalFoodsList) // 🆕 NUEVA LÍNEA
     } catch (error) {
       console.error('Error loading global content:', error)
     }
@@ -937,6 +974,7 @@ export default function VitalMenteApp() {
     setConsumedMacros({ calories: 0, protein: 0, carbs: 0, fats: 0 })
     setSaveStatus('idle')
     setLastSaveTime(null)
+    // Nota: globalFoods se mantiene porque son datos globales
   }
 
   const handleLogoClick = () => {
@@ -1187,6 +1225,26 @@ export default function VitalMenteApp() {
       console.error('Error adding food to meal:', error)
       alert('Error al agregar alimento: ' + error.message)
     }
+  }
+
+  // 🆕 NUEVA FUNCIÓN: Seleccionar alimento (global o personal)
+  const selectFood = (food: GlobalFood | UserFood) => {
+    setSelectedFood(food)
+  }
+
+  // 🆕 NUEVA FUNCIÓN: Organizar alimentos globales por categoría
+  const getFoodsByCategory = () => {
+    const categories = [
+      { id: 'proteinas', name: 'Proteínas', icon: '🍗' },
+      { id: 'vegetales', name: 'Vegetales', icon: '🥬' },
+      { id: 'frutas', name: 'Frutas', icon: '🍎' },
+      { id: 'carbohidratos', name: 'Carbohidratos', icon: '🌾' }
+    ]
+
+    return categories.map(category => ({
+      ...category,
+      foods: globalFoods.filter(food => food.category === category.id)
+    }))
   }
 
   // 🔧 FUNCIÓN MEJORADA: Remover alimento de comida
@@ -2736,24 +2794,64 @@ Gracias!`
               {!selectedFood ? (
                 <div>
                   <h4 className="font-semibold mb-3">Selecciona un alimento:</h4>
-                  <div className="max-h-60 overflow-y-auto space-y-2">
-                    {userFoods.length > 0 ? (
-                      userFoods.map(food => (
-                        <div 
-                          key={food.id} 
-                          className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                          onClick={() => setSelectedFood(food)}
-                        >
-                          <h5 className="font-semibold">{food.name}</h5>
-                          <p className="text-sm text-gray-600">
-                            {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
-                            <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
-                          </p>
+                  <div className="max-h-80 overflow-y-auto space-y-4">
+                    
+                    {/* 🆕 ALIMENTOS GLOBALES POR CATEGORÍA */}
+                    {getFoodsByCategory().map(category => (
+                      category.foods.length > 0 && (
+                        <div key={category.id}>
+                          <h5 className="font-semibold text-sm flex items-center gap-2 mb-2 px-2 py-1 bg-gray-100 rounded">
+                            <span>{category.icon}</span>
+                            {category.name}
+                          </h5>
+                          <div className="space-y-1 ml-2">
+                            {category.foods.map(food => (
+                              <div 
+                                key={food.id} 
+                                className="p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
+                                onClick={() => selectFood(food)}
+                              >
+                                <h6 className="font-semibold">{food.name}</h6>
+                                <p className="text-sm text-gray-600">
+                                  {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
+                                  <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
+                                </p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8">
-                        <p className="text-gray-600 mb-3">No tienes alimentos personalizados aún</p>
+                      )
+                    ))}
+
+                    {/* 🔧 ALIMENTOS PERSONALIZADOS DEL USUARIO */}
+                    {userFoods.length > 0 && (
+                      <div>
+                        <h5 className="font-semibold text-sm flex items-center gap-2 mb-2 px-2 py-1 bg-green-100 rounded">
+                          <span>👨‍🍳</span>
+                          Mis Alimentos Personalizados
+                        </h5>
+                        <div className="space-y-1 ml-2">
+                          {userFoods.map(food => (
+                            <div 
+                              key={food.id} 
+                              className="p-3 border border-green-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors"
+                              onClick={() => selectFood(food)}
+                            >
+                              <h6 className="font-semibold">{food.name}</h6>
+                              <p className="text-sm text-gray-600">
+                                {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
+                                <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 🆕 OPCIÓN PARA CREAR ALIMENTO PERSONALIZADO */}
+                    <div className="border-t pt-4">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600 mb-3">¿No encuentras tu alimento?</p>
                         <button 
                           onClick={() => {
                             setShowMealCalculator(false)
@@ -2763,10 +2861,10 @@ Gracias!`
                           className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2 mx-auto"
                         >
                           <span>{Icons.Plus()}</span>
-                          Crear primer alimento
+                          Crear alimento personalizado
                         </button>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               ) : (
