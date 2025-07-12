@@ -731,7 +731,13 @@ const dbFunctions = {
 
 export default function VitalMenteApp() {
   const [authState, setAuthState] = useState<'login' | 'register' | 'authenticated'>('login')
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null)
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+  if (typeof window !== 'undefined') {
+    const savedUser = localStorage.getItem('vitalmente_user')
+    return savedUser ? JSON.parse(savedUser) : null
+  }
+  return null
+})
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("inicio")
   const [macroResults, setMacroResults] = useState<MacroResult | null>(null)
