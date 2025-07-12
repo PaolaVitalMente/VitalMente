@@ -841,6 +841,7 @@ export default function VitalMenteApp() {
 
       await dbFunctions.updateUserLastLogin(user.id)
       setCurrentUser(user)
+      localStorage.setItem('vitalmente_user', JSON.stringify(user))
       await loadUserData(user.id)
       calculateMacros(user)
       setAuthState('authenticated')
@@ -966,6 +967,7 @@ export default function VitalMenteApp() {
 
   const handleLogout = () => {
     setCurrentUser(null)
+    localStorage.removeItem('vitalmente_user')
     setAuthState('login')
     setDailyProgress({
       id: "", user_id: "", date: new Date().toISOString().split('T')[0],
