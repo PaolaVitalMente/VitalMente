@@ -843,7 +843,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
       localStorage.setItem('vitalmente_user', JSON.stringify(user))
       await loadUserData(user.id)
       calculateMacros(user)
-      setAuthState('authenticated')
       setLoginForm({ phone: "", accessCode: "" })
     } catch (error: any) {
       console.error('Error en login:', error)
