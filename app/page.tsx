@@ -730,12 +730,26 @@ const dbFunctions = {
 // ============================================================================
 
 export default function VitalMenteApp() {
-  const [authState, setAuthState] = useState<'login' | 'register' | 'authenticated'>('login')
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+  console.log('🔍 INICIO: Inicializando currentUser...')
   if (typeof window !== 'undefined') {
+    console.log('✅ Window disponible')
     const savedUser = localStorage.getItem('vitalmente_user')
-    return savedUser ? JSON.parse(savedUser) : null
+    console.log('📦 Datos en localStorage:', savedUser)
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser)
+        console.log('✅ Usuario parseado exitosamente:', parsed)
+        return parsed
+      } catch (error) {
+        console.log('❌ Error parseando JSON:', error)
+        return null
+      }
+    }
+    console.log('❌ No hay datos guardados en localStorage')
+    return null
   }
+  console.log('❌ Window NO disponible (SSR)')
   return null
 })
   const [isLoading, setIsLoading] = useState(false)
