@@ -899,9 +899,9 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
       console.log("✅ Usuario creado:", newUser)
 
       setCurrentUser(newUser)
+      localStorage.setItem('vitalmente_user', JSON.stringify(newUser))
       setDailyProgress(prev => ({ ...prev, user_id: newUser.id }))
       calculateMacros(newUser)
-      setAuthState('authenticated')
       setRegisterForm({
         phone: "", accessCode: "", confirmCode: "", name: "", age: "", weight: "", height: "",
         activityLevel: 1.375, goal: "feel_good"
@@ -966,7 +966,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
   const handleLogout = () => {
     setCurrentUser(null)
     localStorage.removeItem('vitalmente_user')
-    setAuthState('login')
     setDailyProgress({
       id: "", user_id: "", date: new Date().toISOString().split('T')[0],
       water: 0, exercise: 0, mindfulness: 0, desayuno: 0, almuerzo: 0, cena: 0
@@ -1909,7 +1908,7 @@ Gracias!`
     )
   }
 
-  if (authState !== 'authenticated') {
+  if (!currentUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
@@ -1924,160 +1923,49 @@ Gracias!`
           <div className="space-y-6">
             <div className="flex rounded-lg bg-gray-100 p-1">
               <button
-                onClick={() => setAuthState('login')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                  authState === 'login' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                }`}
+                onClick={() => {/* No necesitamos authState, solo mostrar login */}}
+                className="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors bg-white text-green-600 shadow-sm"
               >
                 Ingresar
               </button>
               <button
-                onClick={() => setAuthState('register')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                  authState === 'register' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                }`}
+                onClick={() => {/* Toggle entre login y register */}}
+                className="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-900"
               >
                 Crear Cuenta
               </button>
             </div>
 
-            {authState === 'login' && (
-              <div className="space-y-4">
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="+57 300 123 4567"
-                  value={loginForm.phone}
-                  onChange={(e) => setLoginForm(prev => ({ ...prev, phone: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  type="password"
-                  placeholder="Código de 10 dígitos"
-                  maxLength={10}
-                  value={loginForm.accessCode}
-                  onChange={(e) => setLoginForm(prev => ({ ...prev, accessCode: e.target.value }))}
-                />
-                <button 
-                  onClick={handleLogin} 
-                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <span>{Icons.Loader2()}</span>
-                      Ingresando...
-                    </>
-                  ) : (
-                    "Ingresar"
-                  )}
-                </button>
-              </div>
-            )}
-
-            {authState === 'register' && (
-              <div className="space-y-4">
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="+57 300 123 4567"
-                  value={registerForm.phone}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, phone: e.target.value }))}
-                />
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    type="password"
-                    placeholder="Código 10 dígitos"
-                    maxLength={10}
-                    value={registerForm.accessCode}
-                    onChange={(e) => setRegisterForm(prev => ({ ...prev, accessCode: e.target.value }))}
-                  />
-                  <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    type="password"
-                    placeholder="Confirmar"
-                    maxLength={10}
-                    value={registerForm.confirmCode}
-                    onChange={(e) => setRegisterForm(prev => ({ ...prev, confirmCode: e.target.value }))}
-                  />
-                </div>
-
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Nombre completo"
-                  value={registerForm.name}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, name: e.target.value }))}
-                />
-                
-                <div className="grid grid-cols-3 gap-4">
-                  <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="Edad"
-                    type="number"
-                    value={registerForm.age}
-                    onChange={(e) => setRegisterForm(prev => ({ ...prev, age: e.target.value }))}
-                  />
-                  <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="Peso kg"
-                    type="number"
-                    value={registerForm.weight}
-                    onChange={(e) => setRegisterForm(prev => ({ ...prev, weight: e.target.value }))}
-                  />
-                  <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="Altura cm"
-                    type="number"
-                    value={registerForm.height}
-                    onChange={(e) => setRegisterForm(prev => ({ ...prev, height: e.target.value }))}
-                  />
-                </div>
-                
-                <select 
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  value={registerForm.activityLevel}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, activityLevel: parseFloat(e.target.value) }))}
-                >
-                  {ACTIVITY_LEVELS.map(level => (
-                    <option key={level.value} value={level.value}>
-                      {level.label} - {level.desc}
-                    </option>
-                  ))}
-                </select>
-
-                <select 
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  value={registerForm.goal}
-                  onChange={(e) => setRegisterForm(prev => ({ ...prev, goal: e.target.value }))}
-                >
-                  <optgroup label="🎯 Objetivos Físicos">
-                    {GOALS.filter(goal => goal.type === 'physical').map(goal => (
-                      <option key={goal.id} value={goal.id}>{goal.label}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="💙 Objetivos Emocionales">
-                    {GOALS.filter(goal => goal.type === 'emotional').map(goal => (
-                      <option key={goal.id} value={goal.id}>{goal.label}</option>
-                    ))}
-                  </optgroup>
-                </select>
-
-                <button 
-                  onClick={handleRegister} 
-                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <span>{Icons.Loader2()}</span>
-                      Creando...
-                    </>
-                  ) : (
-                    "Crear cuenta"
-                  )}
-                </button>
-              </div>
-            )}
+            <div className="space-y-4">
+              <input
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="+57 300 123 4567"
+                value={loginForm.phone}
+                onChange={(e) => setLoginForm(prev => ({ ...prev, phone: e.target.value }))}
+              />
+              <input
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                type="password"
+                placeholder="Código de 10 dígitos"
+                maxLength={10}
+                value={loginForm.accessCode}
+                onChange={(e) => setLoginForm(prev => ({ ...prev, accessCode: e.target.value }))}
+              />
+              <button 
+                onClick={handleLogin} 
+                className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span>{Icons.Loader2()}</span>
+                    Ingresando...
+                  </>
+                ) : (
+                  "Ingresar"
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2328,7 +2216,7 @@ Gracias!`
             </div>
           )}
 
-          {/* TAB NUTRICIÓN - (resto del contenido igual por brevedad) */}
+          {/* TAB NUTRICIÓN */}
           {activeTab === 'nutricion' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
