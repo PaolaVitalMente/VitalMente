@@ -795,6 +795,15 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     initializeApp()
   }, [])
 
+  // 🆕 NUEVO: Cargar datos cuando usuario se autentica desde localStorage
+useEffect(() => {
+  if (currentUser && currentUser.id) {
+    console.log('🔄 Usuario detectado desde localStorage, cargando datos...')
+    loadUserData(currentUser.id)
+    calculateMacros(currentUser)
+  }
+}, [currentUser])
+
   const initializeApp = async () => {
     try {
       setConnectionStatus('connecting')
