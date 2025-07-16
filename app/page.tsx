@@ -554,6 +554,14 @@ const dbFunctions = {
     return data as GlobalResource
   },
 
+  // 🆕 FUNCIONES DELETE PARA RECURSOS
+  async deleteResource(id: string): Promise<void> {
+    await supabase
+      .from('global_resources')
+      .delete()
+      .eq('id', id)
+  },
+
   async getActiveSupplements(): Promise<Supplement[]> {
     const { data, error } = await supabase
       .from('supplements')
@@ -605,6 +613,14 @@ const dbFunctions = {
     await supabase
       .from('supplements')
       .update(updateData)
+      .eq('id', id)
+  },
+
+  // 🆕 FUNCIÓN DELETE PARA SUPLEMENTOS
+  async deleteSupplement(id: string): Promise<void> {
+    await supabase
+      .from('supplements')
+      .delete()
       .eq('id', id)
   },
 
@@ -722,6 +738,63 @@ const dbFunctions = {
     } catch (error) {
       console.log('Datos por defecto ya inicializados o error menor:', error)
     }
+  },
+
+  // 🆕 FUNCIONES DE SUPABASE STORAGE
+  async uploadSupplementImage(file: File, supplementName: string): Promise<string> {
+    try {
+      console.log('📤 Iniciando upload de imagen:', file.name)
+      
+      // Generar nombre único
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${supplementName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.${fileExt}`
+      
+      console.log('📝 Nombre generado:', fileName)
+      
+      // Subir a Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('supplement-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+      
+      if (error) {
+        console.error('❌ Error en upload:', error)
+        throw error
+      }
+      
+      console.log('✅ Archivo subido:', data)
+      
+      // Obtener URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('supplement-images')
+        .getPublicUrl(fileName)
+      
+      console.log('🔗 URL pública generada:', publicUrl)
+      return publicUrl
+      
+    } catch (error) {
+      console.error('💥 Error completo en uploadSupplementImage:', error)
+      throw error
+    }
+  },
+
+  async deleteSupplementImage(imageUrl: string): Promise<void> {
+    try {
+      // Extraer nombre del archivo de la URL
+      const fileName = imageUrl.split('/').pop()
+      if (!fileName) return
+      
+      const { error } = await supabase.storage
+        .from('supplement-images')
+        .remove([fileName])
+      
+      if (error) throw error
+      console.log('🗑️ Imagen eliminada:', fileName)
+    } catch (error) {
+      console.error('Error eliminando imagen:', error)
+    }
   }
 }
 
@@ -791,18 +864,21 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
   const [selectedMeal, setSelectedMeal] = useState<'desayuno' | 'almuerzo' | 'cena' | null>(null)
   const [newFood, setNewFood] = useState({ name: "", calories: "", protein: "", carbs: "", fats: "" })
 
+  // 🆕 ESTADOS PARA FLOATING ACTION BUTTONS
+  const [showFloatingMenu, setShowFloatingMenu] = useState(false)
+
   useEffect(() => {
     initializeApp()
   }, [])
 
   // 🆕 NUEVO: Cargar datos cuando usuario se autentica desde localStorage
-useEffect(() => {
-  if (currentUser && currentUser.id) {
-    console.log('🔄 Usuario detectado desde localStorage, cargando datos...')
-    loadUserData(currentUser.id)
-    calculateMacros(currentUser)
-  }
-}, [currentUser])
+  useEffect(() => {
+    if (currentUser && currentUser.id) {
+      console.log('🔄 Usuario detectado desde localStorage, cargando datos...')
+      loadUserData(currentUser.id)
+      calculateMacros(currentUser)
+    }
+  }, [currentUser])
 
   const initializeApp = async () => {
     try {
@@ -1099,6 +1175,47 @@ useEffect(() => {
     }
   }
 
+  // 🆕 NUEVA FUNCIÓN: Quick progress para floating buttons
+  const handleQuickProgress = async (type: 'water' | 'exercise' | 'mindfulness') => {
+    await updateProgress(type, 1)
+    setShowFloatingMenu(false)
+  }
+
+  // 🆕 NUEVA FUNCIÓN: Complete typical day
+  const handleTypicalDay = async () => {
+    if (!currentUser) return
+    
+    setSaveStatus('saving')
+    try {
+      const typicalProgress = {
+        water: 6, // Día típico
+        exercise: 1,
+        mindfulness: 1,
+        desayuno: 1,
+        almuerzo: 1,
+        cena: 1
+      }
+      
+      setDailyProgress(prev => ({ ...prev, ...typicalProgress }))
+      
+      const success = await dbFunctions.saveProgress(currentUser.id, typicalProgress)
+      
+      if (success) {
+        setSaveStatus('saved')
+        setLastSaveTime(new Date())
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } else {
+        throw new Error('Error al guardar día típico')
+      }
+    } catch (error) {
+      console.error('Error guardando día típico:', error)
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus('idle'), 3000)
+    }
+    
+    setShowFloatingMenu(false)
+  }
+
   // 🔧 FUNCIÓN MEJORADA: Reset con confirmación
   const resetProgress = async (type?: 'all' | 'meals' | 'exercise' | 'mindfulness' | 'water') => {
     if (!currentUser) return
@@ -1343,7 +1460,58 @@ Gracias!`
     )
   }
 
-  // Panel de administración COMPLETO (RESTAURADO)
+  // 🆕 FLOATING ACTION BUTTONS COMPONENT
+  const FloatingActionButtons = () => {
+    return (
+      <div className="fixed bottom-24 right-4 z-40">
+        {/* Menu expandido */}
+        {showFloatingMenu && (
+          <div className="flex flex-col gap-3 mb-4 animate-in slide-in-from-bottom">
+            <button
+              onClick={() => handleQuickProgress('water')}
+              className="bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors flex items-center gap-2 min-w-max"
+            >
+              <span className="text-xl">{Icons.Droplets()}</span>
+              <span className="text-sm">Agua +1</span>
+            </button>
+            <button
+              onClick={() => handleQuickProgress('exercise')}
+              className="bg-green-500 text-white p-3 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center gap-2 min-w-max"
+            >
+              <span className="text-xl">{Icons.Activity()}</span>
+              <span className="text-sm">Ejercicio +1</span>
+            </button>
+            <button
+              onClick={() => handleQuickProgress('mindfulness')}
+              className="bg-purple-500 text-white p-3 rounded-full shadow-lg hover:bg-purple-600 transition-colors flex items-center gap-2 min-w-max"
+            >
+              <span className="text-xl">{Icons.Brain()}</span>
+              <span className="text-sm">Mindfulness +1</span>
+            </button>
+            <button
+              onClick={handleTypicalDay}
+              className="bg-orange-500 text-white p-3 rounded-full shadow-lg hover:bg-orange-600 transition-colors flex items-center gap-2 min-w-max"
+            >
+              <span className="text-xl">⚡</span>
+              <span className="text-sm">Día típico</span>
+            </button>
+          </div>
+        )}
+        
+        {/* Botón principal */}
+        <button
+          onClick={() => setShowFloatingMenu(!showFloatingMenu)}
+          className={`bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-all duration-200 ${
+            showFloatingMenu ? 'rotate-45' : 'rotate-0'
+          }`}
+        >
+          <span className="text-2xl">{Icons.Plus()}</span>
+        </button>
+      </div>
+    )
+  }
+
+  // Panel de administración COMPLETO CON SISTEMA DE IMÁGENES Y DELETE
   const AdminPanel = () => {
     const [activeAdminTab, setActiveAdminTab] = useState("overview")
     const [showTipDialog, setShowTipDialog] = useState(false)
@@ -1357,6 +1525,11 @@ Gracias!`
     const [newSupplement, setNewSupplement] = useState({
       name: "", description: "", benefits: "", price: "", image_url: "", whatsapp_message: ""
     })
+
+    // 🆕 ESTADOS PARA SISTEMA DE IMÁGENES
+    const [imageFile, setImageFile] = useState<File | null>(null)
+    const [uploading, setUploading] = useState(false)
+    const [imagePreview, setImagePreview] = useState<string>("")
 
     const [allTips, setAllTips] = useState<GlobalTip[]>([])
     const [allResources, setAllResources] = useState<GlobalResource[]>([])
@@ -1433,13 +1606,24 @@ Gracias!`
       }
     }
 
+    // 🆕 FUNCIÓN MEJORADA CON SISTEMA DE IMÁGENES
     const addSupplementAdmin = async () => {
       if (!newSupplement.name || !newSupplement.description || !newSupplement.price) {
         alert("Por favor completa nombre, descripción y precio")
         return
       }
 
+      setUploading(true)
       try {
+        let imageUrl = newSupplement.image_url || "/placeholder.svg?height=200&width=200"
+        
+        // Si hay archivo, subirlo primero
+        if (imageFile) {
+          console.log('📤 Subiendo imagen del suplemento...')
+          imageUrl = await dbFunctions.uploadSupplementImage(imageFile, newSupplement.name)
+          console.log('✅ Imagen subida exitosamente:', imageUrl)
+        }
+        
         const benefits = newSupplement.benefits.split(',').map(b => b.trim()).filter(b => b)
         
         await dbFunctions.addSupplement({
@@ -1447,21 +1631,47 @@ Gracias!`
           description: newSupplement.description,
           benefits,
           price: parseInt(newSupplement.price),
-          image_url: newSupplement.image_url || "/placeholder.svg?height=200&width=200",
+          image_url: imageUrl,
           is_active: true,
           whatsapp_message: newSupplement.whatsapp_message
         })
 
-        setNewSupplement({
-          name: "", description: "", benefits: "", price: "", image_url: "", whatsapp_message: ""
-        })
+        // Resetear formulario
+        resetSupplementForm()
         setShowSupplementDialog(false)
         loadAdminData()
         loadGlobalContent()
+        
       } catch (error: any) {
         console.error('Error adding supplement:', error)
         alert('Error al agregar suplemento: ' + error.message)
+      } finally {
+        setUploading(false)
       }
+    }
+
+    // 🆕 FUNCIÓN PARA MANEJAR SELECCIÓN DE ARCHIVOS
+    const handleImageFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (file) {
+        setImageFile(file)
+        
+        // Crear preview
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          setImagePreview(e.target?.result as string)
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+
+    // 🆕 FUNCIÓN PARA RESETEAR FORMULARIO
+    const resetSupplementForm = () => {
+      setNewSupplement({
+        name: "", description: "", benefits: "", price: "", image_url: "", whatsapp_message: ""
+      })
+      setImageFile(null)
+      setImagePreview("")
     }
 
     const toggleTipStatus = async (id: string) => {
@@ -1477,14 +1687,30 @@ Gracias!`
       }
     }
 
+    // 🆕 FUNCIÓN DELETE PARA TIPS
     const deleteTip = async (id: string) => {
-      if (confirm("¿Estás seguro de eliminar este tip?")) {
+      if (confirm("¿Estás seguro de eliminar este tip? Esta acción no se puede deshacer.")) {
         try {
           await dbFunctions.deleteTip(id)
           loadAdminData()
           loadGlobalContent()
         } catch (error) {
           console.error('Error deleting tip:', error)
+          alert('Error al eliminar tip')
+        }
+      }
+    }
+
+    // 🆕 FUNCIÓN DELETE PARA RECURSOS
+    const deleteResource = async (id: string) => {
+      if (confirm("¿Estás seguro de eliminar este recurso? Esta acción no se puede deshacer.")) {
+        try {
+          await dbFunctions.deleteResource(id)
+          loadAdminData()
+          loadGlobalContent()
+        } catch (error) {
+          console.error('Error deleting resource:', error)
+          alert('Error al eliminar recurso')
         }
       }
     }
@@ -1499,6 +1725,27 @@ Gracias!`
         }
       } catch (error) {
         console.error('Error updating supplement:', error)
+      }
+    }
+
+    // 🆕 FUNCIÓN DELETE PARA SUPLEMENTOS
+    const deleteSupplement = async (id: string) => {
+      if (confirm("¿Estás seguro de eliminar este suplemento? Esta acción no se puede deshacer.")) {
+        try {
+          const supplement = allSupplements.find(s => s.id === id)
+          
+          // Si tiene imagen personalizada, eliminarla también
+          if (supplement?.image_url && !supplement.image_url.includes('placeholder')) {
+            await dbFunctions.deleteSupplementImage(supplement.image_url)
+          }
+          
+          await dbFunctions.deleteSupplement(id)
+          loadAdminData()
+          loadGlobalContent()
+        } catch (error) {
+          console.error('Error deleting supplement:', error)
+          alert('Error al eliminar suplemento')
+        }
       }
     }
 
@@ -1617,12 +1864,14 @@ Gracias!`
                         <button 
                           onClick={() => toggleTipStatus(tip.id)}
                           className="p-1 text-gray-400 hover:text-gray-600"
+                          title={tip.is_active ? "Desactivar" : "Activar"}
                         >
                           {Icons.Eye()}
                         </button>
                         <button 
                           onClick={() => deleteTip(tip.id)}
                           className="p-1 text-gray-400 hover:text-red-600"
+                          title="Eliminar permanentemente"
                         >
                           {Icons.Trash2()}
                         </button>
@@ -1653,7 +1902,7 @@ Gracias!`
                 {allResources.map(resource => (
                   <div key={resource.id} className="bg-white rounded-lg shadow p-4">
                     <div className="flex justify-between items-start">
-                      <div>
+                      <div className="flex-1">
                         <h4 className="font-semibold">{resource.title}</h4>
                         <p className="text-sm text-gray-600">{resource.description}</p>
                         <div className="flex gap-2 mt-2">
@@ -1663,12 +1912,22 @@ Gracias!`
                           </span>
                         </div>
                       </div>
-                      <button 
-                        onClick={() => window.open(resource.url, '_blank')}
-                        className="p-2 text-gray-400 hover:text-gray-600"
-                      >
-                        {Icons.ExternalLink()}
-                      </button>
+                      <div className="flex gap-2 ml-4">
+                        <button 
+                          onClick={() => window.open(resource.url, '_blank')}
+                          className="p-2 text-gray-400 hover:text-gray-600"
+                          title="Abrir enlace"
+                        >
+                          {Icons.ExternalLink()}
+                        </button>
+                        <button 
+                          onClick={() => deleteResource(resource.id)}
+                          className="p-2 text-gray-400 hover:text-red-600"
+                          title="Eliminar recurso"
+                        >
+                          {Icons.Trash2()}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1702,12 +1961,22 @@ Gracias!`
                         <h4 className="font-semibold">{supplement.name}</h4>
                         <p className="text-lg font-bold text-green-600">${supplement.price.toLocaleString()}</p>
                       </div>
-                      <button 
-                        onClick={() => toggleSupplementStatus(supplement.id)}
-                        className="p-1 text-gray-400 hover:text-gray-600"
-                      >
-                        {Icons.Eye()}
-                      </button>
+                      <div className="flex gap-1">
+                        <button 
+                          onClick={() => toggleSupplementStatus(supplement.id)}
+                          className="p-1 text-gray-400 hover:text-gray-600"
+                          title={supplement.is_active ? "Desactivar" : "Activar"}
+                        >
+                          {Icons.Eye()}
+                        </button>
+                        <button 
+                          onClick={() => deleteSupplement(supplement.id)}
+                          className="p-1 text-gray-400 hover:text-red-600"
+                          title="Eliminar suplemento"
+                        >
+                          {Icons.Trash2()}
+                        </button>
+                      </div>
                     </div>
                     <span className={`inline-block px-2 py-1 text-xs rounded mb-2 ${supplement.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                       {supplement.is_active ? "Activo" : "Inactivo"}
@@ -1849,12 +2118,62 @@ Gracias!`
                   value={newSupplement.price}
                   onChange={(e) => setNewSupplement(prev => ({ ...prev, price: e.target.value }))}
                 />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="URL imagen"
-                  value={newSupplement.image_url}
-                  onChange={(e) => setNewSupplement(prev => ({ ...prev, image_url: e.target.value }))}
-                />
+                
+                {/* 🆕 SISTEMA DE UPLOAD DE IMÁGENES */}
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-gray-700">Imagen del producto:</label>
+                  
+                  {/* Upload de archivo */}
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileSelect}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label 
+                      htmlFor="image-upload" 
+                      className="cursor-pointer flex flex-col items-center space-y-2"
+                    >
+                      {imagePreview ? (
+                        <img 
+                          src={imagePreview} 
+                          alt="Preview" 
+                          className="w-32 h-32 object-cover rounded-lg border"
+                        />
+                      ) : (
+                        <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center border">
+                          <span className="text-gray-400 text-3xl">📷</span>
+                        </div>
+                      )}
+                      <span className="text-sm text-blue-600 font-medium">
+                        {imageFile ? 'Cambiar imagen' : 'Seleccionar imagen'}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        JPG, PNG, WebP o GIF (máx. 50MB)
+                      </span>
+                    </label>
+                  </div>
+                  
+                  {/* Fallback URL */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-300" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">o</span>
+                    </div>
+                  </div>
+                  
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="URL de imagen externa (opcional)"
+                    value={newSupplement.image_url}
+                    onChange={(e) => setNewSupplement(prev => ({ ...prev, image_url: e.target.value }))}
+                  />
+                </div>
+
                 <textarea
                   className="w-full p-3 border border-gray-300 rounded-lg h-20"
                   placeholder="Mensaje WhatsApp personalizado"
@@ -1864,12 +2183,26 @@ Gracias!`
                 <div className="flex gap-2">
                   <button 
                     onClick={addSupplementAdmin} 
-                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
+                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors"
+                    disabled={uploading}
                   >
-                    Agregar
+                    {uploading ? (
+                      <>
+                        <span className="animate-spin">⏳</span>
+                        Subiendo imagen...
+                      </>
+                    ) : (
+                      <>
+                        <span>📦</span>
+                        Agregar Suplemento
+                      </>
+                    )}
                   </button>
                   <button 
-                    onClick={() => setShowSupplementDialog(false)}
+                    onClick={() => {
+                      setShowSupplementDialog(false)
+                      resetSupplementForm()
+                    }}
                     className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
                   >
                     Cancelar
@@ -2021,6 +2354,9 @@ Gracias!`
     <div className="min-h-screen bg-gray-50">
       {/* 🔧 NUEVO: Indicador de estado de guardado */}
       <SaveStatusIndicator />
+      
+      {/* 🆕 FLOATING ACTION BUTTONS */}
+      {currentUser && <FloatingActionButtons />}
       
       <div className="pb-20">
         {/* Navegación de tabs */}
