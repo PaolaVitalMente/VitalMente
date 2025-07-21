@@ -35,7 +35,10 @@ const Icons = {
   Loader2: () => '⏳',
   Calculator: () => '🧮',
   CheckCircle: () => '✅',
-  AlertCircle: () => '⚠️'
+  AlertCircle: () => '⚠️',
+  Play: () => '▶️',
+  Dumbbell: () => '🏋️',
+  Music: () => '🎵'
 }
 
 // ============================================================================
@@ -48,7 +51,71 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // ============================================================================
-// TIPOS Y DATOS INICIALES (MANTENIDOS COMPLETOS)
+// 🆕 FUNCIONES PARA MINIATURAS MULTIMEDIA
+// ============================================================================
+
+const getYouTubeThumbnail = (url: string): string => {
+  // Extraer video ID de diferentes formatos de YouTube
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /^([a-zA-Z0-9_-]{11})$/ // ID directo
+  ]
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern)
+    if (match) {
+      const videoId = match[1]
+      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+    }
+  }
+  
+  // Si no es YouTube, return placeholder
+  return "/placeholder.svg?height=180&width=320&text=Video"
+}
+
+const getSpotifyThumbnail = (url: string): string => {
+  // Para Spotify usaremos un placeholder con icono de música
+  if (url.includes('spotify.com')) {
+    return "/placeholder.svg?height=180&width=320&text=🎵+Spotify"
+  }
+  return "/placeholder.svg?height=180&width=320&text=Audio"
+}
+
+const isYouTubeUrl = (url: string): boolean => {
+  return url.includes('youtube.com') || url.includes('youtu.be')
+}
+
+const isSpotifyUrl = (url: string): boolean => {
+  return url.includes('spotify.com')
+}
+
+const isPDFUrl = (url: string): boolean => {
+  return url.toLowerCase().includes('.pdf') || url.includes('drive.google.com')
+}
+
+const getResourceThumbnail = (url: string, type: string): string => {
+  if (isYouTubeUrl(url)) {
+    return getYouTubeThumbnail(url)
+  }
+  if (isSpotifyUrl(url)) {
+    return getSpotifyThumbnail(url)
+  }
+  if (isPDFUrl(url)) {
+    return "/placeholder.svg?height=180&width=320&text=📄+PDF"
+  }
+  
+  // Default por tipo
+  const typeDefaults = {
+    'mindfulness': "/placeholder.svg?height=180&width=320&text=🧘+Mindfulness",
+    'nutrition': "/placeholder.svg?height=180&width=320&text=🥗+Nutrición",
+    'exercise': "/placeholder.svg?height=180&width=320&text=💪+Ejercicio"
+  }
+  
+  return typeDefaults[type as keyof typeof typeDefaults] || "/placeholder.svg?height=180&width=320&text=Recurso"
+}
+
+// ============================================================================
+// TIPOS Y DATOS INICIALES (ACTUALIZADOS CON EXERCISE)
 // ============================================================================
 
 interface UserProfile {
@@ -89,7 +156,6 @@ interface UserFood {
   created_at: string
 }
 
-// 🆕 NUEVA INTERFAZ: Alimentos globales precargados
 interface GlobalFood {
   id: string
   name: string
@@ -104,7 +170,6 @@ interface GlobalFood {
   created_at: string
 }
 
-// 🆕 NUEVA INTERFAZ: Composición de comidas para la calculadora
 interface MealComposition {
   id: string
   user_id: string
@@ -130,12 +195,14 @@ interface GlobalTip {
   created_at: string
 }
 
+// 🆕 ACTUALIZADO: Incluye "exercise"
 interface GlobalResource {
   id: string
-  type: 'mindfulness' | 'nutrition'
+  type: 'mindfulness' | 'nutrition' | 'exercise'
   title: string
   description: string
   url: string
+  image_url?: string // 🆕 Para PDFs con imagen personalizada
   is_active: boolean
   created_at: string
 }
@@ -161,7 +228,6 @@ interface MacroResult {
   goalLabel: string
 }
 
-// 🆕 NUEVA INTERFAZ: Progreso de macros consumidos
 interface ConsumedMacros {
   calories: number
   protein: number
@@ -191,7 +257,7 @@ const GOALS = [
 ]
 
 // ============================================================================
-// 🚀 FUNCIONES DE BASE DE DATOS MEJORADAS PARA PERSISTENCIA
+// 🚀 FUNCIONES DE BASE DE DATOS MEJORADAS
 // ============================================================================
 
 const dbFunctions = {
@@ -240,7 +306,6 @@ const dbFunctions = {
     }
   },
 
-  // 🔧 FUNCIÓN MEJORADA: Obtener progreso del día con manejo de errores
   async getTodayProgress(userId: string): Promise<DailyProgress | null> {
     try {
       const today = new Date().toISOString().split('T')[0]
@@ -269,7 +334,6 @@ const dbFunctions = {
     }
   },
 
-  // 🔧 FUNCIÓN CLAVE MEJORADA: Guardar progreso con confirmación
   async saveProgress(userId: string, progress: Omit<DailyProgress, 'id' | 'user_id' | 'date'>): Promise<boolean> {
     try {
       const today = new Date().toISOString().split('T')[0]
@@ -290,7 +354,7 @@ const dbFunctions = {
             updated_at: new Date().toISOString()
           },
           { 
-            onConflict: 'user_id,date', // 🔑 CLAVE: Especificar clave de conflicto
+            onConflict: 'user_id,date',
             ignoreDuplicates: false 
           }
         )
@@ -310,7 +374,6 @@ const dbFunctions = {
     }
   },
 
-  // 🔧 FUNCIÓN MEJORADA: Verificar si los datos se guardaron
   async verifyProgressSaved(userId: string, expectedData: any): Promise<boolean> {
     try {
       const today = new Date().toISOString().split('T')[0]
@@ -323,7 +386,6 @@ const dbFunctions = {
 
       if (error || !data) return false
 
-      // Verificar que los datos coincidan
       const matches = data.water === expectedData.water && 
                      data.exercise === expectedData.exercise &&
                      data.mindfulness === expectedData.mindfulness &&
@@ -376,7 +438,6 @@ const dbFunctions = {
     }
   },
 
-  // 🆕 NUEVA FUNCIÓN: Cargar alimentos globales precargados
   async getGlobalFoods(): Promise<GlobalFood[]> {
     try {
       const { data, error } = await supabase
@@ -409,7 +470,6 @@ const dbFunctions = {
     return data as UserFood
   },
 
-  // 🆕 FUNCIONES DE COMIDAS MEJORADAS
   async getTodayMealCompositions(userId: string): Promise<MealComposition[]> {
     try {
       const today = new Date().toISOString().split('T')[0]
@@ -470,7 +530,6 @@ const dbFunctions = {
     }
   },
 
-  // RESTO DE FUNCIONES MANTENIDAS IGUAL...
   async getActiveTips(): Promise<GlobalTip[]> {
     const { data, error } = await supabase
       .from('global_tips')
@@ -554,7 +613,6 @@ const dbFunctions = {
     return data as GlobalResource
   },
 
-  // 🆕 FUNCIONES DELETE PARA RECURSOS
   async deleteResource(id: string): Promise<void> {
     await supabase
       .from('global_resources')
@@ -616,7 +674,6 @@ const dbFunctions = {
       .eq('id', id)
   },
 
-  // 🆕 FUNCIÓN DELETE PARA SUPLEMENTOS
   async deleteSupplement(id: string): Promise<void> {
     await supabase
       .from('supplements')
@@ -671,7 +728,7 @@ const dbFunctions = {
         }
       }
 
-      // Verificar si ya hay recursos
+      // 🆕 ACTUALIZADO: Verificar si ya hay recursos (incluyendo exercise)
       const { data: existingResources } = await supabase.from('global_resources').select('*')
       
       if (!existingResources || existingResources.length === 0) {
@@ -688,6 +745,21 @@ const dbFunctions = {
             title: "Recetas saludables y fáciles",
             description: "25 recetas balanceadas para toda la semana",
             url: "https://www.habitos.mx/recetas-saludables/",
+            is_active: true
+          },
+          // 🆕 RECURSOS DE EJERCICIO POR DEFECTO
+          {
+            type: "exercise" as const,
+            title: "Rutina de ejercicios en casa - 20 minutos",
+            description: "Entrenamiento completo sin equipamiento",
+            url: "https://www.youtube.com/watch?v=8dQKcziOQ8I",
+            is_active: true
+          },
+          {
+            type: "exercise" as const,
+            title: "Yoga para principiantes",
+            description: "15 minutos de yoga matutino para activar el cuerpo",
+            url: "https://www.youtube.com/watch?v=VaoV1PrYft4",
             is_active: true
           }
         ]
@@ -740,18 +812,15 @@ const dbFunctions = {
     }
   },
 
-  // 🆕 FUNCIONES DE SUPABASE STORAGE
   async uploadSupplementImage(file: File, supplementName: string): Promise<string> {
     try {
       console.log('📤 Iniciando upload de imagen:', file.name)
       
-      // Generar nombre único
       const fileExt = file.name.split('.').pop()
       const fileName = `${supplementName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.${fileExt}`
       
       console.log('📝 Nombre generado:', fileName)
       
-      // Subir a Supabase Storage
       const { data, error } = await supabase.storage
         .from('supplement-images')
         .upload(fileName, file, {
@@ -766,7 +835,6 @@ const dbFunctions = {
       
       console.log('✅ Archivo subido:', data)
       
-      // Obtener URL pública
       const { data: { publicUrl } } = supabase.storage
         .from('supplement-images')
         .getPublicUrl(fileName)
@@ -782,7 +850,6 @@ const dbFunctions = {
 
   async deleteSupplementImage(imageUrl: string): Promise<void> {
     try {
-      // Extraer nombre del archivo de la URL
       const fileName = imageUrl.split('/').pop()
       if (!fileName) return
       
@@ -799,7 +866,7 @@ const dbFunctions = {
 }
 
 // ============================================================================
-// COMPONENTE PRINCIPAL CON PERSISTENCIA MEJORADA
+// COMPONENTE PRINCIPAL CON RECURSOS MULTIMEDIA MEJORADOS
 // ============================================================================
 
 export default function VitalMenteApp() {
@@ -815,7 +882,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
   const [macroResults, setMacroResults] = useState<MacroResult | null>(null)
   const [connectionStatus, setConnectionStatus] = useState('connecting')
   
-  // 🔧 ESTADO MEJORADO: Agregar indicadores de guardado
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
   
@@ -832,21 +898,20 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
   })
 
   const [userFoods, setUserFoods] = useState<UserFood[]>([])
-  const [globalFoods, setGlobalFoods] = useState<GlobalFood[]>([]) // 🆕 NUEVO ESTADO
+  const [globalFoods, setGlobalFoods] = useState<GlobalFood[]>([])
   const [progressHistory, setProgressHistory] = useState<DailyProgress[]>([])
   const [globalTips, setGlobalTips] = useState<GlobalTip[]>([])
   const [globalResources, setGlobalResources] = useState<GlobalResource[]>([])
   const [supplements, setSupplements] = useState<Supplement[]>([])
   const [currentTipIndex, setCurrentTipIndex] = useState(0)
 
-  // 🆕 ESTADOS PARA LA CALCULADORA DE MACROS
   const [mealCompositions, setMealCompositions] = useState<MealComposition[]>([])
   const [consumedMacros, setConsumedMacros] = useState<ConsumedMacros>({
     calories: 0, protein: 0, carbs: 0, fats: 0
   })
   const [showMealCalculator, setShowMealCalculator] = useState(false)
   const [selectedMealType, setSelectedMealType] = useState<'desayuno' | 'almuerzo' | 'cena'>('desayuno')
-  const [selectedFood, setSelectedFood] = useState<UserFood | GlobalFood | null>(null) // 🔧 CORREGIDO
+  const [selectedFood, setSelectedFood] = useState<UserFood | GlobalFood | null>(null)
   const [foodQuantity, setFoodQuantity] = useState<string>('100')
 
   const [logoClicks, setLogoClicks] = useState(0)
@@ -859,19 +924,18 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     phone: "", accessCode: "", confirmCode: "", name: "", age: "", weight: "", height: "",
     activityLevel: 1.375, goal: "feel_good"
   })
+  const [showRegister, setShowRegister] = useState(false)
 
   const [showFoodDialog, setShowFoodDialog] = useState(false)
   const [selectedMeal, setSelectedMeal] = useState<'desayuno' | 'almuerzo' | 'cena' | null>(null)
   const [newFood, setNewFood] = useState({ name: "", calories: "", protein: "", carbs: "", fats: "" })
 
-  // 🆕 ESTADOS PARA FLOATING ACTION BUTTONS
   const [showFloatingMenu, setShowFloatingMenu] = useState(false)
 
   useEffect(() => {
     initializeApp()
   }, [])
 
-  // 🆕 NUEVO: Cargar datos cuando usuario se autentica desde localStorage
   useEffect(() => {
     if (currentUser && currentUser.id) {
       console.log('🔄 Usuario detectado desde localStorage, cargando datos...')
@@ -898,12 +962,12 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
         dbFunctions.getActiveTips(),
         dbFunctions.getActiveResources(),
         dbFunctions.getActiveSupplements(),
-        dbFunctions.getGlobalFoods() // 🆕 NUEVA LÍNEA
+        dbFunctions.getGlobalFoods()
       ])
       setGlobalTips(tips)
       setGlobalResources(resources)
       setSupplements(activeSupplements)
-      setGlobalFoods(globalFoodsList) // 🆕 NUEVA LÍNEA
+      setGlobalFoods(globalFoodsList)
     } catch (error) {
       console.error('Error loading global content:', error)
     }
@@ -999,12 +1063,10 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     }
   }
 
-  // 🔧 FUNCIÓN MEJORADA: Cargar datos del usuario con mejor logging
   const loadUserData = async (userId: string) => {
     try {
       console.log('🔍 Iniciando carga de datos para usuario:', userId)
       
-      // Cargar progreso del día
       const todayProgress = await dbFunctions.getTodayProgress(userId)
       if (todayProgress) {
         console.log('✅ Progreso cargado desde BD:', todayProgress)
@@ -1014,7 +1076,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
         setDailyProgress(prev => ({ ...prev, user_id: userId }))
       }
 
-      // Cargar otros datos en paralelo
       const [foods, history, compositions] = await Promise.all([
         dbFunctions.getUserFoods(userId),
         dbFunctions.getProgressHistory(userId),
@@ -1025,7 +1086,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
       setProgressHistory(history)
       setMealCompositions(compositions)
       
-      // Calcular macros consumidos
       calculateConsumedMacros(compositions)
       
       console.log('✅ Todos los datos cargados exitosamente')
@@ -1034,7 +1094,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     }
   }
 
-  // 🆕 NUEVA FUNCIÓN: Calcular macros consumidos del día
   const calculateConsumedMacros = (compositions: MealComposition[]) => {
     const totals = compositions.reduce(
       (acc, comp) => ({
@@ -1059,12 +1118,10 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     setProgressHistory([])
     setMacroResults(null)
     setActiveTab("inicio")
-    // Limpiar estados de calculadora
     setMealCompositions([])
     setConsumedMacros({ calories: 0, protein: 0, carbs: 0, fats: 0 })
     setSaveStatus('idle')
     setLastSaveTime(null)
-    // Nota: globalFoods se mantiene porque son datos globales
   }
 
   const handleLogoClick = () => {
@@ -1091,7 +1148,7 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
   const calculateMacros = (userData: UserProfile) => {
     const bmr = 10 * userData.weight + 6.25 * userData.height - 5 * userData.age + 5
     const tdee = bmr * userData.activity_level
-    const goalData = GOALS.find(g => g.id === userData.goal) || GOALS[3] // Default a "Sentirse bien"
+    const goalData = GOALS.find(g => g.id === userData.goal) || GOALS[3]
     const calories = Math.round(tdee * (1 + goalData.calAdjust))
     
     setMacroResults({
@@ -1117,22 +1174,18 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     return messages[goal] || messages.feel_good
   }
 
-  // 🔧 FUNCIÓN CLAVE MEJORADA: Actualizar progreso con persistencia robusta
   const updateProgress = async (field: keyof DailyProgress, increment: number) => {
     if (!currentUser) return
 
-    // Actualizar estado local inmediatamente para UX responsiva
     const newProgress = { 
       ...dailyProgress, 
       [field]: Math.max(0, (dailyProgress as any)[field] + increment) 
     }
     setDailyProgress(newProgress)
     
-    // Indicar que se está guardando
     setSaveStatus('saving')
 
     try {
-      // Guardar en base de datos
       const success = await dbFunctions.saveProgress(currentUser.id, {
         water: newProgress.water,
         exercise: newProgress.exercise,
@@ -1143,7 +1196,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
       })
 
       if (success) {
-        // Verificar que se guardó correctamente
         const verified = await dbFunctions.verifyProgressSaved(currentUser.id, newProgress)
         
         if (verified) {
@@ -1151,7 +1203,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
           setLastSaveTime(new Date())
           console.log('✅ Progreso guardado y verificado')
           
-          // Limpiar indicador después de 2 segundos
           setTimeout(() => setSaveStatus('idle'), 2000)
         } else {
           throw new Error('Los datos no se guardaron correctamente')
@@ -1164,31 +1215,26 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
       console.error('❌ Error guardando progreso:', error)
       setSaveStatus('error')
       
-      // Revertir cambios en caso de error
       setDailyProgress(dailyProgress)
       
-      // Mostrar error al usuario
       alert('Error al guardar progreso. Por favor intenta de nuevo.')
       
-      // Limpiar error después de 3 segundos
       setTimeout(() => setSaveStatus('idle'), 3000)
     }
   }
 
-  // 🆕 NUEVA FUNCIÓN: Quick progress para floating buttons
   const handleQuickProgress = async (type: 'water' | 'exercise' | 'mindfulness') => {
     await updateProgress(type, 1)
     setShowFloatingMenu(false)
   }
 
-  // 🆕 NUEVA FUNCIÓN: Complete typical day
   const handleTypicalDay = async () => {
     if (!currentUser) return
     
     setSaveStatus('saving')
     try {
       const typicalProgress = {
-        water: 6, // Día típico
+        water: 6,
         exercise: 1,
         mindfulness: 1,
         desayuno: 1,
@@ -1216,7 +1262,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     setShowFloatingMenu(false)
   }
 
-  // 🔧 FUNCIÓN MEJORADA: Reset con confirmación
   const resetProgress = async (type?: 'all' | 'meals' | 'exercise' | 'mindfulness' | 'water') => {
     if (!currentUser) return
 
@@ -1232,7 +1277,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
       newProgress = { ...newProgress, water: 0, exercise: 0, mindfulness: 0, desayuno: 0, almuerzo: 0, cena: 0 }
     } else if (type === 'meals') {
       newProgress = { ...newProgress, desayuno: 0, almuerzo: 0, cena: 0 }
-      // También eliminar composiciones de comidas
       try {
         for (const comp of mealCompositions) {
           await dbFunctions.deleteMealComposition(comp.id)
@@ -1311,7 +1355,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     }
   }
 
-  // 🆕 NUEVA FUNCIÓN: Abrir calculadora de macros
   const openMealCalculator = (mealType: 'desayuno' | 'almuerzo' | 'cena') => {
     setSelectedMealType(mealType)
     setShowMealCalculator(true)
@@ -1319,13 +1362,12 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     setFoodQuantity('100')
   }
 
-  // 🔧 FUNCIÓN MEJORADA: Agregar alimento con cantidad específica
   const addFoodToMeal = async () => {
     if (!selectedFood || !currentUser || !foodQuantity) return
 
     try {
       const quantity = parseInt(foodQuantity)
-      const ratio = quantity / 100 // Los valores nutricionales están por 100g
+      const ratio = quantity / 100
 
       const composition: Omit<MealComposition, 'id' | 'created_at'> = {
         user_id: currentUser.id,
@@ -1343,10 +1385,8 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
       const newComposition = await dbFunctions.addMealComposition(composition)
       setMealCompositions(prev => [...prev, newComposition])
       
-      // Recalcular macros consumidos
       calculateConsumedMacros([...mealCompositions, newComposition])
       
-      // Actualizar progreso de la comida
       await updateProgress(selectedMealType, 1)
       
       setShowMealCalculator(false)
@@ -1358,12 +1398,10 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     }
   }
 
-  // 🆕 NUEVA FUNCIÓN: Seleccionar alimento (global o personal)
   const selectFood = (food: GlobalFood | UserFood) => {
     setSelectedFood(food)
   }
 
-  // 🆕 NUEVA FUNCIÓN: Organizar alimentos globales por categoría
   const getFoodsByCategory = () => {
     const categories = [
       { id: 'proteinas', name: 'Proteínas', icon: '🍗' },
@@ -1378,7 +1416,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     }))
   }
 
-  // 🔧 FUNCIÓN MEJORADA: Remover alimento de comida
   const removeFoodFromMeal = async (compositionId: string) => {
     try {
       await dbFunctions.deleteMealComposition(compositionId)
@@ -1391,7 +1428,6 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     }
   }
 
-  // 🆕 NUEVA FUNCIÓN: Obtener progreso de calorías
   const getCaloriesProgress = () => {
     if (!macroResults) return { consumed: 0, target: 0, percentage: 0 }
     
@@ -1400,7 +1436,7 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     return {
       consumed: consumedMacros.calories,
       target: macroResults.calories,
-      percentage: Math.min(percentage, 100) // Limitar a 100%
+      percentage: Math.min(percentage, 100)
     }
   }
 
@@ -1435,7 +1471,16 @@ Gracias!`
     window.open(whatsappUrl, '_blank')
   }
 
-  // 🔧 COMPONENTE MEJORADO: Indicador de estado de guardado
+  // 🆕 FUNCIÓN PARA OBTENER ICONO SEGÚN TIPO DE RECURSO
+  const getResourceTypeIcon = (type: string) => {
+    switch(type) {
+      case 'mindfulness': return '🧘‍♀️'
+      case 'nutrition': return '🥗'
+      case 'exercise': return '💪'
+      default: return '📝'
+    }
+  }
+
   const SaveStatusIndicator = () => {
     if (saveStatus === 'idle') return null
 
@@ -1460,11 +1505,9 @@ Gracias!`
     )
   }
 
-  // 🆕 FLOATING ACTION BUTTONS COMPONENT
   const FloatingActionButtons = () => {
     return (
       <div className="fixed bottom-24 right-4 z-40">
-        {/* Menu expandido */}
         {showFloatingMenu && (
           <div className="flex flex-col gap-3 mb-4 animate-in slide-in-from-bottom">
             <button
@@ -1498,7 +1541,6 @@ Gracias!`
           </div>
         )}
         
-        {/* Botón principal */}
         <button
           onClick={() => setShowFloatingMenu(!showFloatingMenu)}
           className={`bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-all duration-200 ${
@@ -1511,22 +1553,22 @@ Gracias!`
     )
   }
 
-  // Panel de administración COMPLETO CON SISTEMA DE IMÁGENES Y DELETE
+  // PANEL DE ADMINISTRACIÓN COMPLETO CON CATEGORÍA EXERCISE
   const AdminPanel = () => {
     const [activeAdminTab, setActiveAdminTab] = useState("overview")
     const [showTipDialog, setShowTipDialog] = useState(false)
     const [showResourceDialog, setShowResourceDialog] = useState(false)
     const [showSupplementDialog, setShowSupplementDialog] = useState(false)
-    const [resourceType, setResourceType] = useState<'mindfulness' | 'nutrition'>('mindfulness')
+    // 🔧 ACTUALIZADO: Incluye "exercise"
+    const [resourceType, setResourceType] = useState<'mindfulness' | 'nutrition' | 'exercise'>('mindfulness')
     const [adminStats, setAdminStats] = useState({ totalUsers: 0, activeToday: 0 })
 
     const [newTip, setNewTip] = useState({ category: "", title: "", content: "", icon: "💡" })
-    const [newResource, setNewResource] = useState({ title: "", description: "", url: "" })
+    const [newResource, setNewResource] = useState({ title: "", description: "", url: "", image_url: "" })
     const [newSupplement, setNewSupplement] = useState({
       name: "", description: "", benefits: "", price: "", image_url: "", whatsapp_message: ""
     })
 
-    // 🆕 ESTADOS PARA SISTEMA DE IMÁGENES
     const [imageFile, setImageFile] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
     const [imagePreview, setImagePreview] = useState<string>("")
@@ -1593,10 +1635,11 @@ Gracias!`
           title: newResource.title,
           description: newResource.description,
           url: newResource.url,
+          image_url: newResource.image_url || undefined,
           is_active: true
         })
 
-        setNewResource({ title: "", description: "", url: "" })
+        setNewResource({ title: "", description: "", url: "", image_url: "" })
         setShowResourceDialog(false)
         loadAdminData()
         loadGlobalContent()
@@ -1606,7 +1649,6 @@ Gracias!`
       }
     }
 
-    // 🆕 FUNCIÓN MEJORADA CON SISTEMA DE IMÁGENES
     const addSupplementAdmin = async () => {
       if (!newSupplement.name || !newSupplement.description || !newSupplement.price) {
         alert("Por favor completa nombre, descripción y precio")
@@ -1617,7 +1659,6 @@ Gracias!`
       try {
         let imageUrl = newSupplement.image_url || "/placeholder.svg?height=200&width=200"
         
-        // Si hay archivo, subirlo primero
         if (imageFile) {
           console.log('📤 Subiendo imagen del suplemento...')
           imageUrl = await dbFunctions.uploadSupplementImage(imageFile, newSupplement.name)
@@ -1636,7 +1677,6 @@ Gracias!`
           whatsapp_message: newSupplement.whatsapp_message
         })
 
-        // Resetear formulario
         resetSupplementForm()
         setShowSupplementDialog(false)
         loadAdminData()
@@ -1650,13 +1690,11 @@ Gracias!`
       }
     }
 
-    // 🆕 FUNCIÓN PARA MANEJAR SELECCIÓN DE ARCHIVOS
     const handleImageFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       if (file) {
         setImageFile(file)
         
-        // Crear preview
         const reader = new FileReader()
         reader.onload = (e) => {
           setImagePreview(e.target?.result as string)
@@ -1665,7 +1703,6 @@ Gracias!`
       }
     }
 
-    // 🆕 FUNCIÓN PARA RESETEAR FORMULARIO
     const resetSupplementForm = () => {
       setNewSupplement({
         name: "", description: "", benefits: "", price: "", image_url: "", whatsapp_message: ""
@@ -1687,7 +1724,6 @@ Gracias!`
       }
     }
 
-    // 🆕 FUNCIÓN DELETE PARA TIPS
     const deleteTip = async (id: string) => {
       if (confirm("¿Estás seguro de eliminar este tip? Esta acción no se puede deshacer.")) {
         try {
@@ -1701,7 +1737,6 @@ Gracias!`
       }
     }
 
-    // 🆕 FUNCIÓN DELETE PARA RECURSOS
     const deleteResource = async (id: string) => {
       if (confirm("¿Estás seguro de eliminar este recurso? Esta acción no se puede deshacer.")) {
         try {
@@ -1728,13 +1763,11 @@ Gracias!`
       }
     }
 
-    // 🆕 FUNCIÓN DELETE PARA SUPLEMENTOS
     const deleteSupplement = async (id: string) => {
       if (confirm("¿Estás seguro de eliminar este suplemento? Esta acción no se puede deshacer.")) {
         try {
           const supplement = allSupplements.find(s => s.id === id)
           
-          // Si tiene imagen personalizada, eliminarla también
           if (supplement?.image_url && !supplement.image_url.includes('placeholder')) {
             await dbFunctions.deleteSupplementImage(supplement.image_url)
           }
@@ -1771,7 +1804,6 @@ Gracias!`
         </div>
 
         <div className="max-w-6xl mx-auto px-4 py-6">
-          {/* Tabs para admin */}
           <div className="border-b border-gray-200 mb-6">
             <nav className="flex space-x-8">
               {['overview', 'tips', 'resources', 'supplements'].map((tab) => (
@@ -1830,6 +1862,34 @@ Gracias!`
                       <p className="text-2xl font-bold text-purple-600">{adminStats.totalUsers}</p>
                     </div>
                     <span className="text-2xl">{Icons.Users()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 🆕 ESTADÍSTICAS POR CATEGORÍA DE RECURSOS INCLUYENDO EXERCISE */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Recursos por Categoría</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl mb-2">🧘‍♀️</div>
+                    <div className="text-lg font-bold text-purple-600">
+                      {allResources.filter(r => r.type === 'mindfulness' && r.is_active).length}
+                    </div>
+                    <div className="text-sm text-gray-600">Mindfulness</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl mb-2">🥗</div>
+                    <div className="text-lg font-bold text-green-600">
+                      {allResources.filter(r => r.type === 'nutrition' && r.is_active).length}
+                    </div>
+                    <div className="text-sm text-gray-600">Nutrición</div>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl mb-2">💪</div>
+                    <div className="text-lg font-bold text-blue-600">
+                      {allResources.filter(r => r.type === 'exercise' && r.is_active).length}
+                    </div>
+                    <div className="text-sm text-gray-600">Ejercicio</div>
                   </div>
                 </div>
               </div>
@@ -1898,35 +1958,72 @@ Gracias!`
                 </button>
               </div>
 
+              {/* 🆕 RECURSOS CON MINIATURAS Y CATEGORÍAS INCLUYENDO EXERCISE */}
               <div className="space-y-4">
                 {allResources.map(resource => (
                   <div key={resource.id} className="bg-white rounded-lg shadow p-4">
-                    <div className="flex justify-between items-start">
+                    <div className="flex gap-4">
+                      {/* 🆕 MINIATURA CON SOPORTE PARA TODOS LOS TIPOS */}
+                      <div className="relative w-32 h-20 flex-shrink-0">
+                        <img
+                          src={getResourceThumbnail(resource.url, resource.type)}
+                          alt={resource.title}
+                          className="w-full h-full object-cover rounded-lg"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = getResourceThumbnail("", resource.type)
+                          }}
+                        />
+                        {/* Overlay de tipo de contenido */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-black/60 text-white rounded-full p-2">
+                            {isYouTubeUrl(resource.url) && <span className="text-xs">{Icons.Play()}</span>}
+                            {isSpotifyUrl(resource.url) && <span className="text-xs">{Icons.Music()}</span>}
+                            {isPDFUrl(resource.url) && <span className="text-xs">📄</span>}
+                            {!isYouTubeUrl(resource.url) && !isSpotifyUrl(resource.url) && !isPDFUrl(resource.url) && (
+                              <span className="text-xs">{getResourceTypeIcon(resource.type)}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* CONTENIDO */}
                       <div className="flex-1">
-                        <h4 className="font-semibold">{resource.title}</h4>
-                        <p className="text-sm text-gray-600">{resource.description}</p>
-                        <div className="flex gap-2 mt-2">
-                          <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">{resource.type}</span>
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h4 className="font-semibold">{resource.title}</h4>
+                            <p className="text-sm text-gray-600">{resource.description}</p>
+                          </div>
+                          <div className="flex gap-2 ml-4">
+                            <button 
+                              onClick={() => window.open(resource.url, '_blank')}
+                              className="p-2 text-gray-400 hover:text-gray-600"
+                              title="Abrir enlace"
+                            >
+                              {Icons.ExternalLink()}
+                            </button>
+                            <button 
+                              onClick={() => deleteResource(resource.id)}
+                              className="p-2 text-gray-400 hover:text-red-600"
+                              title="Eliminar recurso"
+                            >
+                              {Icons.Trash2()}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className={`px-2 py-1 text-xs rounded ${
+                            resource.type === 'mindfulness' ? 'bg-purple-100 text-purple-800' :
+                            resource.type === 'nutrition' ? 'bg-green-100 text-green-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {resource.type === 'mindfulness' ? '🧘‍♀️ Mindfulness' :
+                             resource.type === 'nutrition' ? '🥗 Nutrición' :
+                             '💪 Ejercicio'}
+                          </span>
                           <span className={`px-2 py-1 text-xs rounded ${resource.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                             {resource.is_active ? "Activo" : "Inactivo"}
                           </span>
                         </div>
-                      </div>
-                      <div className="flex gap-2 ml-4">
-                        <button 
-                          onClick={() => window.open(resource.url, '_blank')}
-                          className="p-2 text-gray-400 hover:text-gray-600"
-                          title="Abrir enlace"
-                        >
-                          {Icons.ExternalLink()}
-                        </button>
-                        <button 
-                          onClick={() => deleteResource(resource.id)}
-                          className="p-2 text-gray-400 hover:text-red-600"
-                          title="Eliminar recurso"
-                        >
-                          {Icons.Trash2()}
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -1989,7 +2086,7 @@ Gracias!`
           )}
         </div>
 
-        {/* Dialogs de administración */}
+        {/* DIALOGS DE ADMINISTRACIÓN */}
         {showTipDialog && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
@@ -2041,15 +2138,17 @@ Gracias!`
         {showResourceDialog && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Recurso</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Nuevo Recurso</h3>
               <div className="space-y-4">
+                {/* 🆕 SELECTOR CON EXERCISE INCLUIDO */}
                 <select 
                   className="w-full p-3 border border-gray-300 rounded-lg"
                   value={resourceType}
-                  onChange={(e) => setResourceType(e.target.value as 'mindfulness' | 'nutrition')}
+                  onChange={(e) => setResourceType(e.target.value as 'mindfulness' | 'nutrition' | 'exercise')}
                 >
-                  <option value="mindfulness">Mindfulness</option>
-                  <option value="nutrition">Nutrición</option>
+                  <option value="mindfulness">🧘‍♀️ Mindfulness</option>
+                  <option value="nutrition">🥗 Nutrición</option>
+                  <option value="exercise">💪 Ejercicio</option>
                 </select>
                 <input
                   className="w-full p-3 border border-gray-300 rounded-lg"
@@ -2065,16 +2164,26 @@ Gracias!`
                 />
                 <input
                   className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="URL"
+                  placeholder="URL (YouTube, Spotify, PDF, etc.)"
                   value={newResource.url}
                   onChange={(e) => setNewResource(prev => ({ ...prev, url: e.target.value }))}
                 />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  placeholder="URL de imagen personalizada (opcional)"
+                  value={newResource.image_url}
+                  onChange={(e) => setNewResource(prev => ({ ...prev, image_url: e.target.value }))}
+                />
+                <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
+                  💡 <strong>Miniaturas automáticas:</strong> YouTube y Spotify se detectan automáticamente. 
+                  Para PDFs puedes agregar una imagen personalizada.
+                </div>
                 <div className="flex gap-2">
                   <button 
                     onClick={addGlobalResource} 
                     className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
                   >
-                    Agregar
+                    Agregar Recurso
                   </button>
                   <button 
                     onClick={() => setShowResourceDialog(false)}
@@ -2119,11 +2228,9 @@ Gracias!`
                   onChange={(e) => setNewSupplement(prev => ({ ...prev, price: e.target.value }))}
                 />
                 
-                {/* 🆕 SISTEMA DE UPLOAD DE IMÁGENES */}
                 <div className="space-y-3">
                   <label className="block text-sm font-medium text-gray-700">Imagen del producto:</label>
                   
-                  {/* Upload de archivo */}
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
                     <input
                       type="file"
@@ -2156,7 +2263,6 @@ Gracias!`
                     </label>
                   </div>
                   
-                  {/* Fallback URL */}
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-gray-300" />
@@ -2265,49 +2371,145 @@ Gracias!`
           <div className="space-y-6">
             <div className="flex rounded-lg bg-gray-100 p-1">
               <button
-                onClick={() => {/* No necesitamos authState, solo mostrar login */}}
-                className="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors bg-white text-green-600 shadow-sm"
+                onClick={() => setShowRegister(false)}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  !showRegister ? 'bg-white text-green-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                }`}
               >
                 Ingresar
               </button>
               <button
-                onClick={() => {/* Toggle entre login y register */}}
-                className="flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-900"
+                onClick={() => setShowRegister(true)}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  showRegister ? 'bg-white text-green-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                }`}
               >
                 Crear Cuenta
               </button>
             </div>
 
-            <div className="space-y-4">
-              <input
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="+57 300 123 4567"
-                value={loginForm.phone}
-                onChange={(e) => setLoginForm(prev => ({ ...prev, phone: e.target.value }))}
-              />
-              <input
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                type="password"
-                placeholder="Código de 10 dígitos"
-                maxLength={10}
-                value={loginForm.accessCode}
-                onChange={(e) => setLoginForm(prev => ({ ...prev, accessCode: e.target.value }))}
-              />
-              <button 
-                onClick={handleLogin} 
-                className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <span>{Icons.Loader2()}</span>
-                    Ingresando...
-                  </>
-                ) : (
-                  "Ingresar"
-                )}
-              </button>
-            </div>
+            {!showRegister ? (
+              <div className="space-y-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="+57 300 123 4567"
+                  value={loginForm.phone}
+                  onChange={(e) => setLoginForm(prev => ({ ...prev, phone: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  type="password"
+                  placeholder="Código de 10 dígitos"
+                  maxLength={10}
+                  value={loginForm.accessCode}
+                  onChange={(e) => setLoginForm(prev => ({ ...prev, accessCode: e.target.value }))}
+                />
+                <button 
+                  onClick={handleLogin} 
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span>{Icons.Loader2()}</span>
+                      Ingresando...
+                    </>
+                  ) : (
+                    "Ingresar"
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Número de teléfono"
+                  value={registerForm.phone}
+                  onChange={(e) => setRegisterForm(prev => ({ ...prev, phone: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Nombre completo"
+                  value={registerForm.name}
+                  onChange={(e) => setRegisterForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Edad"
+                    type="number"
+                    value={registerForm.age}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, age: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Peso (kg)"
+                    type="number"
+                    value={registerForm.weight}
+                    onChange={(e) => setRegisterForm(prev => ({ ...prev, weight: e.target.value }))}
+                  />
+                </div>
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Altura (cm)"
+                  type="number"
+                  value={registerForm.height}
+                  onChange={(e) => setRegisterForm(prev => ({ ...prev, height: e.target.value }))}
+                />
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  value={registerForm.activityLevel}
+                  onChange={(e) => setRegisterForm(prev => ({ ...prev, activityLevel: parseFloat(e.target.value) }))}
+                >
+                  {ACTIVITY_LEVELS.map(level => (
+                    <option key={level.value} value={level.value}>
+                      {level.label} - {level.desc}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  value={registerForm.goal}
+                  onChange={(e) => setRegisterForm(prev => ({ ...prev, goal: e.target.value }))}
+                >
+                  {GOALS.map(goal => (
+                    <option key={goal.id} value={goal.id}>
+                      {goal.label}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  type="password"
+                  placeholder="Código de acceso (10 dígitos)"
+                  maxLength={10}
+                  value={registerForm.accessCode}
+                  onChange={(e) => setRegisterForm(prev => ({ ...prev, accessCode: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  type="password"
+                  placeholder="Confirmar código"
+                  maxLength={10}
+                  value={registerForm.confirmCode}
+                  onChange={(e) => setRegisterForm(prev => ({ ...prev, confirmCode: e.target.value }))}
+                />
+                <button 
+                  onClick={handleRegister} 
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span>{Icons.Loader2()}</span>
+                      Creando cuenta...
+                    </>
+                  ) : (
+                    "Crear cuenta"
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -2347,15 +2549,14 @@ Gracias!`
 
   const activeTips = globalTips.filter(tip => tip.is_active)
   const mindfulnessResources = globalResources.filter(r => r.type === 'mindfulness' && r.is_active)
-  const nutritionResources = globalResources.filter(r => r.type === 'nutrition' && r.is_active);
+  const nutritionResources = globalResources.filter(r => r.type === 'nutrition' && r.is_active)
+  const exerciseResources = globalResources.filter(r => r.type === 'exercise' && r.is_active) // 🆕 NUEVO
   const caloriesProgress = getCaloriesProgress()
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 🔧 NUEVO: Indicador de estado de guardado */}
       <SaveStatusIndicator />
       
-      {/* 🆕 FLOATING ACTION BUTTONS */}
       {currentUser && <FloatingActionButtons />}
       
       <div className="pb-20">
@@ -2420,7 +2621,7 @@ Gracias!`
                 </div>
               </div>
 
-              {/* 🆕 Progreso de calorías destacado */}
+              {/* Progreso de calorías destacado */}
               {macroResults && (
                 <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
@@ -2444,7 +2645,6 @@ Gracias!`
                 </div>
               )}
 
-              {/* Resto del contenido de inicio... */}
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="text-center mb-4">
                   <div className="text-3xl font-bold text-green-600">{getProgressPercentage()}%</div>
@@ -2575,23 +2775,50 @@ Gracias!`
                 </button>
               </div>
 
-              {/* Recursos de nutrición */}
+              {/* 🆕 RECURSOS DE NUTRICIÓN CON MINIATURAS */}
               {nutritionResources.length > 0 && (
                 <div className="bg-white rounded-lg shadow p-4">
-                  <h3 className="font-semibold mb-3">Recursos recomendados</h3>
+                  <h3 className="font-semibold mb-4">Recursos recomendados</h3>
                   <div className="space-y-3">
                     {nutritionResources.map(resource => (
-                      <div key={resource.id} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                        <div>
-                          <h4 className="font-semibold">{resource.title}</h4>
-                          <p className="text-sm text-gray-600">{resource.description}</p>
+                      <div key={resource.id} className="flex gap-4 p-3 bg-green-50 rounded-lg">
+                        {/* MINIATURA */}
+                        <div className="relative w-20 h-16 flex-shrink-0">
+                          <img
+                            src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                            alt={resource.title}
+                            className="w-full h-full object-cover rounded-lg"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = getResourceThumbnail("", resource.type)
+                            }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="bg-black/60 text-white rounded-full p-1">
+                              {isPDFUrl(resource.url) ? (
+                                <span className="text-xs">📄</span>
+                              ) : isYouTubeUrl(resource.url) ? (
+                                <span className="text-xs">{Icons.Play()}</span>
+                              ) : (
+                                <span className="text-xs">🔗</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <button 
-                          onClick={() => window.open(resource.url, '_blank')}
-                          className="p-2 text-gray-400 hover:text-gray-600"
-                        >
-                          {Icons.ExternalLink()}
-                        </button>
+                        {/* CONTENIDO */}
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="font-semibold">{resource.title}</h4>
+                              <p className="text-sm text-gray-600">{resource.description}</p>
+                            </div>
+                            <button 
+                              onClick={() => window.open(resource.url, '_blank')}
+                              className="p-2 text-gray-400 hover:text-gray-600 ml-2"
+                            >
+                              {Icons.ExternalLink()}
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -2758,7 +2985,7 @@ Gracias!`
             </div>
           )}
 
-          {/* TAB EJERCICIO */}
+          {/* 🆕 TAB EJERCICIO MEJORADO CON RECURSOS MULTIMEDIA */}
           {activeTab === 'ejercicio' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
@@ -2771,6 +2998,64 @@ Gracias!`
                   {Icons.RotateCcw()}
                 </button>
               </div>
+
+              {/* 🆕 RECURSOS DE EJERCICIO CON MINIATURAS */}
+              {exerciseResources.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="font-semibold mb-4">Videos de entrenamiento</h3>
+                  <div className="space-y-3">
+                    {exerciseResources.map(resource => (
+                      <div key={resource.id} className="flex gap-4 p-3 bg-blue-50 rounded-lg">
+                        {/* MINIATURA */}
+                        <div className="relative w-24 h-16 flex-shrink-0">
+                          <img
+                            src={getResourceThumbnail(resource.url, resource.type)}
+                            alt={resource.title}
+                            className="w-full h-full object-cover rounded-lg"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/placeholder.svg?height=64&width=96&text=💪+Video"
+                            }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="bg-red-600 text-white rounded-full p-2">
+                              {isYouTubeUrl(resource.url) && <span className="text-xs">{Icons.Play()}</span>}
+                              {isSpotifyUrl(resource.url) && <span className="text-xs">{Icons.Music()}</span>}
+                              {!isYouTubeUrl(resource.url) && !isSpotifyUrl(resource.url) && (
+                                <span className="text-xs">{Icons.Dumbbell()}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {/* CONTENIDO */}
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="font-semibold text-blue-800">{resource.title}</h4>
+                              <p className="text-sm text-gray-600">{resource.description}</p>
+                              {isYouTubeUrl(resource.url) && (
+                                <span className="inline-block mt-1 px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
+                                  📹 YouTube
+                                </span>
+                              )}
+                              {isSpotifyUrl(resource.url) && (
+                                <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                                  🎵 Spotify
+                                </span>
+                              )}
+                            </div>
+                            <button 
+                              onClick={() => window.open(resource.url, '_blank')}
+                              className="p-2 text-blue-400 hover:text-blue-600 ml-2"
+                            >
+                              {Icons.ExternalLink()}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="bg-white rounded-lg shadow p-6 text-center">
                 <span className="text-4xl">{Icons.Activity()}</span>
@@ -2795,6 +3080,7 @@ Gracias!`
                 </div>
               </div>
 
+              {/* Ejercicios sugeridos mantenidos */}
               <div className="bg-white rounded-lg shadow p-4">
                 <h3 className="font-semibold mb-4">Ejercicios sugeridos</h3>
                 <div className="space-y-3">
@@ -2815,7 +3101,7 @@ Gracias!`
             </div>
           )}
 
-          {/* TAB MINDFULNESS */}
+          {/* 🆕 TAB MINDFULNESS MEJORADO CON RECURSOS MULTIMEDIA */}
           {activeTab === 'mindfulness' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
@@ -2844,23 +3130,58 @@ Gracias!`
                 </div>
               )}
 
-              {/* Recursos de mindfulness */}
+              {/* 🆕 RECURSOS DE MINDFULNESS CON MINIATURAS */}
               {mindfulnessResources.length > 0 && (
                 <div className="bg-white rounded-lg shadow p-4">
                   <h3 className="font-semibold mb-4">Recursos de mindfulness</h3>
                   <div className="space-y-3">
                     {mindfulnessResources.map(resource => (
-                      <div key={resource.id} className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                        <div>
-                          <h4 className="font-semibold">{resource.title}</h4>
-                          <p className="text-sm text-gray-600">{resource.description}</p>
+                      <div key={resource.id} className="flex gap-4 p-3 bg-purple-50 rounded-lg">
+                        {/* MINIATURA */}
+                        <div className="relative w-24 h-16 flex-shrink-0">
+                          <img
+                            src={getResourceThumbnail(resource.url, resource.type)}
+                            alt={resource.title}
+                            className="w-full h-full object-cover rounded-lg"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "/placeholder.svg?height=64&width=96&text=🧘+Audio"
+                            }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="bg-purple-600 text-white rounded-full p-2">
+                              {isYouTubeUrl(resource.url) && <span className="text-xs">{Icons.Play()}</span>}
+                              {isSpotifyUrl(resource.url) && <span className="text-xs">{Icons.Music()}</span>}
+                              {!isYouTubeUrl(resource.url) && !isSpotifyUrl(resource.url) && (
+                                <span className="text-xs">🧘</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <button 
-                          onClick={() => window.open(resource.url, '_blank')}
-                          className="p-2 text-gray-400 hover:text-gray-600"
-                        >
-                          {Icons.ExternalLink()}
-                        </button>
+                        {/* CONTENIDO */}
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="font-semibold text-purple-800">{resource.title}</h4>
+                              <p className="text-sm text-gray-600">{resource.description}</p>
+                              {isYouTubeUrl(resource.url) && (
+                                <span className="inline-block mt-1 px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
+                                  📹 YouTube
+                                </span>
+                              )}
+                              {isSpotifyUrl(resource.url) && (
+                                <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                                  🎵 Spotify
+                                </span>
+                              )}
+                            </div>
+                            <button 
+                              onClick={() => window.open(resource.url, '_blank')}
+                              className="p-2 text-purple-400 hover:text-purple-600 ml-2"
+                            >
+                              {Icons.ExternalLink()}
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -3009,7 +3330,7 @@ Gracias!`
         </div>
       </div>
 
-      {/* 🆕 MODAL DE CALCULADORA DE MACROS */}
+      {/* MODAL DE CALCULADORA DE MACROS */}
       {showMealCalculator && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
@@ -3035,7 +3356,6 @@ Gracias!`
                   <h4 className="font-semibold mb-3">Selecciona un alimento:</h4>
                   <div className="max-h-80 overflow-y-auto space-y-4">
                     
-                    {/* 🆕 ALIMENTOS GLOBALES POR CATEGORÍA */}
                     {getFoodsByCategory().map(category => (
                       category.foods.length > 0 && (
                         <div key={category.id}>
@@ -3062,7 +3382,6 @@ Gracias!`
                       )
                     ))}
 
-                    {/* 🔧 ALIMENTOS PERSONALIZADOS DEL USUARIO */}
                     {userFoods.length > 0 && (
                       <div>
                         <h5 className="font-semibold text-sm flex items-center gap-2 mb-2 px-2 py-1 bg-green-100 rounded">
@@ -3087,7 +3406,6 @@ Gracias!`
                       </div>
                     )}
 
-                    {/* 🆕 OPCIÓN PARA CREAR ALIMENTO PERSONALIZADO */}
                     <div className="border-t pt-4">
                       <div className="text-center">
                         <p className="text-sm text-gray-600 mb-3">¿No encuentras tu alimento?</p>
