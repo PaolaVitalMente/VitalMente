@@ -3,6 +3,12 @@
 import { useState, useEffect } from "react"
 import { createClient } from '@supabase/supabase-js'
 
+// Importar los nuevos sistemas
+import { getAIRecommendations, AIRecommendationEngine } from '../lib/ai-recommendations'
+import { updateUserGamification, GamificationEngine, LEVELS, Achievement, Challenge } from '../lib/gamification'
+import { initializeReferralSystem, ReferralSystem, processNewUserReferral } from '../lib/referral-system'
+import { initializeAnalytics, AdvancedAnalytics } from '../lib/analytics'
+
 // ✅ CORRECCIÓN: Reemplazamos los imports problemáticos con HTML + Tailwind CSS
 // Iconos simples como emojis en lugar de lucide-react
 const Icons = {
@@ -1226,6 +1232,16 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
   const handleQuickProgress = async (type: 'water' | 'exercise' | 'mindfulness') => {
     await updateProgress(type, 1)
     setShowFloatingMenu(false)
+
+    // 🆕 Trackear evento de actividad
+    if (analyticsEngine && currentUser) {
+      await analyticsEngine.trackEvent(
+        currentUser.id,
+        'feature_use',
+        `${type}_quick_logged`,
+        { value: dailyProgress[type] + 1 }
+      )
+    }
   }
 
   const handleTypicalDay = async () => {
@@ -1573,13 +1589,83 @@ Gracias!`
     const [uploading, setUploading] = useState(false)
     const [imagePreview, setImagePreview] = useState<string>("")
 
-    const [allTips, setAllTips] = useState<GlobalTip[]>([])
-    const [allResources, setAllResources] = useState<GlobalResource[]>([])
-    const [allSupplements, setAllSupplements] = useState<Supplement[]>([])
+      const [allTips, setAllTips] = useState<GlobalTip[]>([])
+  const [allResources, setAllResources] = useState<GlobalResource[]>([])
+  const [allSupplements, setAllSupplements] = useState<Supplement[]>([])
 
-    useEffect(() => {
-      if (isAdmin) loadAdminData()
-    }, [isAdmin])
+  // 🆕 Estados para las nuevas funcionalidades
+  const [aiRecommendations, setAiRecommendations] = useState<any>(null)
+  const [gamificationData, setGamificationData] = useState<any>(null)
+  const [referralData, setReferralData] = useState<any>(null)
+  const [analyticsEngine, setAnalyticsEngine] = useState<AdvancedAnalytics | null>(null)
+  const [referralSystem, setReferralSystem] = useState<ReferralSystem | null>(null)
+  const [showAIInsights, setShowAIInsights] = useState(false)
+  const [showGamification, setShowGamification] = useState(false)
+  const [showReferrals, setShowReferrals] = useState(false)
+
+      useEffect(() => {
+    if (isAdmin) loadAdminData()
+  }, [isAdmin])
+
+  // 🆕 Inicializar sistemas avanzados
+  useEffect(() => {
+    const initializeAdvancedSystems = async () => {
+      // Inicializar Analytics
+      const analytics = initializeAnalytics(supabase)
+      setAnalyticsEngine(analytics)
+
+      // Inicializar Sistema de Referidos
+      const referrals = initializeReferralSystem(supabase)
+      setReferralSystem(referrals)
+
+      // Trackear página vista si hay usuario
+      if (currentUser && analytics) {
+        await analytics.trackEvent(
+          currentUser.id,
+          'page_view',
+          'app_loaded',
+          { timestamp: new Date().toISOString() }
+        )
+      }
+    }
+
+    initializeAdvancedSystems()
+  }, [currentUser])
+
+  // 🆕 Actualizar datos de IA y gamificación cuando cambie el progreso
+  useEffect(() => {
+    const updateAdvancedFeatures = async () => {
+      if (!currentUser) return
+
+      try {
+        // Actualizar recomendaciones de IA
+        const aiData = await getAIRecommendations(
+          progressHistory,
+          currentUser,
+          supplements
+        )
+        setAiRecommendations(aiData)
+
+        // Actualizar gamificación
+        const gamificationResult = await updateUserGamification(
+          currentUser.id,
+          progressHistory
+        )
+        setGamificationData(gamificationResult)
+
+        // Actualizar datos de referidos
+        if (referralSystem) {
+          const referralStats = await referralSystem.getUserReferralStats(currentUser.id)
+          const referralCodes = await referralSystem.getUserReferralCodes(currentUser.id)
+          setReferralData({ stats: referralStats, codes: referralCodes })
+        }
+      } catch (error) {
+        console.error('Error updating advanced features:', error)
+      }
+    }
+
+    updateAdvancedFeatures()
+  }, [currentUser, progressHistory, supplements, referralSystem])
 
     const loadAdminData = async () => {
       try {
@@ -2563,7 +2649,7 @@ Gracias!`
         {/* Navegación de tabs */}
         <div className="bg-white border-b">
           <div className="flex">
-            {['inicio', 'nutricion', 'ejercicio', 'mindfulness', 'suplementos'].map((tab) => (
+            {['inicio', 'nutricion', 'ejercicio', 'mindfulness', 'suplementos', 'ai', 'gamificacion', 'referidos'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -2580,8 +2666,17 @@ Gracias!`
                     {tab === 'ejercicio' && Icons.Activity()}
                     {tab === 'mindfulness' && Icons.Brain()}
                     {tab === 'suplementos' && Icons.Package()}
+                    {tab === 'ai' && '🤖'}
+                    {tab === 'gamificacion' && '🎮'}
+                    {tab === 'referidos' && '👥'}
                   </span>
-                  <span className="text-xs">{tab === 'nutricion' ? 'Nutrición' : tab}</span>
+                  <span className="text-xs">
+                    {tab === 'nutricion' && 'Nutrición'}
+                    {tab === 'ai' && 'IA'}
+                    {tab === 'gamificacion' && 'Logros'}
+                    {tab === 'referidos' && 'Referidos'}
+                    {!['nutricion', 'ai', 'gamificacion', 'referidos'].includes(tab) && tab}
+                  </span>
                 </div>
               </button>
             ))}
@@ -3325,6 +3420,403 @@ Gracias!`
                   Asesoría personalizada
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* 🆕 TAB IA RECOMENDACIONES */}
+          {activeTab === 'ai' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-center">🤖 Asistente IA VitalMente</h2>
+
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg p-4 text-center">
+                <span className="text-2xl">🧠</span>
+                <h3 className="font-bold mb-1 mt-2">Análisis Inteligente</h3>
+                <p className="text-sm">Recomendaciones personalizadas basadas en tu progreso</p>
+              </div>
+
+              {aiRecommendations ? (
+                <div className="space-y-4">
+                  {/* Patrón de Usuario */}
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <h3 className="font-semibold mb-3">📊 Tu Patrón de Actividad</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600">Hidratación promedio:</span>
+                        <span className="font-semibold ml-2">{aiRecommendations.userPattern?.avgWaterIntake || 0} vasos/día</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Ejercicio promedio:</span>
+                        <span className="font-semibold ml-2">{aiRecommendations.userPattern?.avgExerciseMinutes || 0} min/día</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Mindfulness promedio:</span>
+                        <span className="font-semibold ml-2">{aiRecommendations.userPattern?.avgMindfulnessMinutes || 0} min/día</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Consistencia:</span>
+                        <span className="font-semibold ml-2">{aiRecommendations.userPattern?.consistencyScore || 0}%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Recomendaciones de Suplementos */}
+                  {aiRecommendations.supplements?.length > 0 && (
+                    <div className="bg-white rounded-lg shadow p-4">
+                      <h3 className="font-semibold mb-3">💊 Suplementos Recomendados por IA</h3>
+                      <div className="space-y-3">
+                        {aiRecommendations.supplements.map((supplement: any, index: number) => (
+                          <div key={supplement.id} className="border-l-4 border-purple-400 pl-3">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <h4 className="font-medium">{supplement.name}</h4>
+                                <p className="text-sm text-gray-600">{supplement.reasoning}</p>
+                                <div className="flex items-center mt-1">
+                                  <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                                    Score IA: {supplement.aiScore}%
+                                  </span>
+                                </div>
+                              </div>
+                              <button 
+                                onClick={() => {
+                                  setActiveTab('suplementos')
+                                  if (analyticsEngine) {
+                                    analyticsEngine.trackEvent(currentUser?.id || '', 'button_click', 'ai_supplement_clicked', { supplement: supplement.name })
+                                  }
+                                }}
+                                className="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700"
+                              >
+                                Ver detalles
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tips Nutricionales */}
+                  {aiRecommendations.nutritionalTips?.length > 0 && (
+                    <div className="bg-white rounded-lg shadow p-4">
+                      <h3 className="font-semibold mb-3">🥗 Consejos Personalizados</h3>
+                      <div className="space-y-2">
+                        {aiRecommendations.nutritionalTips.map((tip: string, index: number) => (
+                          <div key={index} className="flex items-start gap-2">
+                            <span className="text-green-500 mt-1">✓</span>
+                            <p className="text-sm">{tip}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timing Óptimo */}
+                  {aiRecommendations.optimalTiming?.length > 0 && (
+                    <div className="bg-white rounded-lg shadow p-4">
+                      <h3 className="font-semibold mb-3">⏰ Mejor Momento para Suplementos</h3>
+                      <div className="space-y-2">
+                        {aiRecommendations.optimalTiming.map((timing: string, index: number) => (
+                          <div key={index} className="flex items-start gap-2">
+                            <span className="text-blue-500 mt-1">⏰</span>
+                            <p className="text-sm">{timing}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg shadow p-6 text-center">
+                  <span className="text-4xl">🤖</span>
+                  <h3 className="text-lg font-semibold mb-2 mt-4">Analizando tu progreso...</h3>
+                  <p className="text-gray-600">La IA necesita algunos días de datos para generar recomendaciones precisas.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 🆕 TAB GAMIFICACIÓN */}
+          {activeTab === 'gamificacion' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-center">🎮 Logros y Niveles</h2>
+
+              {gamificationData ? (
+                <div className="space-y-4">
+                  {/* Nivel Actual */}
+                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{LEVELS.find(l => l.level === gamificationData.currentLevel)?.icon || '🌱'}</span>
+                          <div>
+                            <h3 className="font-bold">{LEVELS.find(l => l.level === gamificationData.currentLevel)?.title || 'Principiante'}</h3>
+                            <p className="text-sm opacity-90">Nivel {gamificationData.currentLevel}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">{gamificationData.totalPoints}</div>
+                        <div className="text-xs opacity-90">puntos totales</div>
+                      </div>
+                    </div>
+                    
+                    {gamificationData.nextLevel && (
+                      <div className="mt-3">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span>Progreso al siguiente nivel</span>
+                          <span>{Math.round(gamificationData.progressToNextLevel)}%</span>
+                        </div>
+                        <div className="w-full bg-white/20 rounded-full h-2">
+                          <div 
+                            className="bg-white h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${gamificationData.progressToNextLevel}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Estadísticas */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white rounded-lg shadow p-4 text-center">
+                      <div className="text-2xl font-bold text-green-600">{gamificationData.streak}</div>
+                      <div className="text-sm text-gray-600">Racha actual</div>
+                      <div className="text-xs text-gray-500">🔥 días consecutivos</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow p-4 text-center">
+                      <div className="text-2xl font-bold text-blue-600">{gamificationData.weeklyPoints}</div>
+                      <div className="text-sm text-gray-600">Esta semana</div>
+                      <div className="text-xs text-gray-500">📈 puntos ganados</div>
+                    </div>
+                  </div>
+
+                  {/* Logros Recientes */}
+                  {gamificationData.newAchievements?.length > 0 && (
+                    <div className="bg-white rounded-lg shadow p-4">
+                      <h3 className="font-semibold mb-3">🏆 ¡Nuevos Logros Desbloqueados!</h3>
+                      <div className="space-y-2">
+                        {gamificationData.newAchievements.map((achievement: Achievement) => (
+                          <div key={achievement.id} className="flex items-center gap-3 p-2 bg-yellow-50 rounded-lg">
+                            <span className="text-2xl">{achievement.icon}</span>
+                            <div className="flex-1">
+                              <h4 className="font-medium text-sm">{achievement.title}</h4>
+                              <p className="text-xs text-gray-600">{achievement.description}</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-bold text-yellow-600">+{achievement.points}</div>
+                              <div className="text-xs text-gray-500">puntos</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Desafíos Diarios */}
+                  {gamificationData.dailyChallenges?.length > 0 && (
+                    <div className="bg-white rounded-lg shadow p-4">
+                      <h3 className="font-semibold mb-3">🎯 Desafíos de Hoy</h3>
+                      <div className="space-y-3">
+                        {gamificationData.dailyChallenges.map((challenge: Challenge) => (
+                          <div key={challenge.id} className="border-l-4 border-blue-400 pl-3">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-sm">{challenge.title}</h4>
+                                <p className="text-xs text-gray-600">{challenge.description}</p>
+                                <div className="flex items-center mt-1 gap-2">
+                                  <div className="w-full bg-gray-200 rounded-full h-2 max-w-32">
+                                    <div 
+                                      className="bg-blue-400 h-2 rounded-full transition-all duration-300"
+                                      style={{ width: `${Math.min((challenge.currentProgress / challenge.target) * 100, 100)}%` }}
+                                    ></div>
+                                  </div>
+                                  <span className="text-xs text-gray-500">
+                                    {challenge.currentProgress}/{challenge.target}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm font-bold text-blue-600">+{challenge.points}</div>
+                                <div className="text-xs text-gray-500">puntos</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Todos los Logros */}
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <h3 className="font-semibold mb-3">🏅 Todos los Logros</h3>
+                    <div className="grid grid-cols-1 gap-2">
+                      {gamificationData.achievements?.map((achievement: Achievement) => (
+                        <div key={achievement.id} className={`flex items-center gap-3 p-2 rounded-lg ${achievement.isUnlocked ? 'bg-green-50' : 'bg-gray-50'}`}>
+                          <span className={`text-lg ${achievement.isUnlocked ? '' : 'grayscale opacity-50'}`}>
+                            {achievement.icon}
+                          </span>
+                          <div className="flex-1">
+                            <h4 className={`font-medium text-sm ${achievement.isUnlocked ? 'text-green-800' : 'text-gray-500'}`}>
+                              {achievement.title}
+                            </h4>
+                            <p className="text-xs text-gray-600">{achievement.description}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className={`text-sm font-bold ${achievement.isUnlocked ? 'text-green-600' : 'text-gray-400'}`}>
+                              {achievement.isUnlocked ? '✓' : `+${achievement.points}`}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg shadow p-6 text-center">
+                  <span className="text-4xl">🎮</span>
+                  <h3 className="text-lg font-semibold mb-2 mt-4">Cargando tu progreso...</h3>
+                  <p className="text-gray-600">Calculando logros y estadísticas de gamificación.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 🆕 TAB REFERIDOS */}
+          {activeTab === 'referidos' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-center">👥 Programa de Referidos</h2>
+
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-4 text-center">
+                <span className="text-2xl">🚀</span>
+                <h3 className="font-bold mb-1 mt-2">Invita y Gana</h3>
+                <p className="text-sm">Por cada amigo que invites y se mantenga activo, ganas puntos y recompensas</p>
+              </div>
+
+              {referralData ? (
+                <div className="space-y-4">
+                  {/* Estadísticas */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white rounded-lg shadow p-4 text-center">
+                      <div className="text-2xl font-bold text-blue-600">{referralData.stats.totalReferrals}</div>
+                      <div className="text-sm text-gray-600">Total referidos</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow p-4 text-center">
+                      <div className="text-2xl font-bold text-green-600">{referralData.stats.totalPointsEarned}</div>
+                      <div className="text-sm text-gray-600">Puntos ganados</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white rounded-lg shadow p-4 text-center">
+                      <div className="text-2xl font-bold text-purple-600">{referralData.stats.conversionRate.toFixed(1)}%</div>
+                      <div className="text-sm text-gray-600">Tasa conversión</div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow p-4 text-center">
+                      <div className="text-2xl font-bold text-orange-600">{referralData.stats.monthlyReferrals}</div>
+                      <div className="text-sm text-gray-600">Este mes</div>
+                    </div>
+                  </div>
+
+                  {/* Códigos de Referido */}
+                  {referralData.codes?.length > 0 && (
+                    <div className="bg-white rounded-lg shadow p-4">
+                      <h3 className="font-semibold mb-3">🔗 Tus Códigos de Referido</h3>
+                      <div className="space-y-3">
+                        {referralData.codes.map((code: any) => (
+                          <div key={code.id} className="border rounded-lg p-3">
+                            <div className="flex justify-between items-center mb-2">
+                              <div className="text-lg font-mono font-bold text-blue-600">{code.code}</div>
+                              <div className="text-sm text-gray-600">{code.uses}/{code.max_uses} usos</div>
+                            </div>
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => {
+                                  if (referralSystem) {
+                                    const message = referralSystem.generateShareMessage(code.code, currentUser?.name || 'Usuario')
+                                    navigator.clipboard.writeText(message)
+                                    alert('¡Mensaje copiado! Compártelo en WhatsApp o redes sociales')
+                                    
+                                    if (analyticsEngine) {
+                                      analyticsEngine.trackEvent(currentUser?.id || '', 'button_click', 'referral_shared', { code: code.code })
+                                    }
+                                  }
+                                }}
+                                className="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700"
+                              >
+                                📋 Copiar mensaje
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  if (referralSystem) {
+                                    const url = referralSystem.generateReferralUrl(code.code)
+                                    navigator.clipboard.writeText(url)
+                                    alert('¡URL copiada!')
+                                  }
+                                }}
+                                className="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-sm hover:bg-gray-700"
+                              >
+                                🔗 Copiar URL
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Crear Nuevo Código */}
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <h3 className="font-semibold mb-3">➕ Generar Nuevo Código</h3>
+                    <button 
+                      onClick={async () => {
+                        if (referralSystem && currentUser) {
+                          try {
+                            await referralSystem.createReferralCode(currentUser.id)
+                            // Recargar datos de referidos
+                            const referralStats = await referralSystem.getUserReferralStats(currentUser.id)
+                            const referralCodes = await referralSystem.getUserReferralCodes(currentUser.id)
+                            setReferralData({ stats: referralStats, codes: referralCodes })
+                            alert('¡Nuevo código creado exitosamente!')
+                          } catch (error) {
+                            alert('Error al crear código. Inténtalo de nuevo.')
+                          }
+                        }
+                      }}
+                      className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 font-medium"
+                    >
+                      🎯 Crear código de referido
+                    </button>
+                  </div>
+
+                  {/* Cómo Funciona */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-semibold mb-2">📖 ¿Cómo funciona?</h4>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <div className="flex items-start gap-2">
+                        <span className="text-blue-500">1.</span>
+                        <span>Comparte tu código con amigos y familiares</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-blue-500">2.</span>
+                        <span>Cuando se registren usando tu código, ambos obtienen beneficios</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-blue-500">3.</span>
+                        <span>Ganas puntos extra cuando tus referidos se mantienen activos</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-blue-500">4.</span>
+                        <span>Desbloquea recompensas especiales por múltiples referidos exitosos</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg shadow p-6 text-center">
+                  <span className="text-4xl">👥</span>
+                  <h3 className="text-lg font-semibold mb-2 mt-4">Cargando datos de referidos...</h3>
+                  <p className="text-gray-600">Preparando tu programa de referidos personalizado.</p>
+                </div>
+              )}
             </div>
           )}
         </div>
