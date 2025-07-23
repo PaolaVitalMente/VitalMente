@@ -333,23 +333,12 @@ const GOALS = [
 // ============================================================================
 
 const dbFunctions = {
-  // 🔐 FUNCIÓN HELPER PARA HEADERS
-  async getAuthHeaders() {
-    const { data: { session } } = await supabase.auth.getSession()
-    return {
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${session?.access_token || ''}`
-    }
-  },
-  
   async findUserByPhone(phone: string): Promise<UserProfile | null> {
     try {
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('phone', phone)
-        .headers(headers)
         .single()
       
       if (error) {
@@ -364,7 +353,6 @@ const dbFunctions = {
   },
 
   async createUser(userData: Omit<UserProfile, 'id' | 'created_at' | 'last_login'>): Promise<UserProfile> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('users')
       .insert({
@@ -372,7 +360,6 @@ const dbFunctions = {
         last_login: new Date().toISOString(),
         created_at: new Date().toISOString()
       })
-      .headers(headers)
       .select()
       .single()
     
@@ -382,12 +369,10 @@ const dbFunctions = {
 
   async updateUserLastLogin(userId: string): Promise<void> {
     try {
-      const headers = await dbFunctions.getAuthHeaders()
       await supabase
         .from('users')
         .update({ last_login: new Date().toISOString() })
         .eq('id', userId)
-        .headers(headers)
     } catch (error) {
       console.error('Error updating last login:', error)
     }
@@ -398,13 +383,11 @@ const dbFunctions = {
       const today = new Date().toISOString().split('T')[0]
       console.log('🔍 Cargando progreso para:', userId, 'fecha:', today)
       
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('daily_progress')
         .select('*')
         .eq('user_id', userId)
         .eq('date', today)
-        .headers(headers)
         .single()
       
       if (error) {
@@ -433,7 +416,6 @@ const dbFunctions = {
         ...progress
       })
 
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('daily_progress')
         .upsert(
@@ -448,7 +430,6 @@ const dbFunctions = {
             ignoreDuplicates: false 
           }
         )
-        .headers(headers)
         .select()
 
       if (error) {
@@ -468,13 +449,11 @@ const dbFunctions = {
   async verifyProgressSaved(userId: string, expectedData: any): Promise<boolean> {
     try {
       const today = new Date().toISOString().split('T')[0]
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('daily_progress')
         .select('*')
         .eq('user_id', userId)
         .eq('date', today)
-        .headers(headers)
         .single()
 
       if (error || !data) return false
@@ -501,14 +480,12 @@ const dbFunctions = {
 
   async getProgressHistory(userId: string, days: number = 7): Promise<DailyProgress[]> {
     try {
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('daily_progress')
         .select('*')
         .eq('user_id', userId)
         .order('date', { ascending: false })
         .limit(days)
-        .headers(headers)
       
       if (error) throw error
       return data as DailyProgress[]
@@ -520,12 +497,10 @@ const dbFunctions = {
 
   async getUserFoods(userId: string): Promise<UserFood[]> {
     try {
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('user_foods')
         .select('*')
         .eq('user_id', userId)
-        .headers(headers)
       
       if (error) throw error
       return data as UserFood[]
@@ -537,14 +512,12 @@ const dbFunctions = {
 
   async getGlobalFoods(): Promise<GlobalFood[]> {
     try {
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('global_foods')
         .select('*')
         .eq('is_active', true)
         .order('category', { ascending: true })
         .order('name', { ascending: true })
-        .headers(headers)
       
       if (error) throw error
       console.log('✅ Alimentos globales cargados:', data?.length || 0)
@@ -556,14 +529,12 @@ const dbFunctions = {
   },
 
   async addUserFood(food: Omit<UserFood, 'id' | 'created_at'>): Promise<UserFood> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('user_foods')
       .insert({
         ...food,
         created_at: new Date().toISOString()
       })
-      .headers(headers)
       .select()
       .single()
     
@@ -576,14 +547,12 @@ const dbFunctions = {
       const today = new Date().toISOString().split('T')[0]
       console.log('🔍 Cargando comidas para:', userId, 'fecha:', today)
       
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('meal_compositions')
         .select('*')
         .eq('user_id', userId)
         .eq('date', today)
         .order('created_at', { ascending: true })
-        .headers(headers)
       
       if (error) throw error
       
@@ -599,14 +568,12 @@ const dbFunctions = {
     try {
       console.log('💾 Guardando composición de comida:', composition)
       
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('meal_compositions')
         .insert({
           ...composition,
           created_at: new Date().toISOString()
         })
-        .headers(headers)
         .select()
         .single()
       
@@ -622,12 +589,10 @@ const dbFunctions = {
 
   async deleteMealComposition(id: string): Promise<void> {
     try {
-      const headers = await dbFunctions.getAuthHeaders()
       const { error } = await supabase
         .from('meal_compositions')
         .delete()
         .eq('id', id)
-        .headers(headers)
       
       if (error) throw error
       console.log('✅ Composición eliminada:', id)
@@ -638,37 +603,31 @@ const dbFunctions = {
   },
 
   async getActiveTips(): Promise<GlobalTip[]> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('global_tips')
       .select('*')
       .eq('is_active', true)
-      .headers(headers)
     
     if (error) return []
     return data as GlobalTip[]
   },
 
   async getAllTips(): Promise<GlobalTip[]> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('global_tips')
       .select('*')
-      .headers(headers)
     
     if (error) return []
     return data as GlobalTip[]
   },
 
   async addTip(tip: Omit<GlobalTip, 'id' | 'created_at'>): Promise<GlobalTip> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('global_tips')
       .insert({
         ...tip,
         created_at: new Date().toISOString()
       })
-      .headers(headers)
       .select()
       .single()
     
@@ -677,7 +636,6 @@ const dbFunctions = {
   },
 
   async updateTip(id: string, updates: Partial<GlobalTip>): Promise<void> {
-    const headers = await dbFunctions.getAuthHeaders()
     await supabase
       .from('global_tips')
       .update({
@@ -685,50 +643,41 @@ const dbFunctions = {
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
-      .headers(headers)
   },
 
   async deleteTip(id: string): Promise<void> {
-    const headers = await dbFunctions.getAuthHeaders()
     await supabase
       .from('global_tips')
       .delete()
       .eq('id', id)
-      .headers(headers)
   },
 
   async getActiveResources(): Promise<GlobalResource[]> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('global_resources')
       .select('*')
       .eq('is_active', true)
-      .headers(headers)
     
     if (error) return []
     return data as GlobalResource[]
   },
 
   async getAllResources(): Promise<GlobalResource[]> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('global_resources')
       .select('*')
-      .headers(headers)
     
     if (error) return []
     return data as GlobalResource[]
   },
 
   async addResource(resource: Omit<GlobalResource, 'id' | 'created_at'>): Promise<GlobalResource> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('global_resources')
       .insert({
         ...resource,
         created_at: new Date().toISOString()
       })
-      .headers(headers)
       .select()
       .single()
     
@@ -737,21 +686,17 @@ const dbFunctions = {
   },
 
   async deleteResource(id: string): Promise<void> {
-    const headers = await dbFunctions.getAuthHeaders()
     await supabase
       .from('global_resources')
       .delete()
       .eq('id', id)
-      .headers(headers)
   },
 
   async getActiveSupplements(): Promise<Supplement[]> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('supplements')
       .select('*')
       .eq('is_active', true)
-      .headers(headers)
     
     if (error) return []
     return (data || []).map((item: any) => ({
@@ -761,11 +706,9 @@ const dbFunctions = {
   },
 
   async getAllSupplements(): Promise<Supplement[]> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('supplements')
       .select('*')
-      .headers(headers)
     
     if (error) return []
     return (data || []).map((item: any) => ({
@@ -775,7 +718,6 @@ const dbFunctions = {
   },
 
   async addSupplement(supplement: Omit<Supplement, 'id' | 'created_at'>): Promise<Supplement> {
-    const headers = await dbFunctions.getAuthHeaders()
     const { data, error } = await supabase
       .from('supplements')
       .insert({
@@ -783,7 +725,6 @@ const dbFunctions = {
         benefits: supplement.benefits.join(','),
         created_at: new Date().toISOString()
       })
-      .headers(headers)
       .select()
       .single()
     
@@ -792,7 +733,6 @@ const dbFunctions = {
   },
 
   async updateSupplement(id: string, updates: Partial<Supplement>): Promise<void> {
-    const headers = await dbFunctions.getAuthHeaders()
     const updateData: any = { 
       ...updates,
       updated_at: new Date().toISOString()
@@ -804,24 +744,20 @@ const dbFunctions = {
       .from('supplements')
       .update(updateData)
       .eq('id', id)
-      .headers(headers)
   },
 
   async deleteSupplement(id: string): Promise<void> {
-    const headers = await dbFunctions.getAuthHeaders()
     await supabase
       .from('supplements')
       .delete()
       .eq('id', id)
-      .headers(headers)
   },
 
   async getStats() {
     const today = new Date().toISOString().split('T')[0]
-    const headers = await dbFunctions.getAuthHeaders()
     const [users, dailyProgress] = await Promise.all([
-      supabase.from('users').select('*').headers(headers),
-      supabase.from('daily_progress').select('*').eq('date', today).headers(headers)
+      supabase.from('users').select('*'),
+      supabase.from('daily_progress').select('*').eq('date', today)
     ])
     return {
       totalUsers: users.data?.length || 0,
@@ -832,8 +768,7 @@ const dbFunctions = {
   async initializeDefaultData() {
     try {
       // Verificar si ya hay tips
-      const headers = await dbFunctions.getAuthHeaders()
-      const { data: existingTips } = await supabase.from('global_tips').select('*').headers(headers)
+      const { data: existingTips } = await supabase.from('global_tips').select('*')
       
       if (!existingTips || existingTips.length === 0) {
         const defaultTips = [
@@ -866,7 +801,7 @@ const dbFunctions = {
       }
 
       // Verificar si ya hay recursos (incluyendo exercise)
-      const { data: existingResources } = await supabase.from('global_resources').select('*').headers(headers)
+      const { data: existingResources } = await supabase.from('global_resources').select('*')
       
       if (!existingResources || existingResources.length === 0) {
         const defaultResources = [
@@ -906,7 +841,7 @@ const dbFunctions = {
       }
 
       // Verificar si ya hay suplementos
-      const { data: existingSupplements } = await supabase.from('supplements').select('*').headers(headers)
+      const { data: existingSupplements } = await supabase.from('supplements').select('*')
       
       if (!existingSupplements || existingSupplements.length === 0) {
         const defaultSupplements = [
@@ -1003,12 +938,10 @@ const dbFunctions = {
   // 🆕 FUNCIONES DE GAMIFICACIÓN
   async getUserGamification(userId: string): Promise<UserGamification | null> {
     try {
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('user_gamification')
         .select('*')
         .eq('user_id', userId)
-        .headers(headers)
         .single()
         
       if (error) {
@@ -1048,13 +981,11 @@ const dbFunctions = {
 
   async getUserChallenges(userId: string): Promise<UserChallenge[]> {
     try {
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('user_challenges')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
-        .headers(headers)
       
       if (error) {
         console.log('No challenges data found for user:', userId)
@@ -1069,14 +1000,12 @@ const dbFunctions = {
 
   async getAIRecommendations(userId: string): Promise<AIRecommendation[]> {
     try {
-      const headers = await dbFunctions.getAuthHeaders()
       const { data, error } = await supabase
         .from('ai_supplement_recommendations')
         .select('*')
         .eq('user_id', userId)
         .eq('is_active', true)
         .order('priority', { ascending: false })
-        .headers(headers)
       
       if (error) {
         console.log('No AI recommendations found for user:', userId)
