@@ -874,6 +874,7 @@ const dbFunctions = {
             description: "25 recetas balanceadas para toda la semana",
             url: "https://www.habitos.mx/recetas-saludables/",
             is_active: true,
+            image_url: "/placeholder.svg?height=200&width=200",
           },
           {
             type: "exercise" as const,
@@ -881,6 +882,7 @@ const dbFunctions = {
             description: "Entrenamiento completo sin equipamiento",
             url: "https://www.youtube.com/watch?v=8dQKcziOQ8I",
             is_active: true,
+            image_url: "/placeholder.svg?height=200&width=200",
           },
         ]
 
@@ -2212,7 +2214,9 @@ Gracias!`
                     <div className="flex items-center justify-between p-3 bg-white rounded border">
                       <div>
                         <span className="font-medium">Detector de Deshidratación</span>
-                        <p className="text-sm text-gray-600">Si agua {"<"} 6 vasos/día → Recomienda electrolitos</p>
+                        <p classNameclassName="text-sm text-gray-600">
+                          Si agua {"<"} 6 vasos/día → Recomienda electrolitos
+                        </p>
                       </div>
                       <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">En desarrollo</span>
                     </div>
@@ -3055,18 +3059,27 @@ Gracias!`
                     <h4 className="font-semibold">{activeTips[currentTipIndex].title}</h4>
                     <p className="text-gray-600">{activeTips[currentTipIndex].content}</p>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center mt-4">
                     <button
                       onClick={() => setCurrentTipIndex((prev) => (prev === 0 ? activeTips.length - 1 : prev - 1))}
-                      className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border border-gray-300"
                     >
-                      {Icons.ChevronLeft()} Anterior
+                      <span className="text-lg">{Icons.ChevronLeft()}</span>
+                      <span className="text-sm font-medium">Anterior</span>
                     </button>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-500">
+                        {currentTipIndex + 1} de {activeTips.length}
+                      </span>
+                    </div>
+
                     <button
                       onClick={() => setCurrentTipIndex((prev) => (prev === activeTips.length - 1 ? 0 : prev + 1))}
-                      className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border border-gray-300"
                     >
-                      Siguiente {Icons.ChevronRight()}
+                      <span className="text-sm font-medium">Siguiente</span>
+                      <span className="text-lg">{Icons.ChevronRight()}</span>
                     </button>
                   </div>
                 </>
@@ -3267,13 +3280,86 @@ Gracias!`
           </div>
         )}
 
-        {activeTab === "recursos" && (
+        {activeTab === "entrenamiento" && (
+          <div className="space-y-6">
+            {/* Rutinas de ejercicio */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>{Icons.Dumbbell()}</span>
+                Rutinas de Entrenamiento
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {exerciseResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-4">
+                      <h4 className="font-semibold mb-1">{resource.title}</h4>
+                      <p className="text-sm text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Progreso de ejercicio */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>{Icons.Activity()}</span>
+                Tu Progreso de Ejercicio
+              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium">Sesiones completadas hoy</p>
+                  <p className="text-3xl font-bold text-green-600">{dailyProgress.exercise}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => updateProgress("exercise", -1)}
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    {Icons.Minus()}
+                  </button>
+                  <button
+                    onClick={() => updateProgress("exercise", 1)}
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    {Icons.Plus()}
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{getStreakDays()}</div>
+                  <div className="text-sm text-gray-600">Días activos</div>
+                </div>
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {progressHistory.reduce((sum, day) => sum + day.exercise, 0)}
+                  </div>
+                  <div className="text-sm text-gray-600">Total esta semana</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "mindfulness" && (
           <div className="space-y-6">
             {/* Recursos de mindfulness */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <span>{Icons.Brain()}</span>
-                Mindfulness
+                Mindfulness y Meditación
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {mindfulnessResources.map((resource) => (
@@ -3298,66 +3384,47 @@ Gracias!`
               </div>
             </div>
 
-            {/* Recursos de nutrición */}
+            {/* Progreso de mindfulness */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{Icons.UtensilsCrossed()}</span>
-                Nutrición
+                <span>{Icons.Brain()}</span>
+                Tu Progreso de Mindfulness
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {nutritionResources.map((resource) => (
-                  <a
-                    key={resource.id}
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm font-medium">Sesiones completadas hoy</p>
+                  <p className="text-3xl font-bold text-purple-600">{dailyProgress.mindfulness}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => updateProgress("mindfulness", -1)}
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                   >
-                    <img
-                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
-                      alt={resource.title}
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="p-4">
-                      <h4 className="font-semibold mb-1">{resource.title}</h4>
-                      <p className="text-sm text-gray-600">{resource.description}</p>
-                    </div>
-                  </a>
-                ))}
+                    {Icons.Minus()}
+                  </button>
+                  <button
+                    onClick={() => updateProgress("mindfulness", 1)}
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    {Icons.Plus()}
+                  </button>
+                </div>
               </div>
-            </div>
-
-            {/* Recursos de ejercicio */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{Icons.Dumbbell()}</span>
-                Ejercicio
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {exerciseResources.map((resource) => (
-                  <a
-                    key={resource.id}
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
-                  >
-                    <img
-                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
-                      alt={resource.title}
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="p-4">
-                      <h4 className="font-semibold mb-1">{resource.title}</h4>
-                      <p className="text-sm text-gray-600">{resource.description}</p>
-                    </div>
-                  </a>
-                ))}
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="p-4 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">{getStreakDays()}</div>
+                  <div className="text-sm text-gray-600">Días de práctica</div>
+                </div>
+                <div className="p-4 bg-indigo-50 rounded-lg">
+                  <div className="text-2xl font-bold text-indigo-600">
+                    {progressHistory.reduce((sum, day) => sum + day.mindfulness, 0)}
+                  </div>
+                  <div className="text-sm text-gray-600">Total esta semana</div>
+                </div>
               </div>
             </div>
           </div>
         )}
-
         {activeTab === "suplementos" && (
           <div className="space-y-6">
             {/* Lista de suplementos */}
@@ -3402,6 +3469,7 @@ Gracias!`
       </main>
 
       {/* Navegación inferior */}
+
       <nav className="bg-white border-t shadow-md fixed bottom-0 left-0 w-full z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-16 flex justify-between">
@@ -3421,16 +3489,25 @@ Gracias!`
               }`}
             >
               <span className="text-2xl">{Icons.UtensilsCrossed()}</span>
-              <span className="text-xs">Comida</span>
+              <span className="text-xs">Alimentación</span>
             </button>
             <button
-              onClick={() => setActiveTab("recursos")}
+              onClick={() => setActiveTab("entrenamiento")}
               className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
-                activeTab === "recursos" ? "text-green-600" : "text-gray-500"
+                activeTab === "entrenamiento" ? "text-green-600" : "text-gray-500"
               }`}
             >
-              <span className="text-2xl">{Icons.Link()}</span>
-              <span className="text-xs">Recursos</span>
+              <span className="text-2xl">{Icons.Dumbbell()}</span>
+              <span className="text-xs">Entrenamiento</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("mindfulness")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "mindfulness" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <span className="text-2xl">{Icons.Brain()}</span>
+              <span className="text-xs">Mindfulness</span>
             </button>
             <button
               onClick={() => setActiveTab("suplementos")}
