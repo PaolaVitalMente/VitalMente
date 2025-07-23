@@ -977,7 +977,6 @@ const dbFunctions = {
     }
   }
   }
-}
 
 // ============================================================================
 // COMPONENTE PRINCIPAL CON RECURSOS MULTIMEDIA MEJORADOS
