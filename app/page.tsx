@@ -319,6 +319,13 @@ const GOALS = [
   { id: "life_balance", label: "⚡ Balancear cuerpo y mente", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "holistic", category: "holistic" },
   { id: "healthy_habits", label: "🌱 Crear hábitos sostenibles", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "holistic", category: "holistic" },
   { id: "vitalmente", label: "🌟 Sentirme VitalMente", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "holistic", category: "holistic" }
+
+  // 🔄 COMPATIBILIDAD TOTAL - GOALS LEGACY
+  { id: "lose", label: "💪 Perder peso", protein: 30, carbs: 35, fats: 35, calAdjust: -0.2, type: "physical", category: "physical" },
+  { id: "maintain", label: "⚖️ Mantener peso", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "physical", category: "physical" },
+  { id: "gain", label: "🏋️ Ganar músculo", protein: 30, carbs: 40, fats: 30, calAdjust: 0.15, type: "physical", category: "physical" },
+  { id: "feel_good", label: "✨ Sentirse bien", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "emotional", category: "emotional" },
+  { id: "balance", label: "⚡ Equilibrio", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "emotional", category: "emotional" }
 ]
 
 // ============================================================================
