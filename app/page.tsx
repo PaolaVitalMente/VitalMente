@@ -945,13 +945,37 @@ const dbFunctions = {
         .single()
       
       if (error) {
-        console.log('No gamification data found for user:', userId)
-        return null
-      }
+          console.log('No gamification data found for user:', userId)
+          return {
+            id: 0,
+            user_id: userId,
+            current_level: 1,
+            total_points: 0,
+            streak_days: 0,
+            longest_streak: 0,
+            badges: [],
+            weekly_points: 0,
+            monthly_points: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        }
       return data as UserGamification
     } catch (error) {
       console.error('Error loading user gamification:', error)
-      return null
+      return {
+  id: 0,
+  user_id: userId,
+  current_level: 1,
+  total_points: 0,
+  streak_days: 0,
+  longest_streak: 0,
+  badges: [],
+  weekly_points: 0,
+  monthly_points: 0,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
+}
     }
   },
 
@@ -963,7 +987,10 @@ const dbFunctions = {
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
       
-      if (error) throw error
+      if (error) {
+  console.log('No challenges data found for user:', userId)
+  return []
+}
       return data as UserChallenge[]
     } catch (error) {
       console.error('Error loading user challenges:', error)
@@ -980,7 +1007,10 @@ const dbFunctions = {
         .eq('is_active', true)
         .order('priority', { ascending: false })
       
-      if (error) throw error
+      if (error) {
+  console.log('No AI recommendations found for user:', userId)
+  return []
+}
       return data as AIRecommendation[]
     } catch (error) {
       console.error('Error loading AI recommendations:', error)
