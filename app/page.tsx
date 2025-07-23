@@ -1,61 +1,64 @@
 "use client"
+
 import { useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 
 // ============================================================================
-// ICONOS SIMPLES COMO EMOJIS
+// ICONOS OPTIMIZADOS PARA MÓVIL CON TAMAÑOS RESPONSIVOS
 // ============================================================================
 const Icons = {
-  Home: () => "🏠",
-  UtensilsCrossed: () => "🍽️",
-  Activity: () => "💪",
-  Brain: () => "🧠",
-  ChevronLeft: () => "◀️",
-  ChevronRight: () => "▶️",
-  Lightbulb: () => "💡",
-  Droplets: () => "💧",
-  Plus: () => "+",
-  Minus: () => "-",
-  RotateCcw: () => "🔄",
-  X: () => "✖️",
-  ExternalLink: () => "🔗",
-  Edit: () => "✏️",
-  Trash2: () => "🗑️",
-  LogOut: () => "🚪",
-  Users: () => "👥",
-  MessageSquare: () => "💬",
-  Link: () => "🔗",
-  ChefHat: () => "👨‍🍳",
-  Globe: () => "🌍",
-  Eye: () => "👁️",
-  Phone: () => "📞",
-  UserPlus: () => "👤+",
-  Calendar: () => "📅",
-  Package: () => "📦",
-  Loader2: () => "⏳",
-  Calculator: () => "🧮",
-  CheckCircle: () => "✅",
-  AlertCircle: () => "⚠️",
-  Play: () => "▶️",
-  Dumbbell: () => "🏋️",
-  Music: () => "🎵",
-  Trophy: () => "🏆",
-  Star: () => "⭐",
-  Crown: () => "👑",
-  Fire: () => "🔥",
-  Target: () => "🎯",
-  Zap: () => "⚡",
-  Gift: () => "🎁",
-  Medal: () => "🏅",
-  Rocket: () => "🚀",
-  Diamond: () => "💎",
-  Magic: () => "✨",
-  Robot: () => "🤖",
-  Chart: () => "📊",
-  TrendingUp: () => "📈",
-  Database: () => "🗄️",
-  Settings: () => "⚙️",
-  Shield: () => "🛡️",
+  Home: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🏠</span>,
+  UtensilsCrossed: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🍽️</span>,
+  Activity: ({ size = "text-xl" }: { size?: string }) => <span className={size}>💪</span>,
+  Brain: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🧠</span>,
+  ChevronLeft: ({ size = "text-xl" }: { size?: string }) => <span className={size}>◀️</span>,
+  ChevronRight: ({ size = "text-xl" }: { size?: string }) => <span className={size}>▶️</span>,
+  Lightbulb: ({ size = "text-xl" }: { size?: string }) => <span className={size}>💡</span>,
+  Droplets: ({ size = "text-xl" }: { size?: string }) => <span className={size}>💧</span>,
+  Plus: ({ size = "text-xl" }: { size?: string }) => <span className={size}>+</span>,
+  Minus: ({ size = "text-xl" }: { size?: string }) => <span className={size}>-</span>,
+  RotateCcw: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🔄</span>,
+  X: ({ size = "text-xl" }: { size?: string }) => <span className={size}>✖️</span>,
+  ExternalLink: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🔗</span>,
+  Edit: ({ size = "text-xl" }: { size?: string }) => <span className={size}>✏️</span>,
+  Trash2: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🗑️</span>,
+  LogOut: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🚪</span>,
+  Users: ({ size = "text-xl" }: { size?: string }) => <span className={size}>👥</span>,
+  MessageSquare: ({ size = "text-xl" }: { size?: string }) => <span className={size}>💬</span>,
+  Link: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🔗</span>,
+  ChefHat: ({ size = "text-xl" }: { size?: string }) => <span className={size}>👨‍🍳</span>,
+  Globe: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🌍</span>,
+  Eye: ({ size = "text-xl" }: { size?: string }) => <span className={size}>👁️</span>,
+  Phone: ({ size = "text-xl" }: { size?: string }) => <span className={size}>📞</span>,
+  UserPlus: ({ size = "text-xl" }: { size?: string }) => <span className={size}>👤+</span>,
+  Calendar: ({ size = "text-xl" }: { size?: string }) => <span className={size}>📅</span>,
+  Package: ({ size = "text-xl" }: { size?: string }) => <span className={size}>📦</span>,
+  Loader2: ({ size = "text-xl" }: { size?: string }) => <span className={size}>⏳</span>,
+  Calculator: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🧮</span>,
+  CheckCircle: ({ size = "text-xl" }: { size?: string }) => <span className={size}>✅</span>,
+  AlertCircle: ({ size = "text-xl" }: { size?: string }) => <span className={size}>⚠️</span>,
+  Play: ({ size = "text-xl" }: { size?: string }) => <span className={size}>▶️</span>,
+  Dumbbell: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🏋️</span>,
+  Music: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🎵</span>,
+  Trophy: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🏆</span>,
+  Star: ({ size = "text-xl" }: { size?: string }) => <span className={size}>⭐</span>,
+  Crown: ({ size = "text-xl" }: { size?: string }) => <span className={size}>👑</span>,
+  Fire: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🔥</span>,
+  Target: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🎯</span>,
+  Zap: ({ size = "text-xl" }: { size?: string }) => <span className={size}>⚡</span>,
+  Gift: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🎁</span>,
+  Medal: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🏅</span>,
+  Rocket: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🚀</span>,
+  Diamond: ({ size = "text-xl" }: { size?: string }) => <span className={size}>💎</span>,
+  Magic: ({ size = "text-xl" }: { size?: string }) => <span className={size}>✨</span>,
+  Robot: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🤖</span>,
+  Chart: ({ size = "text-xl" }: { size?: string }) => <span className={size}>📊</span>,
+  TrendingUp: ({ size = "text-xl" }: { size?: string }) => <span className={size}>📈</span>,
+  Database: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🗄️</span>,
+  Settings: ({ size = "text-xl" }: { size?: string }) => <span className={size}>⚙️</span>,
+  Shield: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🛡️</span>,
+  Menu: ({ size = "text-xl" }: { size?: string }) => <span className={size}>☰</span>,
+  Close: ({ size = "text-xl" }: { size?: string }) => <span className={size}>✕</span>,
 }
 
 // ============================================================================
@@ -64,6 +67,7 @@ const Icons = {
 const SUPABASE_URL = "https://frzyksfceugddjrerxkf.supabase.co"
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyenlrc2ZjZXVnZGRqcmVyeGtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MzgwMTUsImV4cCI6MjA2NzMxNDAxNX0.E6ZjfC6RJoA98RkDK-I87k2l3d7naK9C-mEC0alH7L8"
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // ============================================================================
@@ -185,7 +189,6 @@ interface ConsumedMacros {
   fats: number
 }
 
-// 🆕 NUEVOS TIPOS PARA GAMIFICACIÓN Y IA
 interface UserGamification {
   id: string
   user_id: string
@@ -223,7 +226,7 @@ interface AIRecommendation {
 }
 
 // ============================================================================
-// CONFIGURACIÓN DE DATOS
+// CONFIGURACIÓN DE DATOS (ORIGINAL)
 // ============================================================================
 const ACTIVITY_LEVELS = [
   { value: 1.2, label: "Sedentario", desc: "Poco ejercicio" },
@@ -326,7 +329,6 @@ const GOALS = [
   },
 ]
 
-// 🆕 SISTEMA DE NIVELES
 const LEVEL_SYSTEM = {
   levels: [
     { level: 1, name: "Principiante", icon: "🌱", pointsRequired: 0, color: "bg-green-100 text-green-800" },
@@ -349,7 +351,7 @@ const LEVEL_SYSTEM = {
 }
 
 // ============================================================================
-// FUNCIONES DE BASE DE DATOS
+// FUNCIONES DE BASE DE DATOS (MANTENIENDO LAS ORIGINALES)
 // ============================================================================
 const dbFunctions = {
   async findUserByPhone(phone: string): Promise<UserProfile | null> {
@@ -391,7 +393,6 @@ const dbFunctions = {
   async getTodayProgress(userId: string): Promise<DailyProgress | null> {
     try {
       const today = new Date().toISOString().split("T")[0]
-      console.log("🔍 Cargando progreso para:", userId, "fecha:", today)
       const { data, error } = await supabase
         .from("daily_progress")
         .select("*")
@@ -400,15 +401,13 @@ const dbFunctions = {
         .single()
       if (error) {
         if (error.code === "PGRST116") {
-          console.log("📝 No hay progreso para hoy, se creará uno nuevo")
           return null
         }
         throw error
       }
-      console.log("✅ Progreso cargado:", data)
       return data as DailyProgress
     } catch (error) {
-      console.error("❌ Error loading today progress:", error)
+      console.error("Error loading today progress:", error)
       return null
     }
   },
@@ -416,11 +415,6 @@ const dbFunctions = {
   async saveProgress(userId: string, progress: Omit<DailyProgress, "id" | "user_id" | "date">): Promise<boolean> {
     try {
       const today = new Date().toISOString().split("T")[0]
-      console.log("💾 Guardando progreso:", {
-        user_id: userId,
-        date: today,
-        ...progress,
-      })
       const { data, error } = await supabase
         .from("daily_progress")
         .upsert(
@@ -437,42 +431,11 @@ const dbFunctions = {
         )
         .select()
       if (error) {
-        console.error("❌ Error guardando progreso:", error)
         throw error
       }
-      console.log("✅ Progreso guardado exitosamente:", data)
       return true
     } catch (error) {
-      console.error("❌ Error en saveProgress:", error)
-      return false
-    }
-  },
-
-  async verifyProgressSaved(userId: string, expectedData: any): Promise<boolean> {
-    try {
-      const today = new Date().toISOString().split("T")[0]
-      const { data, error } = await supabase
-        .from("daily_progress")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("date", today)
-        .single()
-      if (error || !data) return false
-      const matches =
-        data.water === expectedData.water &&
-        data.exercise === expectedData.exercise &&
-        data.mindfulness === expectedData.mindfulness &&
-        data.desayuno === expectedData.desayuno &&
-        data.almuerzo === expectedData.almuerzo &&
-        data.cena === expectedData.cena
-      console.log("🔍 Verificación de datos:", {
-        guardado: data,
-        esperado: expectedData,
-        coincide: matches,
-      })
-      return matches
-    } catch (error) {
-      console.error("Error verificando progreso:", error)
+      console.error("Error en saveProgress:", error)
       return false
     }
   },
@@ -513,7 +476,6 @@ const dbFunctions = {
         .order("category", { ascending: true })
         .order("name", { ascending: true })
       if (error) throw error
-      console.log("✅ Alimentos globales cargados:", data?.length || 0)
       return data as GlobalFood[]
     } catch (error) {
       console.error("Error loading global foods:", error)
@@ -537,7 +499,6 @@ const dbFunctions = {
   async getTodayMealCompositions(userId: string): Promise<MealComposition[]> {
     try {
       const today = new Date().toISOString().split("T")[0]
-      console.log("🔍 Cargando comidas para:", userId, "fecha:", today)
       const { data, error } = await supabase
         .from("meal_compositions")
         .select("*")
@@ -545,7 +506,6 @@ const dbFunctions = {
         .eq("date", today)
         .order("created_at", { ascending: true })
       if (error) throw error
-      console.log("✅ Comidas cargadas:", data?.length || 0)
       return data as MealComposition[]
     } catch (error) {
       console.error("Error loading meal compositions:", error)
@@ -555,7 +515,6 @@ const dbFunctions = {
 
   async addMealComposition(composition: Omit<MealComposition, "id" | "created_at">): Promise<MealComposition> {
     try {
-      console.log("💾 Guardando composición de comida:", composition)
       const { data, error } = await supabase
         .from("meal_compositions")
         .insert({
@@ -565,7 +524,6 @@ const dbFunctions = {
         .select()
         .single()
       if (error) throw error
-      console.log("✅ Composición guardada:", data)
       return data as MealComposition
     } catch (error) {
       console.error("Error adding meal composition:", error)
@@ -577,7 +535,6 @@ const dbFunctions = {
     try {
       const { error } = await supabase.from("meal_compositions").delete().eq("id", id)
       if (error) throw error
-      console.log("✅ Composición eliminada:", id)
     } catch (error) {
       console.error("Error deleting meal composition:", error)
       throw error
@@ -629,7 +586,6 @@ const dbFunctions = {
     }
   },
 
-  // 🆕 FUNCIONES PARA GAMIFICACIÓN Y IA
   async getUserGamification(userId: string): Promise<UserGamification | null> {
     try {
       const { data, error } = await supabase.from("user_gamification").select("*").eq("user_id", userId).single()
@@ -692,7 +648,6 @@ const dbFunctions = {
       const recommendations: AIRecommendation[] = []
 
       if (!progressHistory || progressHistory.length === 0 || !supplements || supplements.length === 0) {
-        console.log("No hay suficientes datos para generar recomendaciones")
         return []
       }
 
@@ -831,7 +786,6 @@ const dbFunctions = {
             description: "25 recetas balanceadas para toda la semana",
             url: "https://www.habitos.mx/recetas-saludables/",
             is_active: true,
-            image_url: "/placeholder.svg?height=200&width=200",
           },
           {
             type: "exercise" as const,
@@ -839,7 +793,6 @@ const dbFunctions = {
             description: "Entrenamiento completo sin equipamiento",
             url: "https://www.youtube.com/watch?v=8dQKcziOQ8I",
             is_active: true,
-            image_url: "/placeholder.svg?height=200&width=200",
           },
         ]
         for (const resource of defaultResources) {
@@ -906,33 +859,14 @@ const getYouTubeThumbnail = (url: string): string => {
   return "/placeholder.svg?height=180&width=320&text=Video"
 }
 
-const getSpotifyThumbnail = (url: string): string => {
+const getResourceThumbnail = (url: string, type: string): string => {
+  if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    return getYouTubeThumbnail(url)
+  }
   if (url.includes("spotify.com")) {
     return "/placeholder.svg?height=180&width=320&text=🎵+Spotify"
   }
-  return "/placeholder.svg?height=180&width=320&text=Audio"
-}
-
-const isYouTubeUrl = (url: string): boolean => {
-  return url.includes("youtube.com") || url.includes("youtu.be")
-}
-
-const isSpotifyUrl = (url: string): boolean => {
-  return url.includes("spotify.com")
-}
-
-const isPDFUrl = (url: string): boolean => {
-  return url.toLowerCase().includes(".pdf") || url.includes("drive.google.com")
-}
-
-const getResourceThumbnail = (url: string, type: string): string => {
-  if (isYouTubeUrl(url)) {
-    return getYouTubeThumbnail(url)
-  }
-  if (isSpotifyUrl(url)) {
-    return getSpotifyThumbnail(url)
-  }
-  if (isPDFUrl(url)) {
+  if (url.toLowerCase().includes(".pdf") || url.includes("drive.google.com")) {
     return "/placeholder.svg?height=180&width=320&text=📄+PDF"
   }
   const typeDefaults = {
@@ -957,7 +891,7 @@ const getResourceTypeIcon = (type: string) => {
 }
 
 // ============================================================================
-// COMPONENTE PRINCIPAL
+// COMPONENTE PRINCIPAL RESPONSIVE
 // ============================================================================
 export default function VitalMenteApp() {
   // Estados principales
@@ -976,6 +910,7 @@ export default function VitalMenteApp() {
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
 
+  // Estados de progreso
   const [dailyProgress, setDailyProgress] = useState<DailyProgress>({
     id: "",
     user_id: "",
@@ -988,6 +923,7 @@ export default function VitalMenteApp() {
     cena: 0,
   })
 
+  // Estados de datos
   const [userFoods, setUserFoods] = useState<UserFood[]>([])
   const [globalFoods, setGlobalFoods] = useState<GlobalFood[]>([])
   const [progressHistory, setProgressHistory] = useState<DailyProgress[]>([])
@@ -1003,17 +939,22 @@ export default function VitalMenteApp() {
     fats: 0,
   })
 
+  // Estados de UI móvil
   const [showMealCalculator, setShowMealCalculator] = useState(false)
   const [selectedMealType, setSelectedMealType] = useState<"desayuno" | "almuerzo" | "cena">("desayuno")
   const [selectedFood, setSelectedFood] = useState<UserFood | GlobalFood | null>(null)
   const [foodQuantity, setFoodQuantity] = useState<string>("100")
+  const [showFloatingMenu, setShowFloatingMenu] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   // Estados de administración
   const [logoClicks, setLogoClicks] = useState(0)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [adminCode, setAdminCode] = useState("")
+  const [activeAdminTab, setActiveAdminTab] = useState("dashboard")
 
+  // Estados de formularios
   const [loginForm, setLoginForm] = useState({ phone: "", accessCode: "" })
   const [registerForm, setRegisterForm] = useState({
     phone: "",
@@ -1026,25 +967,22 @@ export default function VitalMenteApp() {
     activityLevel: 1.375,
     goal: "reduce_stress",
   })
-
   const [showRegister, setShowRegister] = useState(false)
-  const [showFoodDialog, setShowFoodDialog] = useState(false)
-  const [selectedMeal, setSelectedMeal] = useState<"desayuno" | "almuerzo" | "cena" | null>(null)
-  const [newFood, setNewFood] = useState({ name: "", calories: "", protein: "", carbs: "", fats: "" })
-  const [showFloatingMenu, setShowFloatingMenu] = useState(false)
 
-  // Estados para gamificación y IA
+  // Estados de gamificación y IA
   const [userGamification, setUserGamification] = useState<UserGamification | null>(null)
   const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>([])
   const [allUsers, setAllUsers] = useState<UserProfile[]>([])
 
+  // ============================================================================
+  // EFECTOS Y INICIALIZACIÓN
+  // ============================================================================
   useEffect(() => {
     initializeApp()
   }, [])
 
   useEffect(() => {
     if (currentUser && currentUser.id) {
-      console.log("🔄 Usuario detectado desde localStorage, cargando datos...")
       loadUserData(currentUser.id)
       calculateMacros(currentUser)
     }
@@ -1079,6 +1017,65 @@ export default function VitalMenteApp() {
     }
   }
 
+  const loadUserData = async (userId: string) => {
+    try {
+      const todayProgress = await dbFunctions.getTodayProgress(userId)
+      if (todayProgress) {
+        setDailyProgress(todayProgress)
+      } else {
+        setDailyProgress((prev) => ({ ...prev, user_id: userId }))
+      }
+
+      const [foods, history, compositions, gamification, recommendations] = await Promise.all([
+        dbFunctions.getUserFoods(userId),
+        dbFunctions.getProgressHistory(userId),
+        dbFunctions.getTodayMealCompositions(userId),
+        dbFunctions.getUserGamification(userId),
+        dbFunctions.generateAIRecommendations(userId),
+      ])
+
+      setUserFoods(foods)
+      setProgressHistory(history)
+      setMealCompositions(compositions)
+      calculateConsumedMacros(compositions)
+      setUserGamification(gamification)
+      setAiRecommendations(recommendations)
+    } catch (error) {
+      console.error("Error loading user data:", error)
+    }
+  }
+
+  const calculateConsumedMacros = (compositions: MealComposition[]) => {
+    const totals = compositions.reduce(
+      (acc, comp) => ({
+        calories: acc.calories + comp.calories_consumed,
+        protein: acc.protein + comp.protein_consumed,
+        carbs: acc.carbs + comp.carbs_consumed,
+        fats: acc.fats + comp.fats_consumed,
+      }),
+      { calories: 0, protein: 0, carbs: 0, fats: 0 },
+    )
+    setConsumedMacros(totals)
+  }
+
+  const calculateMacros = (userData: UserProfile) => {
+    const bmr = 10 * userData.weight + 6.25 * userData.height - 5 * userData.age + 5
+    const tdee = bmr * userData.activity_level
+    const goalData = GOALS.find((g) => g.id === userData.goal) || GOALS[3]
+    const calories = Math.round(tdee * (1 + goalData.calAdjust))
+    setMacroResults({
+      calories,
+      protein: Math.round((calories * goalData.protein) / 100 / 4),
+      carbs: Math.round((calories * goalData.carbs) / 100 / 4),
+      fats: Math.round((calories * goalData.fats) / 100 / 9),
+      goalType: goalData.type,
+      goalLabel: goalData.label,
+    })
+  }
+
+  // ============================================================================
+  // FUNCIONES DE AUTENTICACIÓN
+  // ============================================================================
   const handleLogin = async () => {
     if (!loginForm.phone || !loginForm.accessCode) {
       alert("Por favor completa todos los campos")
@@ -1127,14 +1124,12 @@ export default function VitalMenteApp() {
     }
     setIsLoading(true)
     try {
-      console.log("🔍 Iniciando registro...")
       const existingUser = await dbFunctions.findUserByPhone(registerForm.phone)
       if (existingUser) {
         alert("Este número ya está registrado. Usa la opción de Ingresar.")
         setIsLoading(false)
         return
       }
-      console.log("📝 Creando nuevo usuario...")
       const userData = {
         phone: registerForm.phone,
         access_code: registerForm.accessCode,
@@ -1145,9 +1140,7 @@ export default function VitalMenteApp() {
         activity_level: registerForm.activityLevel,
         goal: registerForm.goal,
       }
-      console.log("🚀 Datos a enviar:", userData)
       const newUser = await dbFunctions.createUser(userData)
-      console.log("✅ Usuario creado:", newUser)
       setCurrentUser(newUser)
       localStorage.setItem("vitalmente_user", JSON.stringify(newUser))
       setDailyProgress((prev) => ({ ...prev, user_id: newUser.id }))
@@ -1164,54 +1157,11 @@ export default function VitalMenteApp() {
         goal: "reduce_stress",
       })
     } catch (error: any) {
-      console.error("❌ Error detallado en registro:", error)
-      alert(`Error al crear cuenta: ${error.message}\n\nRevisa la consola para más detalles.`)
+      console.error("Error en registro:", error)
+      alert(`Error al crear cuenta: ${error.message}`)
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const loadUserData = async (userId: string) => {
-    try {
-      console.log("🔍 Iniciando carga de datos para usuario:", userId)
-      const todayProgress = await dbFunctions.getTodayProgress(userId)
-      if (todayProgress) {
-        console.log("✅ Progreso cargado desde BD:", todayProgress)
-        setDailyProgress(todayProgress)
-      } else {
-        console.log("📝 No hay progreso para hoy, usando valores por defecto")
-        setDailyProgress((prev) => ({ ...prev, user_id: userId }))
-      }
-      const [foods, history, compositions, gamification, recommendations] = await Promise.all([
-        dbFunctions.getUserFoods(userId),
-        dbFunctions.getProgressHistory(userId),
-        dbFunctions.getTodayMealCompositions(userId),
-        dbFunctions.getUserGamification(userId),
-        dbFunctions.generateAIRecommendations(userId),
-      ])
-      setUserFoods(foods)
-      setProgressHistory(history)
-      setMealCompositions(compositions)
-      calculateConsumedMacros(compositions)
-      setUserGamification(gamification)
-      setAiRecommendations(recommendations)
-      console.log("✅ Todos los datos cargados exitosamente")
-    } catch (error) {
-      console.error("❌ Error loading user data:", error)
-    }
-  }
-
-  const calculateConsumedMacros = (compositions: MealComposition[]) => {
-    const totals = compositions.reduce(
-      (acc, comp) => ({
-        calories: acc.calories + comp.calories_consumed,
-        protein: acc.protein + comp.protein_consumed,
-        carbs: acc.carbs + comp.carbs_consumed,
-        fats: acc.fats + comp.fats_consumed,
-      }),
-      { calories: 0, protein: 0, carbs: 0, fats: 0 },
-    )
-    setConsumedMacros(totals)
   }
 
   const handleLogout = () => {
@@ -1240,72 +1190,9 @@ export default function VitalMenteApp() {
     setAiRecommendations([])
   }
 
-  const handleLogoClick = () => {
-    setLogoClicks((prev) => {
-      const newCount = prev + 1
-      console.log(`🖱️ Logo click ${newCount}/5`)
-      if (newCount === 5) {
-        console.log("🔓 Activando panel de administrador")
-        setShowAdminLogin(true)
-        return 0
-      }
-      return newCount
-    })
-  }
-
-  const handleAdminLogin = () => {
-    console.log("🔐 Intentando acceso admin con código:", adminCode)
-    if (adminCode === "1098648820") {
-      console.log("✅ Código correcto, activando modo admin")
-      setIsAdmin(true)
-      setShowAdminLogin(false)
-      setAdminCode("")
-      loadAdminData()
-      alert("¡Acceso de administrador activado!")
-    } else {
-      console.log("❌ Código incorrecto")
-      alert("Código incorrecto")
-      setAdminCode("")
-    }
-  }
-
-  const loadAdminData = async () => {
-    try {
-      const users = await dbFunctions.getAllUsers()
-      setAllUsers(users)
-    } catch (error) {
-      console.error("Error loading admin data:", error)
-    }
-  }
-
-  const calculateMacros = (userData: UserProfile) => {
-    const bmr = 10 * userData.weight + 6.25 * userData.height - 5 * userData.age + 5
-    const tdee = bmr * userData.activity_level
-    const goalData = GOALS.find((g) => g.id === userData.goal) || GOALS[3]
-    const calories = Math.round(tdee * (1 + goalData.calAdjust))
-    setMacroResults({
-      calories,
-      protein: Math.round((calories * goalData.protein) / 100 / 4),
-      carbs: Math.round((calories * goalData.carbs) / 100 / 4),
-      fats: Math.round((calories * goalData.fats) / 100 / 9),
-      goalType: goalData.type,
-      goalLabel: goalData.label,
-    })
-  }
-
-  const getMotivationalMessage = (goal: string) => {
-    const messages: Record<string, string> = {
-      lose_weight: "¡Cada paso te acerca a tu mejor versión! 💪",
-      maintain_weight: "Mantener el equilibrio es la clave del éxito ⚖️",
-      gain_muscle: "Construyendo fuerza, construyendo futuro 🏋️",
-      reduce_stress: "Hoy es un gran día para sentirte increíble ✨",
-      find_calm: "Respira profundo, la calma está en ti 🧘",
-      life_balance: "El equilibrio perfecto entre cuerpo y mente ⚡",
-      vitalmente: "¡Eres la mejor versión de ti mismo! 🌟 #VitalMente",
-    }
-    return messages[goal] || messages.reduce_stress
-  }
-
+  // ============================================================================
+  // FUNCIONES DE PROGRESO
+  // ============================================================================
   const updateProgress = async (field: keyof DailyProgress, increment: number) => {
     if (!currentUser) return
     const newProgress = {
@@ -1324,20 +1211,14 @@ export default function VitalMenteApp() {
         cena: newProgress.cena,
       })
       if (success) {
-        const verified = await dbFunctions.verifyProgressSaved(currentUser.id, newProgress)
-        if (verified) {
-          setSaveStatus("saved")
-          setLastSaveTime(new Date())
-          console.log("✅ Progreso guardado y verificado")
-          setTimeout(() => setSaveStatus("idle"), 2000)
-        } else {
-          throw new Error("Los datos no se guardaron correctamente")
-        }
+        setSaveStatus("saved")
+        setLastSaveTime(new Date())
+        setTimeout(() => setSaveStatus("idle"), 2000)
       } else {
         throw new Error("Error al guardar progreso")
       }
     } catch (error) {
-      console.error("❌ Error guardando progreso:", error)
+      console.error("Error guardando progreso:", error)
       setSaveStatus("error")
       setDailyProgress(dailyProgress)
       alert("Error al guardar progreso. Por favor intenta de nuevo.")
@@ -1350,88 +1231,6 @@ export default function VitalMenteApp() {
     setShowFloatingMenu(false)
   }
 
-  const handleTypicalDay = async () => {
-    if (!currentUser) return
-    setSaveStatus("saving")
-    try {
-      const typicalProgress = {
-        water: 6,
-        exercise: 1,
-        mindfulness: 1,
-        desayuno: 1,
-        almuerzo: 1,
-        cena: 1,
-      }
-      setDailyProgress((prev) => ({ ...prev, ...typicalProgress }))
-      const success = await dbFunctions.saveProgress(currentUser.id, typicalProgress)
-      if (success) {
-        setSaveStatus("saved")
-        setLastSaveTime(new Date())
-        setTimeout(() => setSaveStatus("idle"), 2000)
-      } else {
-        throw new Error("Error al guardar día típico")
-      }
-    } catch (error) {
-      console.error("Error guardando día típico:", error)
-      setSaveStatus("error")
-      setTimeout(() => setSaveStatus("idle"), 3000)
-    }
-    setShowFloatingMenu(false)
-  }
-
-  const resetProgress = async (type?: "all" | "meals" | "exercise" | "mindfulness" | "water") => {
-    if (!currentUser) return
-    const confirmMessage =
-      type === "all"
-        ? "¿Estás seguro de reiniciar TODO el progreso del día?"
-        : `¿Estás seguro de reiniciar el progreso de ${type}?`
-    if (!confirm(confirmMessage)) return
-    let newProgress = { ...dailyProgress }
-    if (type === "all" || !type) {
-      newProgress = { ...newProgress, water: 0, exercise: 0, mindfulness: 0, desayuno: 0, almuerzo: 0, cena: 0 }
-    } else if (type === "meals") {
-      newProgress = { ...newProgress, desayuno: 0, almuerzo: 0, cena: 0 }
-      try {
-        for (const comp of mealCompositions) {
-          await dbFunctions.deleteMealComposition(comp.id)
-        }
-        setMealCompositions([])
-        calculateConsumedMacros([])
-      } catch (error) {
-        console.error("Error eliminando composiciones:", error)
-      }
-    } else if (type === "water") {
-      newProgress = { ...newProgress, water: 0 }
-    } else if (type === "exercise") {
-      newProgress = { ...newProgress, exercise: 0 }
-    } else if (type === "mindfulness") {
-      newProgress = { ...newProgress, mindfulness: 0 }
-    }
-    setDailyProgress(newProgress)
-    setSaveStatus("saving")
-    try {
-      const success = await dbFunctions.saveProgress(currentUser.id, {
-        water: newProgress.water,
-        exercise: newProgress.exercise,
-        mindfulness: newProgress.mindfulness,
-        desayuno: newProgress.desayuno,
-        almuerzo: newProgress.almuerzo,
-        cena: newProgress.cena,
-      })
-      if (success) {
-        setSaveStatus("saved")
-        setLastSaveTime(new Date())
-        setTimeout(() => setSaveStatus("idle"), 2000)
-      } else {
-        throw new Error("Error al guardar reset")
-      }
-    } catch (error) {
-      console.error("Error saving reset:", error)
-      setSaveStatus("error")
-      setTimeout(() => setSaveStatus("idle"), 3000)
-    }
-  }
-
   const getProgressPercentage = () => {
     const targets = { water: 8, exercise: 1, mindfulness: 1, desayuno: 1, almuerzo: 1, cena: 1 }
     let completed = 0
@@ -1441,34 +1240,67 @@ export default function VitalMenteApp() {
     return Math.round((completed / 6) * 100)
   }
 
-  const addUserFood = async () => {
-    if (!newFood.name || !selectedMeal || !currentUser) return
-    try {
-      const food = await dbFunctions.addUserFood({
-        user_id: currentUser.id,
-        name: newFood.name,
-        calories: Number.parseInt(newFood.calories) || 0,
-        protein: Number.parseInt(newFood.protein) || 0,
-        carbs: Number.parseInt(newFood.carbs) || 0,
-        fats: Number.parseInt(newFood.fats) || 0,
-        category: selectedMeal,
-      })
-      setUserFoods((prev) => [...prev, food])
-      await updateProgress(selectedMeal, 1)
-      setNewFood({ name: "", calories: "", protein: "", carbs: "", fats: "" })
-      setShowFoodDialog(false)
-      setSelectedMeal(null)
-    } catch (error: any) {
-      console.error("Error adding food:", error)
-      alert("Error al agregar alimento: " + error.message)
+  const getMotivationalMessage = (goal: string) => {
+    const messages: Record<string, string> = {
+      lose_weight: "¡Cada paso te acerca a tu mejor versión! 💪",
+      maintain_weight: "Mantener el equilibrio es la clave del éxito ⚖️",
+      gain_muscle: "Construyendo fuerza, construyendo futuro 🏋️",
+      reduce_stress: "Hoy es un gran día para sentirte increíble ✨",
+      find_calm: "Respira profundo, la calma está en ti 🧘",
+      life_balance: "El equilibrio perfecto entre cuerpo y mente ⚡",
+      vitalmente: "¡Eres la mejor versión de ti mismo! 🌟 #VitalMente",
+    }
+    return messages[goal] || messages.reduce_stress
+  }
+
+  // ============================================================================
+  // FUNCIONES DE ADMINISTRACIÓN
+  // ============================================================================
+  const handleLogoClick = () => {
+    setLogoClicks((prev) => {
+      const newCount = prev + 1
+      if (newCount === 5) {
+        setShowAdminLogin(true)
+        return 0
+      }
+      return newCount
+    })
+  }
+
+  const handleAdminLogin = () => {
+    if (adminCode === "1098648820") {
+      setIsAdmin(true)
+      setShowAdminLogin(false)
+      setAdminCode("")
+      loadAdminData()
+      alert("¡Acceso de administrador activado!")
+    } else {
+      alert("Código incorrecto")
+      setAdminCode("")
     }
   }
 
+  const loadAdminData = async () => {
+    try {
+      const users = await dbFunctions.getAllUsers()
+      setAllUsers(users)
+    } catch (error) {
+      console.error("Error loading admin data:", error)
+    }
+  }
+
+  // ============================================================================
+  // FUNCIONES DE COMIDA
+  // ============================================================================
   const openMealCalculator = (mealType: "desayuno" | "almuerzo" | "cena") => {
     setSelectedMealType(mealType)
     setShowMealCalculator(true)
     setSelectedFood(null)
     setFoodQuantity("100")
+  }
+
+  const selectFood = (food: GlobalFood | UserFood) => {
+    setSelectedFood(food)
   }
 
   const addFoodToMeal = async () => {
@@ -1499,10 +1331,6 @@ export default function VitalMenteApp() {
       console.error("Error adding food to meal:", error)
       alert("Error al agregar alimento: " + error.message)
     }
-  }
-
-  const selectFood = (food: GlobalFood | UserFood) => {
-    setSelectedFood(food)
   }
 
   const getFoodsByCategory = () => {
@@ -1541,28 +1369,6 @@ export default function VitalMenteApp() {
     }
   }
 
-  const getStreakDays = () => {
-    if (progressHistory.length === 0) return 0
-    let streak = 0
-    const sortedHistory = [...progressHistory].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    for (let i = 0; i < sortedHistory.length; i++) {
-      const progress = sortedHistory[i]
-      const hasActivity =
-        progress.water > 0 ||
-        progress.exercise > 0 ||
-        progress.mindfulness > 0 ||
-        progress.desayuno > 0 ||
-        progress.almuerzo > 0 ||
-        progress.cena > 0
-      if (hasActivity) {
-        streak++
-      } else {
-        break
-      }
-    }
-    return streak
-  }
-
   const handleSupplementContact = (supplement: Supplement) => {
     const defaultMessage = `Hola! Me interesa el suplemento ${supplement.name} que vi en VitalMente. ¿Podrían darme más información sobre disponibilidad y forma de pago?
 
@@ -1575,33 +1381,25 @@ Gracias!`
     window.open(whatsappUrl, "_blank")
   }
 
-  const handleRecommendationClick = (recommendationId: string) => {
-    const recommendation = aiRecommendations.find((r) => r.id === recommendationId)
-    if (recommendation) {
-      setActiveTab("suplementos")
-      alert(`🤖 Recomendación IA: ${recommendation.reason}`)
-    }
-  }
-
   // ============================================================================
-  // COMPONENTES DE UI PREMIUM RESPONSIVE
+  // COMPONENTES DE UI RESPONSIVOS
   // ============================================================================
   const SaveStatusIndicator = () => {
     if (saveStatus === "idle") return null
     const statusConfig = {
-      saving: { icon: Icons.Loader2(), text: "Guardando...", color: "text-blue-600 bg-blue-50" },
-      saved: { icon: Icons.CheckCircle(), text: "Guardado", color: "text-green-600 bg-green-50" },
-      error: { icon: Icons.AlertCircle(), text: "Error al guardar", color: "text-red-600 bg-red-50" },
+      saving: { icon: <Icons.Loader2 size="text-sm" />, text: "Guardando...", color: "text-blue-600 bg-blue-50" },
+      saved: { icon: <Icons.CheckCircle size="text-sm" />, text: "Guardado", color: "text-green-600 bg-green-50" },
+      error: { icon: <Icons.AlertCircle size="text-sm" />, text: "Error", color: "text-red-600 bg-red-50" },
     }
     const config = statusConfig[saveStatus]
     return (
       <div
-        className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 ${config.color} max-w-xs transition-all duration-300`}
+        className={`fixed top-4 right-4 z-50 px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 ${config.color} text-xs sm:text-sm`}
       >
-        <span className="text-base">{config.icon}</span>
-        <span className="text-sm font-medium">{config.text}</span>
+        {config.icon}
+        <span className="font-medium">{config.text}</span>
         {lastSaveTime && saveStatus === "saved" && (
-          <span className="text-xs opacity-75 hidden sm:inline">{lastSaveTime.toLocaleTimeString()}</span>
+          <span className="opacity-75 hidden sm:inline">{lastSaveTime.toLocaleTimeString()}</span>
         )}
       </div>
     )
@@ -1611,44 +1409,37 @@ Gracias!`
     return (
       <div className="fixed bottom-20 right-4 z-40">
         {showFloatingMenu && (
-          <div className="flex flex-col gap-3 mb-4 animate-in slide-in-from-bottom">
+          <div className="flex flex-col gap-2 mb-3 animate-in slide-in-from-bottom">
             <button
               onClick={() => handleQuickProgress("water")}
-              className="bg-blue-500 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-blue-600 transition-colors flex items-center gap-3 text-sm font-medium whitespace-nowrap"
+              className="bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors flex items-center gap-2 min-w-max text-sm"
             >
-              <span className="text-xl">{Icons.Droplets()}</span>
+              <Icons.Droplets size="text-lg" />
               <span className="hidden sm:inline">Agua +1</span>
             </button>
             <button
               onClick={() => handleQuickProgress("exercise")}
-              className="bg-green-500 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center gap-3 text-sm font-medium whitespace-nowrap"
+              className="bg-green-500 text-white p-3 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center gap-2 min-w-max text-sm"
             >
-              <span className="text-xl">{Icons.Activity()}</span>
+              <Icons.Activity size="text-lg" />
               <span className="hidden sm:inline">Ejercicio +1</span>
             </button>
             <button
               onClick={() => handleQuickProgress("mindfulness")}
-              className="bg-purple-500 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-purple-600 transition-colors flex items-center gap-3 text-sm font-medium whitespace-nowrap"
+              className="bg-purple-500 text-white p-3 rounded-full shadow-lg hover:bg-purple-600 transition-colors flex items-center gap-2 min-w-max text-sm"
             >
-              <span className="text-xl">{Icons.Brain()}</span>
+              <Icons.Brain size="text-lg" />
               <span className="hidden sm:inline">Mindfulness +1</span>
-            </button>
-            <button
-              onClick={handleTypicalDay}
-              className="bg-orange-500 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-orange-600 transition-colors flex items-center gap-3 text-sm font-medium whitespace-nowrap"
-            >
-              <span className="text-xl">⚡</span>
-              <span className="hidden sm:inline">Día típico</span>
             </button>
           </div>
         )}
         <button
           onClick={() => setShowFloatingMenu(!showFloatingMenu)}
-          className={`bg-green-600 text-white p-4 sm:p-5 rounded-full shadow-lg hover:bg-green-700 transition-all duration-200 ${
+          className={`bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-all duration-200 ${
             showFloatingMenu ? "rotate-45" : "rotate-0"
           }`}
         >
-          <span className="text-2xl sm:text-3xl">{Icons.Plus()}</span>
+          <Icons.Plus size="text-xl" />
         </button>
       </div>
     )
@@ -1666,60 +1457,56 @@ Gracias!`
       : 100
 
     return (
-      <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-2xl p-6 mb-6 shadow-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
-          <div className="flex items-center gap-4">
-            <span className="text-4xl sm:text-5xl">{currentLevelInfo.icon}</span>
+      <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl sm:text-3xl">{currentLevelInfo.icon}</span>
             <div>
-              <h3 className="font-bold text-xl sm:text-2xl">{currentLevelInfo.name}</h3>
-              <p className="text-sm sm:text-base opacity-90">Nivel {userGamification.current_level}</p>
+              <h3 className="font-bold text-base sm:text-lg">{currentLevelInfo.name}</h3>
+              <p className="text-xs sm:text-sm opacity-90">Nivel {userGamification.current_level}</p>
             </div>
           </div>
-          <div className="text-center sm:text-right">
-            <div className="text-3xl sm:text-4xl font-bold">{userGamification.total_points}</div>
-            <div className="text-sm opacity-75">puntos totales</div>
+          <div className="text-right">
+            <div className="text-xl sm:text-2xl font-bold">{userGamification.total_points}</div>
+            <div className="text-xs opacity-75">puntos</div>
           </div>
         </div>
         {nextLevelInfo && (
-          <div className="mb-4">
-            <div className="flex justify-between text-sm mb-2">
-              <span>Progreso al siguiente nivel</span>
-              <span className="font-medium">{Math.round(progressToNext)}%</span>
+          <div className="mb-3">
+            <div className="flex justify-between text-xs mb-1">
+              <span>Siguiente nivel</span>
+              <span>{Math.round(progressToNext)}%</span>
             </div>
-            <div className="w-full bg-white/20 rounded-full h-3">
+            <div className="w-full bg-white/20 rounded-full h-2">
               <div
-                className="bg-white h-3 rounded-full transition-all duration-500"
+                className="bg-white h-2 rounded-full transition-all duration-300"
                 style={{ width: `${Math.min(progressToNext, 100)}%` }}
               ></div>
             </div>
-            <div className="text-sm mt-2 opacity-75">
-              {userGamification.total_points} / {nextLevelInfo.pointsRequired} puntos
-            </div>
           </div>
         )}
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-3 gap-2 text-center text-xs sm:text-sm">
           <div>
-            <div className="text-xl sm:text-2xl font-bold">{userGamification.streak_days}</div>
-            <div className="text-xs sm:text-sm opacity-75">Racha actual</div>
+            <div className="font-bold">{userGamification.streak_days}</div>
+            <div className="opacity-75">Racha</div>
           </div>
           <div>
-            <div className="text-xl sm:text-2xl font-bold">{userGamification.weekly_points}</div>
-            <div className="text-xs sm:text-sm opacity-75">Puntos semana</div>
+            <div className="font-bold">{userGamification.weekly_points}</div>
+            <div className="opacity-75">Semana</div>
           </div>
           <div>
-            <div className="text-xl sm:text-2xl font-bold">{getStreakDays()}</div>
-            <div className="text-xs sm:text-sm opacity-75">Días activos</div>
+            <div className="font-bold">{userGamification.monthly_points}</div>
+            <div className="opacity-75">Mes</div>
           </div>
         </div>
       </div>
     )
   }
 
-  // ============================================================================
-  // PANEL COMPLETO DE ADMINISTRACIÓN
-  // ============================================================================
+  // Panel de administración responsive
+  // Después de la línea del AdminPanel, reemplazar toda la función AdminPanel con la versión completa:
+
   const AdminPanel = () => {
-    const [activeAdminTab, setActiveAdminTab] = useState("dashboard")
     const [showAddResource, setShowAddResource] = useState(false)
     const [newResource, setNewResource] = useState({
       type: "mindfulness" as "mindfulness" | "nutrition" | "exercise",
@@ -1728,6 +1515,8 @@ Gracias!`
       url: "",
       image_url: "",
     })
+
+    // 🆕 Estados para agregar tips
     const [showAddTip, setShowAddTip] = useState(false)
     const [newTip, setNewTip] = useState({
       category: "",
@@ -1735,6 +1524,8 @@ Gracias!`
       content: "",
       icon: "💡",
     })
+
+    // 🆕 Estados para agregar suplementos
     const [showAddSupplement, setShowAddSupplement] = useState(false)
     const [newSupplement, setNewSupplement] = useState({
       name: "",
@@ -1745,7 +1536,7 @@ Gracias!`
       whatsapp_message: "",
     })
 
-    // Función para agregar recursos
+    // 🆕 Función para agregar recursos
     const addResource = async () => {
       try {
         const { data, error } = await supabase
@@ -1775,7 +1566,7 @@ Gracias!`
       }
     }
 
-    // Función para agregar tips
+    // 🆕 Función para agregar tips
     const addTip = async () => {
       try {
         const { data, error } = await supabase
@@ -1804,7 +1595,7 @@ Gracias!`
       }
     }
 
-    // Función para agregar suplementos
+    // 🆕 Función para agregar suplementos
     const addSupplement = async () => {
       try {
         const { data, error } = await supabase
@@ -1838,66 +1629,63 @@ Gracias!`
 
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header de administración */}
+        {/* Header móvil de administración */}
         <div className="bg-white border-b shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div className="px-4 py-4">
+            <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
-                  <span className="text-3xl">{Icons.Shield()}</span>
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <Icons.Shield size="text-xl sm:text-2xl" />
                   <span className="hidden sm:inline">Panel de Administración Maestro</span>
-                  <span className="sm:hidden">Admin Panel</span>
+                  <span className="sm:hidden">Admin Maestro</span>
                 </h1>
-                <p className="text-base sm:text-lg text-gray-600 hidden sm:block mt-2">
+                <p className="text-xs sm:text-sm text-gray-600">
                   Análisis de patrones y gestión de suplementación inteligente
                 </p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <span className="inline-block px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full font-medium">
-                    🌐 Conectado
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                    🌐 Conectado a Supabase
                   </span>
-                  <span className="inline-block px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full font-medium">
-                    🤖 IA Activa
-                  </span>
-                  <span className="inline-block px-3 py-1 text-sm bg-purple-100 text-purple-800 rounded-full font-medium">
-                    🚀 Vercel
+                  <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA Activa</span>
+                  <span className="inline-block px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
+                    🚀 Desplegado en Vercel
                   </span>
                 </div>
               </div>
               <button
                 onClick={() => setIsAdmin(false)}
-                className="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition-colors text-base font-medium"
+                className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
               >
-                <span className="text-xl">{Icons.LogOut()}</span>
-                <span className="hidden sm:inline">Salir del Admin</span>
-                <span className="sm:hidden">Salir</span>
+                <Icons.LogOut size="text-sm" />
+                <span className="hidden sm:inline">Salir</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Navegación de tabs */}
+        {/* Navegación de tabs responsive */}
         <div className="bg-white border-b overflow-x-auto">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex space-x-8 min-w-max">
+          <div className="px-4">
+            <div className="flex space-x-4 sm:space-x-8 min-w-max">
               {[
-                { id: "dashboard", name: "Dashboard", icon: Icons.Chart() },
-                { id: "users", name: "Usuarios", icon: Icons.Users() },
-                { id: "ia-patterns", name: "IA Patterns", icon: Icons.Robot() },
-                { id: "resources", name: "Recursos", icon: Icons.Link() },
-                { id: "supplements", name: "Suplementos", icon: Icons.Package() },
-                { id: "analytics", name: "Analytics", icon: Icons.TrendingUp() },
+                { id: "dashboard", name: "Dashboard", icon: <Icons.Chart size="text-sm" /> },
+                { id: "users", name: "Usuarios", icon: <Icons.Users size="text-sm" /> },
+                { id: "ia-patterns", name: "IA Patterns", icon: <Icons.Robot size="text-sm" /> },
+                { id: "resources", name: "Recursos", icon: <Icons.Link size="text-sm" /> },
+                { id: "supplements", name: "Suplementos", icon: <Icons.Package size="text-sm" /> },
+                { id: "analytics", name: "Analytics", icon: <Icons.TrendingUp size="text-sm" /> },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveAdminTab(tab.id)}
-                  className={`py-4 px-2 border-b-2 font-medium text-sm sm:text-base flex items-center gap-3 whitespace-nowrap transition-colors ${
+                  className={`py-3 px-2 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap ${
                     activeAdminTab === tab.id
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  <span className="text-lg">{tab.icon}</span>
-                  <span className="hidden sm:inline">{tab.name}</span>
+                  {tab.icon}
+                  {tab.name}
                 </button>
               ))}
             </div>
@@ -1905,18 +1693,18 @@ Gracias!`
         </div>
 
         {/* Contenido de administración */}
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="px-4 py-6">
           {/* TAB DASHBOARD */}
           {activeAdminTab === "dashboard" && (
-            <div className="space-y-8">
+            <div className="space-y-4">
               {/* Métricas principales */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white rounded-lg shadow p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm sm:text-base font-medium text-gray-600">Usuarios Totales</p>
-                      <p className="text-3xl sm:text-4xl font-bold text-blue-600 mt-2">{allUsers.length}</p>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-2">
+                      <p className="text-xs font-medium text-gray-600">Usuarios Totales</p>
+                      <p className="text-xl sm:text-2xl font-bold text-blue-600">{allUsers.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">
                         +
                         {
                           allUsers.filter(
@@ -1926,62 +1714,62 @@ Gracias!`
                         esta semana
                       </p>
                     </div>
-                    <span className="text-4xl sm:text-5xl">{Icons.Users()}</span>
+                    <Icons.Users size="text-2xl" />
                   </div>
                 </div>
-                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div className="bg-white rounded-lg shadow p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm sm:text-base font-medium text-gray-600">Suplementos</p>
-                      <p className="text-3xl sm:text-4xl font-bold text-purple-600 mt-2">{supplements.length}</p>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-2">Catálogo completo</p>
+                      <p className="text-xs font-medium text-gray-600">Suplementos Activos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-purple-600">{supplements.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Catálogo completo</p>
                     </div>
-                    <span className="text-4xl sm:text-5xl">{Icons.Package()}</span>
+                    <Icons.Package size="text-2xl" />
                   </div>
                 </div>
-                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div className="bg-white rounded-lg shadow p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm sm:text-base font-medium text-gray-600">Tips Activos</p>
-                      <p className="text-3xl sm:text-4xl font-bold text-green-600 mt-2">{globalTips.length}</p>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-2">Contenido educativo</p>
+                      <p className="text-xs font-medium text-gray-600">Tips Activos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-green-600">{globalTips.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Contenido educativo</p>
                     </div>
-                    <span className="text-4xl sm:text-5xl">{Icons.Lightbulb()}</span>
+                    <Icons.Lightbulb size="text-2xl" />
                   </div>
                 </div>
-                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div className="bg-white rounded-lg shadow p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm sm:text-base font-medium text-gray-600">Recursos</p>
-                      <p className="text-3xl sm:text-4xl font-bold text-orange-600 mt-2">{globalResources.length}</p>
-                      <p className="text-xs sm:text-sm text-gray-500 mt-2">Videos, PDFs</p>
+                      <p className="text-xs font-medium text-gray-600">Recursos Activos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-orange-600">{globalResources.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Videos, PDFs, Enlaces</p>
                     </div>
-                    <span className="text-4xl sm:text-5xl">{Icons.Link()}</span>
+                    <Icons.Link size="text-2xl" />
                   </div>
                 </div>
               </div>
 
               {/* Estado del sistema */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                  <span className="text-2xl">{Icons.Database()}</span>
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Database size="text-lg" />
                   Estado del Sistema
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <div className="text-center p-6 bg-green-50 rounded-xl border border-green-100">
-                    <div className="text-4xl mb-3">✅</div>
-                    <div className="text-lg font-semibold text-green-800">Supabase</div>
-                    <div className="text-sm sm:text-base text-green-600 mt-1">Conectado y funcionando</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl mb-2">✅</div>
+                    <div className="font-semibold text-green-800 text-sm">Supabase</div>
+                    <div className="text-xs text-green-600">Conectado y funcionando</div>
                   </div>
-                  <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-100">
-                    <div className="text-4xl mb-3">🚀</div>
-                    <div className="text-lg font-semibold text-blue-800">Vercel</div>
-                    <div className="text-sm sm:text-base text-blue-600 mt-1">Desplegado y activo</div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl mb-2">🚀</div>
+                    <div className="font-semibold text-blue-800 text-sm">Vercel</div>
+                    <div className="text-xs text-blue-600">Desplegado y activo</div>
                   </div>
-                  <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-100">
-                    <div className="text-4xl mb-3">🤖</div>
-                    <div className="text-lg font-semibold text-purple-800">IA Engine</div>
-                    <div className="text-sm sm:text-base text-purple-600 mt-1">Generando recomendaciones</div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl mb-2">🤖</div>
+                    <div className="font-semibold text-purple-800 text-sm">IA Engine</div>
+                    <div className="text-xs text-purple-600">Generando recomendaciones</div>
                   </div>
                 </div>
               </div>
@@ -1990,38 +1778,36 @@ Gracias!`
 
           {/* TAB USUARIOS */}
           {activeAdminTab === "users" && (
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <h3 className="text-xl sm:text-2xl font-semibold flex items-center gap-3">
-                  <span className="text-2xl">{Icons.Users()}</span>
-                  Lista de Usuarios ({allUsers.length})
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
+                  <Icons.Users size="text-lg" />
+                  Lista de Usuarios Registrados ({allUsers.length})
                 </h3>
               </div>
               <div className="max-h-96 overflow-y-auto">
                 {allUsers.map((user) => (
-                  <div key={user.id} className="p-6 border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                      <div className="flex-1">
-                        <p className="font-semibold text-base sm:text-lg">{user.name}</p>
-                        <p className="text-sm sm:text-base text-gray-600">{user.phone}</p>
-                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                  <div key={user.id} className="p-4 border-b hover:bg-gray-50 transition-colors">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm">{user.name}</p>
+                        <p className="text-xs text-gray-600">{user.phone}</p>
+                        <p className="text-xs text-gray-500">
                           Registrado: {new Date(user.created_at).toLocaleDateString()}
                         </p>
-                        <p className="text-xs sm:text-sm text-gray-500">
+                        <p className="text-xs text-gray-500">
                           Último acceso: {new Date(user.last_login).toLocaleDateString()}
                         </p>
                       </div>
-                      <div className="text-left sm:text-right">
-                        <span className="text-sm bg-gray-100 px-3 py-1 rounded-full mb-2 inline-block font-medium">
+                      <div className="text-right">
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded mb-1 block">
                           {GOALS.find((g) => g.id === user.goal)?.label || user.goal}
                         </span>
-                        <div className="text-sm text-gray-500 space-y-1">
-                          <div>
-                            {user.age} años | {user.weight}kg | {user.height}cm
-                          </div>
-                          <div>
-                            Actividad: {ACTIVITY_LEVELS.find((a) => a.value === user.activity_level)?.label}
-                          </div>
+                        <div className="text-xs text-gray-500">
+                          {user.age} años | {user.weight}kg | {user.height}cm
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Actividad: {ACTIVITY_LEVELS.find((a) => a.value === user.activity_level)?.label}
                         </div>
                       </div>
                     </div>
@@ -2031,75 +1817,90 @@ Gracias!`
             </div>
           )}
 
-          {/* TAB IA PATTERNS */}
+          {/* 🆕 TAB IA PATTERNS - RESTAURADO COMPLETO */}
           {activeAdminTab === "ia-patterns" && (
-            <div className="space-y-8">
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                  <span className="text-2xl">{Icons.Robot()}</span>
+            <div className="space-y-4 sm:space-y-6">
+              {/* Explicación del sistema IA */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Robot size="text-lg" />
                   Sistema de Análisis Inteligente
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                  <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-100">
-                    <div className="text-4xl sm:text-5xl mb-4">🧠</div>
-                    <div className="font-semibold text-base sm:text-lg">Análisis de Comportamiento</div>
-                    <div className="text-sm text-gray-600 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">🧠</div>
+                    <div className="font-semibold text-sm">Análisis de Comportamiento</div>
+                    <div className="text-xs text-gray-600">
                       Detecta patrones en hidratación, ejercicio y mindfulness
                     </div>
                   </div>
-                  <div className="text-center p-6 bg-green-50 rounded-xl border border-green-100">
-                    <div className="text-4xl sm:text-5xl mb-4">🎯</div>
-                    <div className="font-semibold text-base sm:text-lg">Recomendaciones Personalizadas</div>
-                    <div className="text-sm text-gray-600 mt-2">Sugiere suplementos basados en déficits detectados</div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">🎯</div>
+                    <div className="font-semibold text-sm">Recomendaciones Personalizadas</div>
+                    <div className="text-xs text-gray-600">Sugiere suplementos basados en déficits detectados</div>
                   </div>
-                  <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-100">
-                    <div className="text-4xl sm:text-5xl mb-4">📊</div>
-                    <div className="font-semibold text-base sm:text-lg">Scoring de Confianza</div>
-                    <div className="text-sm text-gray-600 mt-2">Evalúa la precisión de cada recomendación</div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">📊</div>
+                    <div className="font-semibold text-sm">Scoring de Confianza</div>
+                    <div className="text-xs text-gray-600">Evalúa la precisión de cada recomendación</div>
                   </div>
-                  <div className="text-center p-6 bg-orange-50 rounded-xl border border-orange-100">
-                    <div className="text-4xl sm:text-5xl mb-4">⚡</div>
-                    <div className="font-semibold text-base sm:text-lg">Optimización Temporal</div>
-                    <div className="text-sm text-gray-600 mt-2">Determina el mejor momento para cada suplemento</div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">⚡</div>
+                    <div className="font-semibold text-sm">Optimización Temporal</div>
+                    <div className="text-xs text-gray-600">Determina el mejor momento para cada suplemento</div>
                   </div>
                 </div>
 
                 {/* Algoritmos activos */}
-                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                  <h4 className="font-semibold text-lg mb-4">🔬 Algoritmos Activos</h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">🔬 Algoritmos Activos</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-white rounded border">
                       <div>
-                        <span className="font-medium text-base">Detector de Deshidratación</span>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Si agua menor a 6 vasos/día → Recomienda electrolitos
+                        <span className="font-medium text-sm">Detector de Déficit de Ejercicio</span>
+                        <p className="text-xs text-gray-600">
+                          Si ejercicio promedio {"<"} 0.5 sesiones/día → Recomienda energéticos
                         </p>
                       </div>
-                      <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full font-medium">
-                        En desarrollo
-                      </span>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Activo</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white rounded border">
+                      <div>
+                        <span className="font-medium text-sm">Detector de Estrés/Ansiedad</span>
+                        <p className="text-xs text-gray-600">
+                          Si mindfulness {"<"} 0.5 sesiones/día → Recomienda relajantes
+                        </p>
+                      </div>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Activo</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white rounded border">
+                      <div>
+                        <span className="font-medium text-sm">Detector de Deshidratación</span>
+                        <p className="text-xs text-gray-600">Si agua {"<"} 6 vasos/día → Recomienda electrolitos</p>
+                      </div>
+                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">En desarrollo</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Métricas de IA */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h3 className="text-xl sm:text-2xl font-semibold mb-6">📈 Métricas de IA</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center p-6 border border-gray-200 rounded-xl">
-                    <div className="text-3xl sm:text-4xl font-bold text-blue-600">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4">📈 Métricas de IA</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-blue-600">
                       {allUsers.length > 0 ? Math.round((aiRecommendations.length / allUsers.length) * 100) : 0}%
                     </div>
-                    <div className="text-sm sm:text-base text-gray-600 mt-2">Usuarios con recomendaciones activas</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Usuarios con recomendaciones activas</div>
                   </div>
-                  <div className="text-center p-6 border border-gray-200 rounded-xl">
-                    <div className="text-3xl sm:text-4xl font-bold text-green-600">85%</div>
-                    <div className="text-sm sm:text-base text-gray-600 mt-2">Precisión promedio del algoritmo</div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-green-600">85%</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Precisión promedio del algoritmo</div>
                   </div>
-                  <div className="text-center p-6 border border-gray-200 rounded-xl">
-                    <div className="text-3xl sm:text-4xl font-bold text-purple-600">12%</div>
-                    <div className="text-sm sm:text-base text-gray-600 mt-2">Tasa de conversión estimada</div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-purple-600">12%</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Tasa de conversión estimada</div>
                   </div>
                 </div>
               </div>
@@ -2108,46 +1909,46 @@ Gracias!`
 
           {/* TAB RECURSOS */}
           {activeAdminTab === "resources" && (
-            <div className="space-y-8">
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-                  <h3 className="text-xl sm:text-2xl font-semibold flex items-center gap-3">
-                    <span className="text-2xl">{Icons.Link()}</span>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                  <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+                    <Icons.Link size="text-lg" />
                     Gestión de Recursos ({globalResources.length})
                   </h3>
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <button
                       onClick={() => setShowAddResource(true)}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 flex items-center gap-3 text-base font-medium transition-colors"
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm justify-center"
                     >
-                      <span className="text-xl">{Icons.Plus()}</span>
+                      <Icons.Plus size="text-sm" />
                       Agregar Recurso
                     </button>
                     <button
                       onClick={() => setShowAddTip(true)}
-                      className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 flex items-center gap-3 text-base font-medium transition-colors"
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm justify-center"
                     >
-                      <span className="text-xl">{Icons.Plus()}</span>
+                      <Icons.Plus size="text-sm" />
                       Agregar Tip
                     </button>
                   </div>
                 </div>
 
                 {/* Lista de recursos existentes */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {globalResources.map((resource) => (
-                    <div key={resource.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className="text-2xl">{getResourceTypeIcon(resource.type)}</span>
-                        <span className="text-base font-medium capitalize">{resource.type}</span>
+                    <div key={resource.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">{getResourceTypeIcon(resource.type)}</span>
+                        <span className="text-xs sm:text-sm font-medium capitalize">{resource.type}</span>
                       </div>
-                      <h4 className="font-semibold text-lg mb-2">{resource.title}</h4>
-                      <p className="text-sm sm:text-base text-gray-600 mb-3">{resource.description}</p>
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600 mb-2">{resource.description}</p>
                       <a
                         href={resource.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-800 break-all underline"
+                        className="text-xs text-blue-600 hover:text-blue-800 break-all"
                       >
                         {resource.url}
                       </a>
@@ -2157,20 +1958,20 @@ Gracias!`
               </div>
 
               {/* Lista de tips */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                  <span className="text-2xl">{Icons.Lightbulb()}</span>
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Lightbulb size="text-lg" />
                   Tips Activos ({globalTips.length})
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {globalTips.map((tip) => (
-                    <div key={tip.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="text-2xl">{tip.icon}</span>
-                        <span className="text-base font-medium">{tip.category}</span>
+                    <div key={tip.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">{tip.icon}</span>
+                        <span className="text-xs sm:text-sm font-medium">{tip.category}</span>
                       </div>
-                      <h4 className="font-semibold text-lg mb-2">{tip.title}</h4>
-                      <p className="text-sm sm:text-base text-gray-600">{tip.content}</p>
+                      <h4 className="font-semibold text-sm mb-1">{tip.title}</h4>
+                      <p className="text-xs text-gray-600">{tip.content}</p>
                     </div>
                   ))}
                 </div>
@@ -2180,30 +1981,30 @@ Gracias!`
 
           {/* TAB SUPLEMENTOS */}
           {activeAdminTab === "supplements" && (
-            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-                <h3 className="text-xl sm:text-2xl font-semibold flex items-center gap-3">
-                  <span className="text-2xl">{Icons.Package()}</span>
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+                  <Icons.Package size="text-lg" />
                   Gestión de Suplementos ({supplements.length})
                 </h3>
                 <button
                   onClick={() => setShowAddSupplement(true)}
-                  className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 flex items-center gap-3 text-base font-medium transition-colors"
+                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2 text-sm w-full sm:w-auto justify-center"
                 >
-                  <span className="text-xl">{Icons.Plus()}</span>
+                  <Icons.Plus size="text-sm" />
                   Agregar Suplemento
                 </button>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {supplements.map((supplement) => (
-                  <div key={supplement.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
-                    <h4 className="font-semibold text-lg mb-2">{supplement.name}</h4>
-                    <p className="text-sm sm:text-base text-gray-600 mb-3">{supplement.description}</p>
-                    <p className="text-xl font-bold text-green-600 mb-3">${supplement.price.toLocaleString()}</p>
-                    <div className="text-sm text-gray-500">
-                      <p className="font-medium mb-1">Beneficios:</p>
-                      <p>{supplement.benefits.join(", ")}</p>
+                  <div key={supplement.id} className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-sm mb-1">{supplement.name}</h4>
+                    <p className="text-xs text-gray-600 mb-2">{supplement.description}</p>
+                    <p className="text-sm sm:text-base font-bold text-green-600 mb-2">
+                      ${supplement.price.toLocaleString()}
+                    </p>
+                    <div className="text-xs text-gray-500">
+                      <p>Beneficios: {supplement.benefits.join(", ")}</p>
                     </div>
                   </div>
                 ))}
@@ -2211,43 +2012,44 @@ Gracias!`
             </div>
           )}
 
-          {/* TAB ANALYTICS */}
+          {/* 🆕 TAB ANALYTICS - RESTAURADO COMPLETO */}
           {activeAdminTab === "analytics" && (
-            <div className="space-y-8">
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                  <span className="text-2xl">{Icons.TrendingUp()}</span>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.TrendingUp size="text-lg" />
                   Analytics Avanzados
                 </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-semibold text-lg mb-4">📊 Distribución de Objetivos</h4>
-                    <div className="space-y-3">
+                    <h4 className="font-semibold mb-3 text-sm sm:text-base">📊 Distribución de Objetivos</h4>
+                    <div className="space-y-2">
                       {GOALS.map((goal) => {
                         const count = allUsers.filter((u) => u.goal === goal.id).length
                         const percentage = allUsers.length > 0 ? Math.round((count / allUsers.length) * 100) : 0
                         return (
                           <div key={goal.id} className="flex items-center justify-between">
-                            <span className="text-sm sm:text-base">{goal.label}</span>
-                            <div className="flex items-center gap-3">
-                              <div className="w-24 bg-gray-200 rounded-full h-3">
-                                <div className="bg-blue-500 h-3 rounded-full transition-all duration-300" style={{ width: `${percentage}%` }}></div>
+                            <span className="text-xs sm:text-sm truncate flex-1 mr-2">{goal.label}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-16 sm:w-20 bg-gray-200 rounded-full h-2">
+                                <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${percentage}%` }}></div>
                               </div>
-                              <span className="text-sm text-gray-500 w-12 text-right">{count} ({percentage}%)</span>
+                              <span className="text-xs text-gray-500 w-6 text-right">{count}</span>
                             </div>
                           </div>
                         )
                       })}
                     </div>
                   </div>
-
                   <div>
-                    <h4 className="font-semibold text-lg mb-4">⚡ Actividad Reciente</h4>
-                    <div className="space-y-3">
-                      {allUsers.slice(0, 8).map((user) => (
-                        <div key={user.id} className="flex items-center justify-between text-sm sm:text-base">
-                          <span className="font-medium">{user.name}</span>
-                          <span className="text-gray-500">{new Date(user.last_login).toLocaleDateString()}</span>
+                    <h4 className="font-semibold mb-3 text-sm sm:text-base">⚡ Actividad Reciente</h4>
+                    <div className="space-y-2">
+                      {allUsers.slice(0, 5).map((user) => (
+                        <div key={user.id} className="flex items-center justify-between text-xs sm:text-sm">
+                          <span className="truncate flex-1 mr-2">{user.name}</span>
+                          <span className="text-gray-500 text-xs">
+                            {new Date(user.last_login).toLocaleDateString()}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -2255,31 +2057,39 @@ Gracias!`
                 </div>
               </div>
 
-              {/* Métricas de engagement */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h3 className="text-xl sm:text-2xl font-semibold mb-6">🎯 Métricas de Engagement</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-100">
-                    <div className="text-3xl sm:text-4xl font-bold text-blue-600">
-                      {allUsers.length > 0 ? Math.round((allUsers.filter(u => new Date(u.last_login) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length / allUsers.length) * 100) : 0}%
+              {/* Métricas adicionales de analytics */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4">📈 Métricas de Engagement</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-blue-600">
+                      {
+                        allUsers.filter((u) => new Date(u.last_login) > new Date(Date.now() - 24 * 60 * 60 * 1000))
+                          .length
+                      }
                     </div>
-                    <div className="text-sm sm:text-base text-gray-600 mt-2">Usuarios activos (7 días)</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Usuarios activos hoy</div>
                   </div>
-                  <div className="text-center p-6 bg-green-50 rounded-xl border border-green-100">
-                    <div className="text-3xl sm:text-4xl font-bold text-green-600">
-                      {Math.round(supplements.length * 0.8)}
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-green-600">
+                      {
+                        allUsers.filter((u) => new Date(u.last_login) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+                          .length
+                      }
                     </div>
-                    <div className="text-sm sm:text-base text-gray-600 mt-2">Consultas de suplementos/mes</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Usuarios activos esta semana</div>
                   </div>
-                  <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-100">
-                    <div className="text-3xl sm:text-4xl font-bold text-purple-600">
-                      {Math.round(globalResources.length * 2.3)}
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-purple-600">
+                      {Math.round((globalResources.length + globalTips.length + supplements.length) / 3)}
                     </div>
-                    <div className="text-sm sm:text-base text-gray-600 mt-2">Recursos visualizados/mes</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Contenido promedio por categoría</div>
                   </div>
-                  <div className="text-center p-6 bg-orange-50 rounded-xl border border-orange-100">
-                    <div className="text-3xl sm:text-4xl font-bold text-orange-600">4.8</div>
-                    <div className="text-sm sm:text-base text-gray-600 mt-2">Puntuación de satisfacción</div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-orange-600">
+                      {allUsers.length > 0 ? Math.round((aiRecommendations.length / allUsers.length) * 100) : 0}%
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Cobertura de recomendaciones IA</div>
                   </div>
                 </div>
               </div>
@@ -2287,17 +2097,21 @@ Gracias!`
           )}
         </div>
 
-        {/* MODALES FUNCIONALES */}
+        {/* 🆕 MODALES COMPLETOS - RESPONSIVE */}
         {/* Modal para agregar recurso */}
         {showAddResource && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-            <div className="relative top-4 sm:top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white">
-              <div className="mt-3">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Agregar Nuevo Recurso</h3>
-
-                <div className="space-y-5">
+            <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Agregar Nuevo Recurso</h3>
+                  <button onClick={() => setShowAddResource(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                    <Icons.X size="text-lg" />
+                  </button>
+                </div>
+                <div className="space-y-4">
                   <select
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     value={newResource.type}
                     onChange={(e) => setNewResource((prev) => ({ ...prev, type: e.target.value as any }))}
                   >
@@ -2305,41 +2119,36 @@ Gracias!`
                     <option value="nutrition">🥗 Nutrición</option>
                     <option value="exercise">💪 Ejercicio</option>
                   </select>
-
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Título del recurso"
                     value={newResource.title}
                     onChange={(e) => setNewResource((prev) => ({ ...prev, title: e.target.value }))}
                   />
-
                   <textarea
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Descripción"
-                    rows={4}
+                    rows={3}
                     value={newResource.description}
                     onChange={(e) => setNewResource((prev) => ({ ...prev, description: e.target.value }))}
                   />
-
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="URL (YouTube, PDF, Spotify, etc.)"
                     value={newResource.url}
                     onChange={(e) => setNewResource((prev) => ({ ...prev, url: e.target.value }))}
                   />
-
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="URL de imagen (opcional)"
                     value={newResource.image_url}
                     onChange={(e) => setNewResource((prev) => ({ ...prev, image_url: e.target.value }))}
                   />
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                <div className="grid grid-cols-2 gap-3 mt-6">
                   <button
                     onClick={addResource}
-                    className="bg-blue-500 text-white p-4 rounded-xl hover:bg-blue-600 text-base font-medium transition-colors"
+                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 text-sm"
                   >
                     Agregar Recurso
                   </button>
@@ -2354,7 +2163,7 @@ Gracias!`
                         image_url: "",
                       })
                     }}
-                    className="bg-gray-500 text-white p-4 rounded-xl hover:bg-gray-600 text-base font-medium transition-colors"
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
                   >
                     Cancelar
                   </button>
@@ -2367,45 +2176,45 @@ Gracias!`
         {/* Modal para agregar tip */}
         {showAddTip && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-            <div className="relative top-4 sm:top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white">
-              <div className="mt-3">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Agregar Nuevo Tip</h3>
-
-                <div className="space-y-5">
+            <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Agregar Nuevo Tip</h3>
+                  <button onClick={() => setShowAddTip(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                    <Icons.X size="text-lg" />
+                  </button>
+                </div>
+                <div className="space-y-4">
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Categoría (ej: Hidratación, Ejercicio)"
                     value={newTip.category}
                     onChange={(e) => setNewTip((prev) => ({ ...prev, category: e.target.value }))}
                   />
-
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Título del tip"
                     value={newTip.title}
                     onChange={(e) => setNewTip((prev) => ({ ...prev, title: e.target.value }))}
                   />
-
                   <textarea
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Contenido del tip"
-                    rows={5}
+                    rows={4}
                     value={newTip.content}
                     onChange={(e) => setNewTip((prev) => ({ ...prev, content: e.target.value }))}
                   />
-
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Emoji/Icono (ej: 💧, 🏃‍♂️, 🧘‍♀️)"
                     value={newTip.icon}
                     onChange={(e) => setNewTip((prev) => ({ ...prev, icon: e.target.value }))}
                   />
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                <div className="grid grid-cols-2 gap-3 mt-6">
                   <button
                     onClick={addTip}
-                    className="bg-green-500 text-white p-4 rounded-xl hover:bg-green-600 text-base font-medium transition-colors"
+                    className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 text-sm"
                   >
                     Agregar Tip
                   </button>
@@ -2419,7 +2228,7 @@ Gracias!`
                         icon: "💡",
                       })
                     }}
-                    className="bg-gray-500 text-white p-4 rounded-xl hover:bg-gray-600 text-base font-medium transition-colors"
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
                   >
                     Cancelar
                   </button>
@@ -2429,64 +2238,62 @@ Gracias!`
           </div>
         )}
 
-        {/* Modal para agregar suplemento */}
+        {/* 🆕 Modal para agregar suplemento - COMPLETO */}
         {showAddSupplement && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-            <div className="relative top-4 sm:top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white">
-              <div className="mt-3">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Agregar Nuevo Suplemento</h3>
-
-                <div className="space-y-5">
+            <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Agregar Nuevo Suplemento</h3>
+                  <button onClick={() => setShowAddSupplement(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                    <Icons.X size="text-lg" />
+                  </button>
+                </div>
+                <div className="space-y-4">
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Nombre del suplemento"
                     value={newSupplement.name}
                     onChange={(e) => setNewSupplement((prev) => ({ ...prev, name: e.target.value }))}
                   />
-
                   <textarea
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Descripción"
-                    rows={4}
+                    rows={3}
                     value={newSupplement.description}
                     onChange={(e) => setNewSupplement((prev) => ({ ...prev, description: e.target.value }))}
                   />
-
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Beneficios (separados por comas)"
                     value={newSupplement.benefits}
                     onChange={(e) => setNewSupplement((prev) => ({ ...prev, benefits: e.target.value }))}
                   />
-
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Precio (solo números)"
                     type="number"
                     value={newSupplement.price}
                     onChange={(e) => setNewSupplement((prev) => ({ ...prev, price: e.target.value }))}
                   />
-
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="URL de imagen"
                     value={newSupplement.image_url}
                     onChange={(e) => setNewSupplement((prev) => ({ ...prev, image_url: e.target.value }))}
                   />
-
                   <textarea
-                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                     placeholder="Mensaje personalizado de WhatsApp (opcional)"
-                    rows={4}
+                    rows={3}
                     value={newSupplement.whatsapp_message}
                     onChange={(e) => setNewSupplement((prev) => ({ ...prev, whatsapp_message: e.target.value }))}
                   />
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                <div className="grid grid-cols-2 gap-3 mt-6">
                   <button
                     onClick={addSupplement}
-                    className="bg-purple-500 text-white p-4 rounded-xl hover:bg-purple-600 text-base font-medium transition-colors"
+                    className="bg-purple-500 text-white p-3 rounded-lg hover:bg-purple-600 text-sm"
                   >
                     Agregar Suplemento
                   </button>
@@ -2502,7 +2309,7 @@ Gracias!`
                         whatsapp_message: "",
                       })
                     }}
-                    className="bg-gray-500 text-white p-4 rounded-xl hover:bg-gray-600 text-base font-medium transition-colors"
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
                   >
                     Cancelar
                   </button>
@@ -2528,10 +2335,12 @@ Gracias!`
   if (connectionStatus === "connecting") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-12 w-full max-w-md text-center">
-          <div className="text-5xl sm:text-6xl mb-6">{Icons.Loader2()}</div>
-          <h3 className="text-xl sm:text-2xl font-semibold mb-3">Conectando con Supabase</h3>
-          <p className="text-base sm:text-lg text-gray-600">Inicializando base de datos...</p>
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+          <div className="text-3xl mb-4">
+            <Icons.Loader2 size="text-3xl" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">Conectando</h3>
+          <p className="text-gray-600 text-sm">Inicializando base de datos...</p>
         </div>
       </div>
     )
@@ -2540,13 +2349,15 @@ Gracias!`
   if (connectionStatus === "error") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-12 w-full max-w-md text-center">
-          <div className="text-5xl sm:text-6xl mb-6 text-red-500">{Icons.X()}</div>
-          <h3 className="text-xl sm:text-2xl font-semibold mb-3">Error de conexión</h3>
-          <p className="text-base sm:text-lg text-gray-600 mb-6">No se pudo conectar con la base de datos</p>
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+          <div className="text-3xl mb-4 text-red-500">
+            <Icons.X size="text-3xl" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">Error de conexión</h3>
+          <p className="text-gray-600 mb-4 text-sm">No se pudo conectar con la base de datos</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-red-500 text-white px-6 py-3 rounded-xl hover:bg-red-600 text-base font-medium transition-colors"
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm"
           >
             Reintentar
           </button>
@@ -2556,43 +2367,39 @@ Gracias!`
   }
 
   // ============================================================================
-  // PANTALLA DE LOGIN/REGISTRO
+  // PANTALLA DE LOGIN/REGISTRO RESPONSIVE
   // ============================================================================
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-10 w-full max-w-md">
-          <div className="text-center mb-8">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+          <div className="text-center mb-6">
             <div onClick={handleLogoClick} className="cursor-pointer">
-              <h1 className="text-3xl sm:text-4xl font-bold text-green-600">VitalMente</h1>
-              <p className="text-base sm:text-lg text-gray-600 mt-2">Tu compañero de bienestar personalizado</p>
-              <div className="flex flex-wrap justify-center gap-2 mt-4">
-                <span className="inline-block px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full font-medium">
-                  🌐 Conectado
-                </span>
-                <span className="inline-block px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full font-medium">
-                  🤖 IA Activa
-                </span>
+              <h1 className="text-xl sm:text-2xl font-bold text-green-600">VitalMente</h1>
+              <p className="text-gray-600 text-sm">Tu compañero de bienestar personalizado</p>
+              <div className="flex justify-center gap-2 mt-2 flex-wrap">
+                <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded">🌐 Conectado</span>
+                <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA Activa</span>
               </div>
-              {logoClicks > 0 && <div className="mt-3 text-sm text-gray-400">Clics: {logoClicks}/5 para admin</div>}
+              {logoClicks > 0 && <div className="mt-2 text-xs text-gray-400">Clics: {logoClicks}/5</div>}
             </div>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Botones de navegación */}
-            <div className="flex rounded-xl bg-gray-100 p-1">
+            <div className="flex rounded-lg bg-gray-100 p-1">
               <button
                 onClick={() => setShowRegister(false)}
-                className={`flex-1 py-3 px-4 rounded-lg text-base font-medium transition-colors ${
-                  !showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
+                  !showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600"
                 }`}
               >
                 Ingresar
               </button>
               <button
                 onClick={() => setShowRegister(true)}
-                className={`flex-1 py-3 px-4 rounded-lg text-base font-medium transition-colors ${
-                  showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
+                  showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600"
                 }`}
               >
                 Crear Cuenta
@@ -2600,15 +2407,15 @@ Gracias!`
             </div>
 
             {!showRegister ? (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <input
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   placeholder="+57 300 123 4567"
                   value={loginForm.phone}
                   onChange={(e) => setLoginForm((prev) => ({ ...prev, phone: e.target.value }))}
                 />
                 <input
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   type="password"
                   placeholder="Código de 10 dígitos"
                   maxLength={10}
@@ -2617,12 +2424,12 @@ Gracias!`
                 />
                 <button
                   onClick={handleLogin}
-                  className="w-full bg-green-500 text-white p-4 rounded-xl hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-3 transition-colors text-base font-medium"
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors text-sm"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
-                      <span className="text-xl">{Icons.Loader2()}</span>
+                      <Icons.Loader2 size="text-sm" />
                       Ingresando...
                     </>
                   ) : (
@@ -2631,30 +2438,29 @@ Gracias!`
                 </button>
               </div>
             ) : (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <input
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   placeholder="Número de teléfono"
                   value={registerForm.phone}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
                 />
                 <input
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   placeholder="Nombre completo"
                   value={registerForm.name}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, name: e.target.value }))}
                 />
-                {/* Grid para edad y peso */}
                 <div className="grid grid-cols-2 gap-4">
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     placeholder="Edad"
                     type="number"
                     value={registerForm.age}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, age: e.target.value }))}
                   />
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     placeholder="Peso (kg)"
                     type="number"
                     value={registerForm.weight}
@@ -2662,14 +2468,14 @@ Gracias!`
                   />
                 </div>
                 <input
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   placeholder="Altura (cm)"
                   type="number"
                   value={registerForm.height}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, height: e.target.value }))}
                 />
                 <select
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   value={registerForm.activityLevel}
                   onChange={(e) =>
                     setRegisterForm((prev) => ({ ...prev, activityLevel: Number.parseFloat(e.target.value) }))
@@ -2682,7 +2488,7 @@ Gracias!`
                   ))}
                 </select>
                 <select
-                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   value={registerForm.goal}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, goal: e.target.value }))}
                 >
@@ -2708,10 +2514,9 @@ Gracias!`
                     ))}
                   </optgroup>
                 </select>
-                {/* Códigos de acceso */}
                 <div className="space-y-4">
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     type="password"
                     placeholder="Código de acceso (10 dígitos)"
                     maxLength={10}
@@ -2719,7 +2524,7 @@ Gracias!`
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, accessCode: e.target.value }))}
                   />
                   <input
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     type="password"
                     placeholder="Confirmar código"
                     maxLength={10}
@@ -2729,12 +2534,12 @@ Gracias!`
                 </div>
                 <button
                   onClick={handleRegister}
-                  className="w-full bg-green-500 text-white p-4 rounded-xl hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-3 transition-colors text-base font-medium"
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors text-sm"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
-                      <span className="text-xl">{Icons.Loader2()}</span>
+                      <Icons.Loader2 size="text-sm" />
                       Creando cuenta...
                     </>
                   ) : (
@@ -2749,20 +2554,20 @@ Gracias!`
         {/* Modal de acceso administrador */}
         {showAdminLogin && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-            <div className="relative top-4 sm:top-20 mx-auto p-6 border w-full max-w-sm shadow-xl rounded-2xl bg-white">
-              <div className="mt-3">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Acceso Administrador</h3>
+            <div className="relative top-20 mx-auto border w-full max-w-sm shadow-lg rounded-md bg-white">
+              <div className="p-5">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Acceso Administrador</h3>
                 <input
-                  className="w-full p-4 border border-gray-300 rounded-xl mb-6 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm"
                   type="password"
                   placeholder="Código de acceso"
                   value={adminCode}
                   onChange={(e) => setAdminCode(e.target.value)}
                 />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={handleAdminLogin}
-                    className="bg-blue-500 text-white p-4 rounded-xl hover:bg-blue-600 transition-colors text-base font-medium"
+                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 text-sm"
                   >
                     Ingresar
                   </button>
@@ -2772,7 +2577,7 @@ Gracias!`
                       setAdminCode("")
                       setLogoClicks(0)
                     }}
-                    className="bg-gray-500 text-white p-4 rounded-xl hover:bg-gray-600 transition-colors text-base font-medium"
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
                   >
                     Cancelar
                   </button>
@@ -2786,7 +2591,7 @@ Gracias!`
   }
 
   // ============================================================================
-  // APLICACIÓN PRINCIPAL
+  // APLICACIÓN PRINCIPAL RESPONSIVE
   // ============================================================================
   const activeTips = globalTips.filter((tip) => tip.is_active)
   const mindfulnessResources = globalResources.filter((r) => r.type === "mindfulness" && r.is_active)
@@ -2799,208 +2604,197 @@ Gracias!`
       <SaveStatusIndicator />
       <FloatingActionButtons />
 
-      {/* Header */}
-      <header className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      {/* Header responsive */}
+      <header className="bg-white border-b shadow-sm sticky top-0 z-30">
+        <div className="px-4 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl sm:text-3xl font-bold text-green-600">VitalMente</h1>
-              <span className="inline-block px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full font-medium">
-                🤖 IA
-              </span>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-2xl font-bold text-green-600">VitalMente</h1>
+              <span className="hidden sm:inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA</span>
             </div>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-3 sm:px-6 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors text-base font-medium flex items-center gap-2"
-            >
-              <span className="text-lg">{Icons.LogOut()}</span>
-              <span className="hidden sm:inline">Salir</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="sm:hidden p-2 rounded-lg hover:bg-gray-100"
+              >
+                <Icons.Menu size="text-xl" />
+              </button>
+              <button
+                onClick={handleLogout}
+                className="hidden sm:flex px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 items-center gap-2 text-sm"
+              >
+                <Icons.LogOut size="text-sm" />
+                Salir
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Menú móvil desplegable */}
+        {showMobileMenu && (
+          <div className="sm:hidden bg-white border-t p-4">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 rounded-lg text-sm"
+            >
+              <Icons.LogOut size="text-sm" />
+              Cerrar Sesión
+            </button>
+          </div>
+        )}
       </header>
 
       {/* Contenido principal */}
-      <main className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+      <main className="px-4 py-6">
         {activeTab === "inicio" && (
-          <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-4">
             {/* Bienvenida */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-3">
-                ¡Hola, {currentUser?.name}! <span className="text-2xl">{Icons.Magic()}</span>
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="text-base sm:text-lg font-semibold mb-2 flex items-center gap-2">
+                ¡Hola, {currentUser?.name}! <Icons.Magic size="text-lg" />
               </h2>
-              <p className="text-base sm:text-lg text-gray-600">
-                {getMotivationalMessage(currentUser?.goal || "reduce_stress")}
-              </p>
+              <p className="text-gray-600 text-sm">{getMotivationalMessage(currentUser?.goal || "reduce_stress")}</p>
             </div>
 
             {/* Panel de gamificación */}
             <GamificationPanel />
 
             {/* Progreso diario */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
-                <h3 className="text-xl sm:text-2xl font-semibold flex items-center gap-3">
-                  <span className="text-2xl">{Icons.Target()}</span>
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold flex items-center gap-2">
+                  <Icons.Target size="text-lg" />
                   Progreso Diario
                 </h3>
-                <span className="text-base sm:text-lg text-gray-600 font-medium">
-                  {getProgressPercentage()}% completado{" "}
-                  <span className="text-xl">{Icons.CheckCircle()}</span>
+                <span className="text-xs text-gray-600">
+                  {getProgressPercentage()}% <Icons.CheckCircle size="text-sm" />
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {/* Agua */}
-                <div className="flex items-center gap-4 p-5 bg-blue-50 rounded-xl border border-blue-100">
-                  <span className="text-3xl sm:text-4xl">{Icons.Droplets()}</span>
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                  <Icons.Droplets size="text-2xl" />
                   <div className="flex-1">
-                    <p className="text-base sm:text-lg font-medium">Agua</p>
-                    <div className="flex items-center gap-3 mt-2">
+                    <p className="text-sm font-medium">Agua</p>
+                    <div className="flex items-center gap-2 mt-1">
                       <button
                         onClick={() => updateProgress("water", -1)}
-                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
+                        className="p-1 rounded-full hover:bg-blue-100 transition-colors"
                       >
-                        {Icons.Minus()}
+                        <Icons.Minus size="text-sm" />
                       </button>
-                      <span className="text-2xl sm:text-3xl font-bold">{dailyProgress.water}</span>
+                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.water}</span>
                       <button
                         onClick={() => updateProgress("water", 1)}
-                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
+                        className="p-1 rounded-full hover:bg-blue-100 transition-colors"
                       >
-                        {Icons.Plus()}
+                        <Icons.Plus size="text-sm" />
                       </button>
                     </div>
                   </div>
                 </div>
 
                 {/* Ejercicio */}
-                <div className="flex items-center gap-4 p-5 bg-green-50 rounded-xl border border-green-100">
-                  <span className="text-3xl sm:text-4xl">{Icons.Activity()}</span>
+                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                  <Icons.Activity size="text-2xl" />
                   <div className="flex-1">
-                    <p className="text-base sm:text-lg font-medium">Ejercicio</p>
-                    <div className="flex items-center gap-3 mt-2">
+                    <p className="text-sm font-medium">Ejercicio</p>
+                    <div className="flex items-center gap-2 mt-1">
                       <button
                         onClick={() => updateProgress("exercise", -1)}
-                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
+                        className="p-1 rounded-full hover:bg-green-100 transition-colors"
                       >
-                        {Icons.Minus()}
+                        <Icons.Minus size="text-sm" />
                       </button>
-                      <span className="text-2xl sm:text-3xl font-bold">{dailyProgress.exercise}</span>
+                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.exercise}</span>
                       <button
                         onClick={() => updateProgress("exercise", 1)}
-                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
+                        className="p-1 rounded-full hover:bg-green-100 transition-colors"
                       >
-                        {Icons.Plus()}
+                        <Icons.Plus size="text-sm" />
                       </button>
                     </div>
                   </div>
                 </div>
 
                 {/* Mindfulness */}
-                <div className="flex items-center gap-4 p-5 bg-purple-50 rounded-xl border border-purple-100">
-                  <span className="text-3xl sm:text-4xl">{Icons.Brain()}</span>
+                <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                  <Icons.Brain size="text-2xl" />
                   <div className="flex-1">
-                    <p className="text-base sm:text-lg font-medium">Mindfulness</p>
-                    <div className="flex items-center gap-3 mt-2">
+                    <p className="text-sm font-medium">Mindfulness</p>
+                    <div className="flex items-center gap-2 mt-1">
                       <button
                         onClick={() => updateProgress("mindfulness", -1)}
-                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
+                        className="p-1 rounded-full hover:bg-purple-100 transition-colors"
                       >
-                        {Icons.Minus()}
+                        <Icons.Minus size="text-sm" />
                       </button>
-                      <span className="text-2xl sm:text-3xl font-bold">{dailyProgress.mindfulness}</span>
+                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.mindfulness}</span>
                       <button
                         onClick={() => updateProgress("mindfulness", 1)}
-                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
+                        className="p-1 rounded-full hover:bg-purple-100 transition-colors"
                       >
-                        {Icons.Plus()}
+                        <Icons.Plus size="text-sm" />
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Botones de acción */}
-              <div className="flex flex-col sm:flex-row justify-between mt-6 gap-3">
-                <button
-                  onClick={() => resetProgress("all")}
-                  className="px-4 py-3 text-base text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium"
-                >
-                  <span className="text-lg mr-2">{Icons.RotateCcw()}</span>
-                  Reiniciar día
-                </button>
-                <button
-                  onClick={() => resetProgress("meals")}
-                  className="px-4 py-3 text-base text-orange-600 hover:bg-orange-50 rounded-xl transition-colors font-medium"
-                >
-                  <span className="text-lg mr-2">{Icons.UtensilsCrossed()}</span>
-                  Reiniciar comidas
-                </button>
-              </div>
             </div>
 
-            {/* Tips */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                <span className="text-2xl">{Icons.Lightbulb()}</span>
+            {/* Tips del día */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Lightbulb size="text-lg" />
                 Tip del día
               </h3>
               {activeTips.length > 0 ? (
                 <>
-                  <div className="mb-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-2xl sm:text-3xl">{activeTips[currentTipIndex].icon}</span>
-                      <span className="text-lg sm:text-xl font-medium">{activeTips[currentTipIndex].category}</span>
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xl">{activeTips[currentTipIndex].icon}</span>
+                      <span className="font-medium text-sm">{activeTips[currentTipIndex].category}</span>
                     </div>
-                    <h4 className="font-semibold text-lg sm:text-xl mb-2">{activeTips[currentTipIndex].title}</h4>
-                    <p className="text-base sm:text-lg text-gray-600">{activeTips[currentTipIndex].content}</p>
+                    <h4 className="font-semibold text-sm mb-1">{activeTips[currentTipIndex].title}</h4>
+                    <p className="text-gray-600 text-sm">{activeTips[currentTipIndex].content}</p>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between">
                     <button
                       onClick={() => setCurrentTipIndex((prev) => (prev === 0 ? activeTips.length - 1 : prev - 1))}
-                      className="flex items-center gap-3 px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors border border-gray-300 text-base font-medium"
+                      className="px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg flex items-center gap-1"
                     >
-                      <span className="text-xl">{Icons.ChevronLeft()}</span>
-                      <span>Anterior</span>
+                      <Icons.ChevronLeft size="text-sm" /> Anterior
                     </button>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm sm:text-base text-gray-500">
-                        {currentTipIndex + 1} de {activeTips.length}
-                      </span>
-                    </div>
                     <button
                       onClick={() => setCurrentTipIndex((prev) => (prev === activeTips.length - 1 ? 0 : prev + 1))}
-                      className="flex items-center gap-3 px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors border border-gray-300 text-base font-medium"
+                      className="px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg flex items-center gap-1"
                     >
-                      <span>Siguiente</span>
-                      <span className="text-xl">{Icons.ChevronRight()}</span>
+                      Siguiente <Icons.ChevronRight size="text-sm" />
                     </button>
                   </div>
                 </>
               ) : (
-                <p className="text-base text-gray-500">No hay tips activos disponibles.</p>
+                <p className="text-gray-500 text-sm">No hay tips disponibles.</p>
               )}
             </div>
 
             {/* Recomendaciones IA */}
             {aiRecommendations.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-                <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                  <span className="text-2xl">{Icons.Robot()}</span>
-                  Recomendaciones Personalizadas
+              <div className="bg-white rounded-lg shadow p-4">
+                <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Robot size="text-lg" />
+                  Recomendaciones IA
                 </h3>
                 {aiRecommendations.map((rec) => (
-                  <div key={rec.id} className="border border-gray-200 rounded-xl p-5 sm:p-6 mb-4">
-                    <h4 className="font-semibold mb-2 text-lg">{rec.reason}</h4>
-                    <p className="text-base text-gray-600 mb-4">
-                      Suplementos recomendados: {rec.supplement_names.join(", ")}
-                    </p>
+                  <div key={rec.id} className="border border-gray-200 rounded-lg p-3 mb-3">
+                    <h4 className="font-semibold text-sm mb-1">{rec.reason}</h4>
+                    <p className="text-xs text-gray-600 mb-2">Suplementos: {rec.supplement_names.join(", ")}</p>
                     <button
-                      onClick={() => handleRecommendationClick(rec.id)}
-                      className="px-4 py-3 text-base text-blue-600 hover:bg-blue-50 rounded-xl transition-colors font-medium"
+                      onClick={() => setActiveTab("suplementos")}
+                      className="px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
                     >
-                      Ver más <span className="text-lg ml-1">{Icons.ExternalLink()}</span>
+                      Ver más <Icons.ExternalLink size="text-xs" />
                     </button>
                   </div>
                 ))}
@@ -3010,360 +2804,292 @@ Gracias!`
         )}
 
         {activeTab === "comida" && (
-          <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-4">
             {/* Resumen de calorías */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                <span className="text-2xl">{Icons.UtensilsCrossed()}</span>
-                Resumen de Comida
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.UtensilsCrossed size="text-lg" />
+                Resumen Nutricional
               </h3>
               {macroResults ? (
                 <>
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="text-base sm:text-lg font-medium">Calorías consumidas</p>
-                    <p className="text-2xl sm:text-3xl font-bold">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-medium">Calorías</p>
+                    <p className="text-lg font-bold">
                       {caloriesProgress.consumed} / {caloriesProgress.target}
                     </p>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-4 mb-6">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
                     <div
-                      className="bg-green-500 h-4 rounded-full transition-all duration-500"
+                      className="bg-green-500 h-2.5 rounded-full transition-all duration-300"
                       style={{ width: `${caloriesProgress.percentage}%` }}
                     ></div>
                   </div>
-                  <div className="grid grid-cols-3 gap-6 text-center">
-                    <div>
-                      <p className="text-base sm:text-lg font-medium">Proteína</p>
-                      <p className="text-2xl sm:text-3xl font-bold">{consumedMacros.protein}g</p>
-                      <p className="text-sm sm:text-base text-gray-500">
-                        Meta: {macroResults.protein}g ({Math.round((consumedMacros.protein / macroResults.protein) * 100)}%)
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="p-2 bg-red-50 rounded-lg">
+                      <p className="text-xs font-medium">Proteína</p>
+                      <p className="text-sm font-bold">{consumedMacros.protein}g</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((consumedMacros.protein / macroResults.protein) * 100)}%
                       </p>
                     </div>
-                    <div>
-                      <p className="text-base sm:text-lg font-medium">Carbohidratos</p>
-                      <p className="text-2xl sm:text-3xl font-bold">{consumedMacros.carbs}g</p>
-                      <p className="text-sm sm:text-base text-gray-500">
-                        Meta: {macroResults.carbs}g ({Math.round((consumedMacros.carbs / macroResults.carbs) * 100)}%)
+                    <div className="p-2 bg-yellow-50 rounded-lg">
+                      <p className="text-xs font-medium">Carbos</p>
+                      <p className="text-sm font-bold">{consumedMacros.carbs}g</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((consumedMacros.carbs / macroResults.carbs) * 100)}%
                       </p>
                     </div>
-                    <div>
-                      <p className="text-base sm:text-lg font-medium">Grasas</p>
-                      <p className="text-2xl sm:text-3xl font-bold">{consumedMacros.fats}g</p>
-                      <p className="text-sm sm:text-base text-gray-500">
-                        Meta: {macroResults.fats}g ({Math.round((consumedMacros.fats / macroResults.fats) * 100)}%)
+                    <div className="p-2 bg-blue-50 rounded-lg">
+                      <p className="text-xs font-medium">Grasas</p>
+                      <p className="text-sm font-bold">{consumedMacros.fats}g</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((consumedMacros.fats / macroResults.fats) * 100)}%
                       </p>
                     </div>
                   </div>
                 </>
               ) : (
-                <p className="text-base text-gray-500">Calculando macros...</p>
+                <p className="text-gray-500 text-sm">Calculando macros...</p>
               )}
             </div>
 
-            {/* Comidas de hoy */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                <span className="text-2xl">{Icons.ChefHat()}</span>
+            {/* Comidas del día */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.ChefHat size="text-lg" />
                 Comidas de Hoy
               </h3>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="space-y-4">
                 {/* Desayuno */}
-                <div>
-                  <h4 className="font-semibold mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
-                    <span className="flex items-center gap-2 text-lg">
-                      <span className="text-xl">{Icons.UtensilsCrossed()}</span>
-                      Desayuno
-                    </span>
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                      <Icons.UtensilsCrossed size="text-sm" /> Desayuno
+                    </h4>
                     <button
                       onClick={() => openMealCalculator("desayuno")}
-                      className="px-3 py-2 text-base text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
                     >
-                      <span className="text-lg mr-1">{Icons.Plus()}</span>
-                      Agregar
+                      <Icons.Plus size="text-xs" /> Agregar
                     </button>
-                  </h4>
-                  {mealCompositions
-                    .filter((c) => c.meal_type === "desayuno")
-                    .map((composition) => (
-                      <div
-                        key={composition.id}
-                        className="flex items-center justify-between border-b py-3 last:border-b-0"
-                      >
-                        <div>
-                          <p className="text-base font-medium">{composition.food_name}</p>
-                          <p className="text-sm text-gray-500">
-                            {composition.quantity_grams}g - {composition.calories_consumed} cal
-                          </p>
+                  </div>
+                  <div className="space-y-2">
+                    {mealCompositions
+                      .filter((c) => c.meal_type === "desayuno")
+                      .map((composition) => (
+                        <div key={composition.id} className="flex items-center justify-between text-xs">
+                          <div>
+                            <p className="font-medium">{composition.food_name}</p>
+                            <p className="text-gray-500">
+                              {composition.quantity_grams}g - {composition.calories_consumed} cal
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => removeFoodFromMeal(composition.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Icons.Trash2 size="text-xs" />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => removeFoodFromMeal(composition.id)}
-                          className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <span className="text-lg">{Icons.Trash2()}</span>
-                        </button>
-                      </div>
-                    ))}
+                      ))}
+                  </div>
                 </div>
 
                 {/* Almuerzo */}
-                <div>
-                  <h4 className="font-semibold mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
-                    <span className="flex items-center gap-2 text-lg">
-                      <span className="text-xl">{Icons.UtensilsCrossed()}</span>
-                      Almuerzo
-                    </span>
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                      <Icons.UtensilsCrossed size="text-sm" /> Almuerzo
+                    </h4>
                     <button
                       onClick={() => openMealCalculator("almuerzo")}
-                      className="px-3 py-2 text-base text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
                     >
-                      <span className="text-lg mr-1">{Icons.Plus()}</span>
-                      Agregar
+                      <Icons.Plus size="text-xs" /> Agregar
                     </button>
-                  </h4>
-                  {mealCompositions
-                    .filter((c) => c.meal_type === "almuerzo")
-                    .map((composition) => (
-                      <div
-                        key={composition.id}
-                        className="flex items-center justify-between border-b py-3 last:border-b-0"
-                      >
-                        <div>
-                          <p className="text-base font-medium">{composition.food_name}</p>
-                          <p className="text-sm text-gray-500">
-                            {composition.quantity_grams}g - {composition.calories_consumed} cal
-                          </p>
+                  </div>
+                  <div className="space-y-2">
+                    {mealCompositions
+                      .filter((c) => c.meal_type === "almuerzo")
+                      .map((composition) => (
+                        <div key={composition.id} className="flex items-center justify-between text-xs">
+                          <div>
+                            <p className="font-medium">{composition.food_name}</p>
+                            <p className="text-gray-500">
+                              {composition.quantity_grams}g - {composition.calories_consumed} cal
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => removeFoodFromMeal(composition.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Icons.Trash2 size="text-xs" />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => removeFoodFromMeal(composition.id)}
-                          className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <span className="text-lg">{Icons.Trash2()}</span>
-                        </button>
-                      </div>
-                    ))}
+                      ))}
+                  </div>
                 </div>
 
                 {/* Cena */}
-                <div>
-                  <h4 className="font-semibold mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
-                    <span className="flex items-center gap-2 text-lg">
-                      <span className="text-xl">{Icons.UtensilsCrossed()}</span>
-                      Cena
-                    </span>
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                      <Icons.UtensilsCrossed size="text-sm" /> Cena
+                    </h4>
                     <button
                       onClick={() => openMealCalculator("cena")}
-                      className="px-3 py-2 text-base text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
                     >
-                      <span className="text-lg mr-1">{Icons.Plus()}</span>
-                      Agregar
+                      <Icons.Plus size="text-xs" /> Agregar
                     </button>
-                  </h4>
-                  {mealCompositions
-                    .filter((c) => c.meal_type === "cena")
-                    .map((composition) => (
-                      <div
-                        key={composition.id}
-                        className="flex items-center justify-between border-b py-3 last:border-b-0"
-                      >
-                        <div>
-                          <p className="text-base font-medium">{composition.food_name}</p>
-                          <p className="text-sm text-gray-500">
-                            {composition.quantity_grams}g - {composition.calories_consumed} cal
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => removeFoodFromMeal(composition.id)}
-                          className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <span className="text-lg">{Icons.Trash2()}</span>
-                        </button>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "entrenamiento" && (
-          <div className="space-y-6 sm:space-y-8">
-            {/* Rutinas de ejercicio */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                <span className="text-2xl">{Icons.Dumbbell()}</span>
-                Rutinas de Entrenamiento
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {exerciseResources.map((resource) => (
-                  <a
-                    key={resource.id}
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
-                  >
-                    <img
-                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
-                      alt={resource.title}
-                      className="w-full h-40 object-cover"
-                    />
-                    <div className="p-5">
-                      <h4 className="font-semibold mb-2 text-lg">{resource.title}</h4>
-                      <p className="text-base text-gray-600">{resource.description}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Progreso de ejercicio */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                <span className="text-2xl">{Icons.Activity()}</span>
-                Tu Progreso de Ejercicio
-              </h3>
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <p className="text-base sm:text-lg font-medium">Sesiones completadas hoy</p>
-                  <p className="text-4xl sm:text-5xl font-bold text-green-600">{dailyProgress.exercise}</p>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => updateProgress("exercise", -1)}
-                    className="p-3 rounded-full hover:bg-gray-100 transition-colors text-xl"
-                  >
-                    {Icons.Minus()}
-                  </button>
-                  <button
-                    onClick={() => updateProgress("exercise", 1)}
-                    className="p-3 rounded-full hover:bg-gray-100 transition-colors text-xl"
-                  >
-                    {Icons.Plus()}
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-6 text-center">
-                <div className="p-6 bg-blue-50 rounded-xl border border-blue-100">
-                  <div className="text-3xl sm:text-4xl font-bold text-blue-600">{getStreakDays()}</div>
-                  <div className="text-base sm:text-lg text-gray-600 mt-2">Días activos</div>
-                </div>
-                <div className="p-6 bg-green-50 rounded-xl border border-green-100">
-                  <div className="text-3xl sm:text-4xl font-bold text-green-600">
-                    {progressHistory.reduce((sum, day) => sum + day.exercise, 0)}
                   </div>
-                  <div className="text-base sm:text-lg text-gray-600 mt-2">Total esta semana</div>
+                  <div className="space-y-2">
+                    {mealCompositions
+                      .filter((c) => c.meal_type === "cena")
+                      .map((composition) => (
+                        <div key={composition.id} className="flex items-center justify-between text-xs">
+                          <div>
+                            <p className="font-medium">{composition.food_name}</p>
+                            <p className="text-gray-500">
+                              {composition.quantity_grams}g - {composition.calories_consumed} cal
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => removeFoodFromMeal(composition.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Icons.Trash2 size="text-xs" />
+                          </button>
+                        </div>
+                      ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {activeTab === "mindfulness" && (
-          <div className="space-y-6 sm:space-y-8">
+        {activeTab === "recursos" && (
+          <div className="space-y-4">
             {/* Recursos de mindfulness */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                <span className="text-2xl">{Icons.Brain()}</span>
-                Mindfulness y Meditación
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Brain size="text-lg" />
+                Mindfulness
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {mindfulnessResources.map((resource) => (
                   <a
                     key={resource.id}
                     href={resource.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                   >
                     <img
                       src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
                       alt={resource.title}
-                      className="w-full h-40 object-cover"
+                      className="w-full h-32 object-cover"
                     />
-                    <div className="p-5">
-                      <h4 className="font-semibold mb-2 text-lg">{resource.title}</h4>
-                      <p className="text-base text-gray-600">{resource.description}</p>
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600">{resource.description}</p>
                     </div>
                   </a>
                 ))}
               </div>
             </div>
 
-            {/* Progreso de mindfulness */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                <span className="text-2xl">{Icons.Brain()}</span>
-                Tu Progreso de Mindfulness
+            {/* Recursos de nutrición */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.UtensilsCrossed size="text-lg" />
+                Nutrición
               </h3>
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <p className="text-base sm:text-lg font-medium">Sesiones completadas hoy</p>
-                  <p className="text-4xl sm:text-5xl font-bold text-purple-600">{dailyProgress.mindfulness}</p>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => updateProgress("mindfulness", -1)}
-                    className="p-3 rounded-full hover:bg-gray-100 transition-colors text-xl"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {nutritionResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                   >
-                    {Icons.Minus()}
-                  </button>
-                  <button
-                    onClick={() => updateProgress("mindfulness", 1)}
-                    className="p-3 rounded-full hover:bg-gray-100 transition-colors text-xl"
-                  >
-                    {Icons.Plus()}
-                  </button>
-                </div>
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
               </div>
-              <div className="grid grid-cols-2 gap-6 text-center">
-                <div className="p-6 bg-purple-50 rounded-xl border border-purple-100">
-                  <div className="text-3xl sm:text-4xl font-bold text-purple-600">{getStreakDays()}</div>
-                  <div className="text-base sm:text-lg text-gray-600 mt-2">Días de práctica</div>
-                </div>
-                <div className="p-6 bg-indigo-50 rounded-xl border border-indigo-100">
-                  <div className="text-3xl sm:text-4xl font-bold text-indigo-600">
-                    {progressHistory.reduce((sum, day) => sum + day.mindfulness, 0)}
-                  </div>
-                  <div className="text-base sm:text-lg text-gray-600 mt-2">Total esta semana</div>
-                </div>
+            </div>
+
+            {/* Recursos de ejercicio */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Dumbbell size="text-lg" />
+                Ejercicio
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {exerciseResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
               </div>
             </div>
           </div>
         )}
 
         {activeTab === "suplementos" && (
-          <div className="space-y-6 sm:space-y-8">
-            {/* Lista de suplementos */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
-              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
-                <span className="text-2xl">{Icons.Package()}</span>
+          <div className="space-y-4">
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Package size="text-lg" />
                 Suplementos
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {supplements.map((supplement) => (
-                  <div
-                    key={supplement.id}
-                    className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
-                  >
+                  <div key={supplement.id} className="border border-gray-200 rounded-lg overflow-hidden">
                     <img
                       src={supplement.image_url || "/placeholder.svg?height=200&width=200"}
                       alt={supplement.name}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-32 object-cover"
                     />
-                    <div className="p-5">
-                      <h4 className="font-semibold mb-2 text-lg">{supplement.name}</h4>
-                      <p className="text-base text-gray-600 mb-3">{supplement.description}</p>
-                      <p className="text-xl font-medium text-green-600 mb-3">${supplement.price.toLocaleString()}</p>
-                      <ul className="text-sm text-gray-500 mb-4">
-                        {supplement.benefits.map((benefit, index) => (
-                          <li key={index}>- {benefit}</li>
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{supplement.name}</h4>
+                      <p className="text-xs text-gray-600 mb-2">{supplement.description}</p>
+                      <p className="text-sm font-medium text-green-600 mb-2">${supplement.price.toLocaleString()}</p>
+                      <ul className="text-xs text-gray-500 mb-3 space-y-1">
+                        {supplement.benefits.slice(0, 3).map((benefit, index) => (
+                          <li key={index}>• {benefit}</li>
                         ))}
                       </ul>
                       <button
                         onClick={() => handleSupplementContact(supplement)}
-                        className="w-full px-4 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-3 text-base font-medium"
+                        className="w-full px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm"
                       >
-                        <span className="text-lg">{Icons.MessageSquare()}</span>
+                        <Icons.MessageSquare size="text-sm" />
                         Contactar
                       </button>
                     </div>
@@ -3375,18 +3101,18 @@ Gracias!`
         )}
       </main>
 
-      {/* Navegación inferior */}
+      {/* Navegación inferior fija */}
       <nav className="bg-white border-t shadow-lg fixed bottom-0 left-0 w-full z-30">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4">
-          <div className="h-20 flex justify-between">
+        <div className="px-4">
+          <div className="h-16 flex justify-between">
             <button
               onClick={() => setActiveTab("inicio")}
               className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
                 activeTab === "inicio" ? "text-green-600" : "text-gray-500"
               }`}
             >
-              <span className="text-2xl sm:text-3xl">{Icons.Home()}</span>
-              <span className="text-xs sm:text-sm font-medium">Inicio</span>
+              <Icons.Home size="text-xl" />
+              <span className="text-xs mt-1">Inicio</span>
             </button>
             <button
               onClick={() => setActiveTab("comida")}
@@ -3394,26 +3120,17 @@ Gracias!`
                 activeTab === "comida" ? "text-green-600" : "text-gray-500"
               }`}
             >
-              <span className="text-2xl sm:text-3xl">{Icons.UtensilsCrossed()}</span>
-              <span className="text-xs sm:text-sm font-medium">Alimentación</span>
+              <Icons.UtensilsCrossed size="text-xl" />
+              <span className="text-xs mt-1">Comida</span>
             </button>
             <button
-              onClick={() => setActiveTab("entrenamiento")}
+              onClick={() => setActiveTab("recursos")}
               className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
-                activeTab === "entrenamiento" ? "text-green-600" : "text-gray-500"
+                activeTab === "recursos" ? "text-green-600" : "text-gray-500"
               }`}
             >
-              <span className="text-2xl sm:text-3xl">{Icons.Dumbbell()}</span>
-              <span className="text-xs sm:text-sm font-medium">Entrenamiento</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("mindfulness")}
-              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
-                activeTab === "mindfulness" ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              <span className="text-2xl sm:text-3xl">{Icons.Brain()}</span>
-              <span className="text-xs sm:text-sm font-medium">Mindfulness</span>
+              <Icons.Link size="text-xl" />
+              <span className="text-xs mt-1">Recursos</span>
             </button>
             <button
               onClick={() => setActiveTab("suplementos")}
@@ -3421,41 +3138,45 @@ Gracias!`
                 activeTab === "suplementos" ? "text-green-600" : "text-gray-500"
               }`}
             >
-              <span className="text-2xl sm:text-3xl">{Icons.Package()}</span>
-              <span className="text-xs sm:text-sm font-medium">Suplementos</span>
+              <Icons.Package size="text-xl" />
+              <span className="text-xs mt-1">Tienda</span>
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Modal de calculadora de comida */}
+      {/* Modal de calculadora de comida - Responsive */}
       {showMealCalculator && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-          <div className="relative top-4 sm:top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white">
-            <div className="mt-3">
-              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">
-                Agregar comida a {selectedMealType}
-              </h3>
+          <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Agregar a {selectedMealType}</h3>
+                <button onClick={() => setShowMealCalculator(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                  <Icons.X size="text-lg" />
+                </button>
+              </div>
+
               {/* Selector de comida */}
-              <div className="mb-6">
-                <h4 className="font-semibold mb-4 text-lg">Buscar comida</h4>
-                <div className="space-y-4">
+              <div className="mb-4">
+                <h4 className="font-semibold mb-3 text-sm">Seleccionar alimento</h4>
+                <div className="space-y-3">
                   {getFoodsByCategory().map((category) => (
                     <div key={category.id}>
-                      <h5 className="font-medium flex items-center gap-3 text-base mb-3">
-                        <span className="text-xl">{category.icon}</span>
-                        {category.name}
+                      <h5 className="font-medium flex items-center gap-2 text-sm mb-2">
+                        {category.icon} {category.name}
                       </h5>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-2">
                         {category.foods.map((food) => (
                           <button
                             key={food.id}
                             onClick={() => selectFood(food)}
-                            className={`px-4 py-3 text-sm border rounded-xl hover:bg-gray-50 transition-colors ${
+                            className={`px-3 py-2 text-xs border rounded-lg hover:bg-gray-50 transition-colors text-left ${
                               selectedFood?.id === food.id ? "border-green-500 bg-green-50" : "border-gray-300"
                             }`}
                           >
-                            {food.name}
+                            <div className="font-medium">{food.name}</div>
+                            <div className="text-gray-500">{food.calories} cal/100g</div>
                           </button>
                         ))}
                       </div>
@@ -3463,36 +3184,43 @@ Gracias!`
                   ))}
                 </div>
               </div>
+
               {/* Selector de cantidad */}
               {selectedFood && (
-                <div className="mb-6">
-                  <h4 className="font-semibold mb-3 text-lg">
-                    {selectedFood.name} - {selectedFood.calories} cal / 100g
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <h4 className="font-semibold mb-2 text-sm">
+                    {selectedFood.name} - {selectedFood.calories} cal/100g
                   </h4>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
                     <input
                       type="number"
-                      className="w-32 p-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-green-500"
-                      placeholder="Cantidad (g)"
+                      className="flex-1 p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Cantidad"
                       value={foodQuantity}
                       onChange={(e) => setFoodQuantity(e.target.value)}
                     />
-                    <span className="text-base">gramos</span>
+                    <span className="text-sm text-gray-600">gramos</span>
                   </div>
+                  {foodQuantity && (
+                    <div className="mt-2 text-xs text-gray-600">
+                      Calorías: {Math.round((Number(selectedFood.calories) * Number(foodQuantity)) / 100)} cal
+                    </div>
+                  )}
                 </div>
               )}
+
               {/* Botones de acción */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={addFoodToMeal}
-                  className="bg-green-500 text-white p-4 rounded-xl hover:bg-green-600 disabled:bg-gray-400 text-base font-medium transition-colors"
+                  className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 text-sm"
                   disabled={!selectedFood || !foodQuantity}
                 >
-                  Agregar comida
+                  Agregar
                 </button>
                 <button
                   onClick={() => setShowMealCalculator(false)}
-                  className="bg-gray-500 text-white p-4 rounded-xl hover:bg-gray-600 text-base font-medium transition-colors"
+                  className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
                 >
                   Cancelar
                 </button>
@@ -3503,26 +3231,4 @@ Gracias!`
       )}
     </div>
   )
-}medium text-base">Detector de Déficit de Ejercicio</span>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Si ejercicio promedio {"<"} 0.5 sesiones/día → Recomienda energéticos
-                        </p>
-                      </div>
-                      <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full font-medium">
-                        Activo
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
-                      <div>
-                        <span className="font-medium text-base">Detector de Estrés/Ansiedad</span>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Si mindfulness {"<"} 0.5 sesiones/día → Recomienda relajantes
-                        </p>
-                      </div>
-                      <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full font-medium">
-                        Activo
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
-                      <div>
-                        <span className="font-
+}
