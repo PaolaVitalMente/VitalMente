@@ -2072,7 +2072,7 @@ Gracias!`
                       <div>
                         <span className="font-medium text-base">Detector de Deshidratación</span>
                         <p className="text-sm text-gray-600 mt-1">
-                          Si agua {"<"} 6 vasos/día → Recomienda electrolitos
+                          Si agua menor a 6 vasos/día → Recomienda electrolitos
                         </p>
                       </div>
                       <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full font-medium">
