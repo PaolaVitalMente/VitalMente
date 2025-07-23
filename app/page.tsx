@@ -922,7 +922,8 @@ const dbFunctions = {
       console.log('🗑️ Imagen eliminada:', fileName)
     } catch (error) {
       console.error('Error eliminando imagen:', error)
-    },
+    }
+  },
 // 🆕 FUNCIONES DE GAMIFICACIÓN
   async getUserGamification(userId: string): Promise<UserGamification | null> {
     try {
