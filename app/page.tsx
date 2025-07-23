@@ -185,7 +185,7 @@ interface ConsumedMacros {
   fats: number
 }
 
-// 🆕 NUEVOS TIPOS PARA GAMIFICACIÓN Y IA (SIN ROMPER LO EXISTENTE)
+// 🆕 NUEVOS TIPOS PARA GAMIFICACIÓN Y IA
 interface UserGamification {
   id: string
   user_id: string
@@ -223,7 +223,7 @@ interface AIRecommendation {
 }
 
 // ============================================================================
-// CONFIGURACIÓN DE DATOS (ORIGINAL)
+// CONFIGURACIÓN DE DATOS
 // ============================================================================
 const ACTIVITY_LEVELS = [
   { value: 1.2, label: "Sedentario", desc: "Poco ejercicio" },
@@ -326,7 +326,7 @@ const GOALS = [
   },
 ]
 
-// 🆕 SISTEMA DE NIVELES (NUEVO)
+// 🆕 SISTEMA DE NIVELES
 const LEVEL_SYSTEM = {
   levels: [
     { level: 1, name: "Principiante", icon: "🌱", pointsRequired: 0, color: "bg-green-100 text-green-800" },
@@ -349,7 +349,7 @@ const LEVEL_SYSTEM = {
 }
 
 // ============================================================================
-// FUNCIONES DE BASE DE DATOS (MANTENIENDO LAS ORIGINALES + NUEVAS)
+// FUNCIONES DE BASE DE DATOS
 // ============================================================================
 const dbFunctions = {
   async findUserByPhone(phone: string): Promise<UserProfile | null> {
@@ -629,13 +629,12 @@ const dbFunctions = {
     }
   },
 
-  // 🆕 FUNCIONES NUEVAS PARA GAMIFICACIÓN Y IA (SIN ROMPER LO EXISTENTE)
+  // 🆕 FUNCIONES PARA GAMIFICACIÓN Y IA
   async getUserGamification(userId: string): Promise<UserGamification | null> {
     try {
       const { data, error } = await supabase.from("user_gamification").select("*").eq("user_id", userId).single()
       if (error) {
         if (error.code === "PGRST116") {
-          // No existe, crear uno nuevo
           return await dbFunctions.initializeUserGamification(userId)
         }
         throw error
@@ -668,7 +667,6 @@ const dbFunctions = {
       return data as UserGamification
     } catch (error) {
       console.error("Error initializing gamification:", error)
-      // Si falla, devolver datos por defecto
       return {
         id: "",
         user_id: userId,
@@ -689,24 +687,20 @@ const dbFunctions = {
 
   async generateAIRecommendations(userId: string): Promise<AIRecommendation[]> {
     try {
-      // Simulación de recomendaciones IA basadas en patrones
       const progressHistory = await dbFunctions.getProgressHistory(userId, 7)
       const supplements = await dbFunctions.getActiveSupplements()
       const recommendations: AIRecommendation[] = []
 
-      // Verificar que tenemos datos válidos
       if (!progressHistory || progressHistory.length === 0 || !supplements || supplements.length === 0) {
         console.log("No hay suficientes datos para generar recomendaciones")
         return []
       }
 
-      // Análisis simple de patrones con validación
       const avgWater = progressHistory.reduce((sum, day) => sum + (day.water || 0), 0) / progressHistory.length
       const avgExercise = progressHistory.reduce((sum, day) => sum + (day.exercise || 0), 0) / progressHistory.length
       const avgMindfulness =
         progressHistory.reduce((sum, day) => sum + (day.mindfulness || 0), 0) / progressHistory.length
 
-      // Recomendación para energía si falta ejercicio
       if (avgExercise < 0.5 && supplements.length > 0) {
         const energySupplements = supplements.filter(
           (s) =>
@@ -737,7 +731,6 @@ const dbFunctions = {
         }
       }
 
-      // Recomendación para relajación si falta mindfulness
       if (avgMindfulness < 0.5 && supplements.length > 0) {
         const relaxSupplements = supplements.filter(
           (s) =>
@@ -791,7 +784,6 @@ const dbFunctions = {
 
   async initializeDefaultData() {
     try {
-      // Verificar si ya hay tips
       const { data: existingTips } = await supabase.from("global_tips").select("*")
       if (!existingTips || existingTips.length === 0) {
         const defaultTips = [
@@ -823,7 +815,6 @@ const dbFunctions = {
         }
       }
 
-      // Verificar si ya hay recursos
       const { data: existingResources } = await supabase.from("global_resources").select("*")
       if (!existingResources || existingResources.length === 0) {
         const defaultResources = [
@@ -856,7 +847,6 @@ const dbFunctions = {
         }
       }
 
-      // Verificar si ya hay suplementos
       const { data: existingSupplements } = await supabase.from("supplements").select("*")
       if (!existingSupplements || existingSupplements.length === 0) {
         const defaultSupplements = [
@@ -902,7 +892,7 @@ const dbFunctions = {
 }
 
 // ============================================================================
-// FUNCIONES AUXILIARES (ORIGINALES)
+// FUNCIONES AUXILIARES
 // ============================================================================
 const getYouTubeThumbnail = (url: string): string => {
   const patterns = [/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/, /^([a-zA-Z0-9_-]{11})$/]
@@ -967,11 +957,10 @@ const getResourceTypeIcon = (type: string) => {
 }
 
 // ============================================================================
-// COMPONENTE PRINCIPAL (RESTAURADO Y FUNCIONAL)
+// COMPONENTE PRINCIPAL
 // ============================================================================
 export default function VitalMenteApp() {
-  // 🆕 ESTADO PARA TABS DE ADMIN
-  const [activeAdminTab, setActiveAdminTab] = useState("dashboard")
+  // Estados principales
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     if (typeof window !== "undefined") {
       const savedUser = localStorage.getItem("vitalmente_user")
@@ -979,12 +968,14 @@ export default function VitalMenteApp() {
     }
     return null
   })
+
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("inicio")
   const [macroResults, setMacroResults] = useState<MacroResult | null>(null)
   const [connectionStatus, setConnectionStatus] = useState("connecting")
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
+
   const [dailyProgress, setDailyProgress] = useState<DailyProgress>({
     id: "",
     user_id: "",
@@ -996,6 +987,7 @@ export default function VitalMenteApp() {
     almuerzo: 0,
     cena: 0,
   })
+
   const [userFoods, setUserFoods] = useState<UserFood[]>([])
   const [globalFoods, setGlobalFoods] = useState<GlobalFood[]>([])
   const [progressHistory, setProgressHistory] = useState<DailyProgress[]>([])
@@ -1010,16 +1002,18 @@ export default function VitalMenteApp() {
     carbs: 0,
     fats: 0,
   })
+
   const [showMealCalculator, setShowMealCalculator] = useState(false)
   const [selectedMealType, setSelectedMealType] = useState<"desayuno" | "almuerzo" | "cena">("desayuno")
   const [selectedFood, setSelectedFood] = useState<UserFood | GlobalFood | null>(null)
   const [foodQuantity, setFoodQuantity] = useState<string>("100")
 
-  // 🔧 ESTADOS DE ADMINISTRACIÓN CORREGIDOS
+  // Estados de administración
   const [logoClicks, setLogoClicks] = useState(0)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [adminCode, setAdminCode] = useState("")
+
   const [loginForm, setLoginForm] = useState({ phone: "", accessCode: "" })
   const [registerForm, setRegisterForm] = useState({
     phone: "",
@@ -1032,13 +1026,14 @@ export default function VitalMenteApp() {
     activityLevel: 1.375,
     goal: "reduce_stress",
   })
+
   const [showRegister, setShowRegister] = useState(false)
   const [showFoodDialog, setShowFoodDialog] = useState(false)
   const [selectedMeal, setSelectedMeal] = useState<"desayuno" | "almuerzo" | "cena" | null>(null)
   const [newFood, setNewFood] = useState({ name: "", calories: "", protein: "", carbs: "", fats: "" })
   const [showFloatingMenu, setShowFloatingMenu] = useState(false)
 
-  // 🆕 ESTADOS NUEVOS PARA GAMIFICACIÓN Y IA
+  // Estados para gamificación y IA
   const [userGamification, setUserGamification] = useState<UserGamification | null>(null)
   const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>([])
   const [allUsers, setAllUsers] = useState<UserProfile[]>([])
@@ -1198,7 +1193,6 @@ export default function VitalMenteApp() {
       setProgressHistory(history)
       setMealCompositions(compositions)
       calculateConsumedMacros(compositions)
-      // 🆕 Establecer datos nuevos
       setUserGamification(gamification)
       setAiRecommendations(recommendations)
       console.log("✅ Todos los datos cargados exitosamente")
@@ -1246,7 +1240,6 @@ export default function VitalMenteApp() {
     setAiRecommendations([])
   }
 
-  // 🔧 FUNCIÓN DE LOGO CLICK CORREGIDA
   const handleLogoClick = () => {
     setLogoClicks((prev) => {
       const newCount = prev + 1
@@ -1254,13 +1247,12 @@ export default function VitalMenteApp() {
       if (newCount === 5) {
         console.log("🔓 Activando panel de administrador")
         setShowAdminLogin(true)
-        return 0 // Reset counter
+        return 0
       }
       return newCount
     })
   }
 
-  // 🔧 FUNCIÓN DE ADMIN LOGIN CORREGIDA
   const handleAdminLogin = () => {
     console.log("🔐 Intentando acceso admin con código:", adminCode)
     if (adminCode === "1098648820") {
@@ -1268,7 +1260,6 @@ export default function VitalMenteApp() {
       setIsAdmin(true)
       setShowAdminLogin(false)
       setAdminCode("")
-      // Cargar datos de admin
       loadAdminData()
       alert("¡Acceso de administrador activado!")
     } else {
@@ -1584,19 +1575,16 @@ Gracias!`
     window.open(whatsappUrl, "_blank")
   }
 
-  // 🆕 FUNCIÓN PARA MANEJAR CLICK EN RECOMENDACIÓN IA
   const handleRecommendationClick = (recommendationId: string) => {
     const recommendation = aiRecommendations.find((r) => r.id === recommendationId)
     if (recommendation) {
-      // Cambiar a tab de suplementos
       setActiveTab("suplementos")
-      // Mostrar mensaje de recomendación
       alert(`🤖 Recomendación IA: ${recommendation.reason}`)
     }
   }
 
   // ============================================================================
-  // COMPONENTES DE UI RESPONSIVE
+  // COMPONENTES DE UI PREMIUM RESPONSIVE
   // ============================================================================
   const SaveStatusIndicator = () => {
     if (saveStatus === "idle") return null
@@ -1608,10 +1596,10 @@ Gracias!`
     const config = statusConfig[saveStatus]
     return (
       <div
-        className={`fixed top-4 right-4 z-50 px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 ${config.color} max-w-xs`}
+        className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 ${config.color} max-w-xs transition-all duration-300`}
       >
-        <span className="text-sm">{config.icon}</span>
-        <span className="text-xs sm:text-sm font-medium">{config.text}</span>
+        <span className="text-base">{config.icon}</span>
+        <span className="text-sm font-medium">{config.text}</span>
         {lastSaveTime && saveStatus === "saved" && (
           <span className="text-xs opacity-75 hidden sm:inline">{lastSaveTime.toLocaleTimeString()}</span>
         )}
@@ -1623,50 +1611,49 @@ Gracias!`
     return (
       <div className="fixed bottom-20 right-4 z-40">
         {showFloatingMenu && (
-          <div className="flex flex-col gap-2 mb-3 animate-in slide-in-from-bottom">
+          <div className="flex flex-col gap-3 mb-4 animate-in slide-in-from-bottom">
             <button
               onClick={() => handleQuickProgress("water")}
-              className="bg-blue-500 text-white p-2 sm:p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap"
+              className="bg-blue-500 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-blue-600 transition-colors flex items-center gap-3 text-sm font-medium whitespace-nowrap"
             >
-              <span className="text-base sm:text-xl">{Icons.Droplets()}</span>
+              <span className="text-xl">{Icons.Droplets()}</span>
               <span className="hidden sm:inline">Agua +1</span>
             </button>
             <button
               onClick={() => handleQuickProgress("exercise")}
-              className="bg-green-500 text-white p-2 sm:p-3 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap"
+              className="bg-green-500 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center gap-3 text-sm font-medium whitespace-nowrap"
             >
-              <span className="text-base sm:text-xl">{Icons.Activity()}</span>
+              <span className="text-xl">{Icons.Activity()}</span>
               <span className="hidden sm:inline">Ejercicio +1</span>
             </button>
             <button
               onClick={() => handleQuickProgress("mindfulness")}
-              className="bg-purple-500 text-white p-2 sm:p-3 rounded-full shadow-lg hover:bg-purple-600 transition-colors flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap"
+              className="bg-purple-500 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-purple-600 transition-colors flex items-center gap-3 text-sm font-medium whitespace-nowrap"
             >
-              <span className="text-base sm:text-xl">{Icons.Brain()}</span>
+              <span className="text-xl">{Icons.Brain()}</span>
               <span className="hidden sm:inline">Mindfulness +1</span>
             </button>
             <button
               onClick={handleTypicalDay}
-              className="bg-orange-500 text-white p-2 sm:p-3 rounded-full shadow-lg hover:bg-orange-600 transition-colors flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap"
+              className="bg-orange-500 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-orange-600 transition-colors flex items-center gap-3 text-sm font-medium whitespace-nowrap"
             >
-              <span className="text-base sm:text-xl">⚡</span>
+              <span className="text-xl">⚡</span>
               <span className="hidden sm:inline">Día típico</span>
             </button>
           </div>
         )}
         <button
           onClick={() => setShowFloatingMenu(!showFloatingMenu)}
-          className={`bg-green-600 text-white p-3 sm:p-4 rounded-full shadow-lg hover:bg-green-700 transition-all duration-200 ${
+          className={`bg-green-600 text-white p-4 sm:p-5 rounded-full shadow-lg hover:bg-green-700 transition-all duration-200 ${
             showFloatingMenu ? "rotate-45" : "rotate-0"
           }`}
         >
-          <span className="text-xl sm:text-2xl">{Icons.Plus()}</span>
+          <span className="text-2xl sm:text-3xl">{Icons.Plus()}</span>
         </button>
       </div>
     )
   }
 
-  // 🆕 COMPONENTE DE GAMIFICACIÓN RESPONSIVE
   const GamificationPanel = () => {
     if (!userGamification) return null
     const currentLevelInfo =
@@ -1679,58 +1666,58 @@ Gracias!`
       : 100
 
     return (
-      <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg p-4 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-3">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl sm:text-3xl">{currentLevelInfo.icon}</span>
+      <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-2xl p-6 mb-6 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+          <div className="flex items-center gap-4">
+            <span className="text-4xl sm:text-5xl">{currentLevelInfo.icon}</span>
             <div>
-              <h3 className="font-bold text-base sm:text-lg">{currentLevelInfo.name}</h3>
-              <p className="text-xs sm:text-sm opacity-90">Nivel {userGamification.current_level}</p>
+              <h3 className="font-bold text-xl sm:text-2xl">{currentLevelInfo.name}</h3>
+              <p className="text-sm sm:text-base opacity-90">Nivel {userGamification.current_level}</p>
             </div>
           </div>
           <div className="text-center sm:text-right">
-            <div className="text-xl sm:text-2xl font-bold">{userGamification.total_points}</div>
-            <div className="text-xs opacity-75">puntos totales</div>
+            <div className="text-3xl sm:text-4xl font-bold">{userGamification.total_points}</div>
+            <div className="text-sm opacity-75">puntos totales</div>
           </div>
         </div>
-        {/* Barra de progreso al siguiente nivel */}
         {nextLevelInfo && (
-          <div className="mb-3">
-            <div className="flex justify-between text-xs mb-1">
+          <div className="mb-4">
+            <div className="flex justify-between text-sm mb-2">
               <span>Progreso al siguiente nivel</span>
-              <span>{Math.round(progressToNext)}%</span>
+              <span className="font-medium">{Math.round(progressToNext)}%</span>
             </div>
-            <div className="w-full bg-white/20 rounded-full h-2">
+            <div className="w-full bg-white/20 rounded-full h-3">
               <div
-                className="bg-white h-2 rounded-full transition-all duration-300"
+                className="bg-white h-3 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(progressToNext, 100)}%` }}
               ></div>
             </div>
-            <div className="text-xs mt-1 opacity-75">
+            <div className="text-sm mt-2 opacity-75">
               {userGamification.total_points} / {nextLevelInfo.pointsRequired} puntos
             </div>
           </div>
         )}
-        {/* Estadísticas responsive */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+        <div className="grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-base sm:text-lg font-bold">{userGamification.streak_days}</div>
-            <div className="text-xs opacity-75">Racha actual</div>
+            <div className="text-xl sm:text-2xl font-bold">{userGamification.streak_days}</div>
+            <div className="text-xs sm:text-sm opacity-75">Racha actual</div>
           </div>
           <div>
-            <div className="text-base sm:text-lg font-bold">{userGamification.weekly_points}</div>
-            <div className="text-xs opacity-75">Puntos semana</div>
+            <div className="text-xl sm:text-2xl font-bold">{userGamification.weekly_points}</div>
+            <div className="text-xs sm:text-sm opacity-75">Puntos semana</div>
           </div>
           <div>
-            <div className="text-base sm:text-lg font-bold">{getStreakDays()}</div>
-            <div className="text-xs opacity-75">Días activos</div>
+            <div className="text-xl sm:text-2xl font-bold">{getStreakDays()}</div>
+            <div className="text-xs sm:text-sm opacity-75">Días activos</div>
           </div>
         </div>
       </div>
     )
   }
 
-  // 🆕 PANEL COMPLETO DE ADMINISTRACIÓN RESPONSIVE
+  // ============================================================================
+  // PANEL COMPLETO DE ADMINISTRACIÓN
+  // ============================================================================
   const AdminPanel = () => {
     const [activeAdminTab, setActiveAdminTab] = useState("dashboard")
     const [showAddResource, setShowAddResource] = useState(false)
@@ -1851,34 +1838,36 @@ Gracias!`
 
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header de administración responsive */}
+        {/* Header de administración */}
         <div className="bg-white border-b shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <span>{Icons.Shield()}</span>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+                  <span className="text-3xl">{Icons.Shield()}</span>
                   <span className="hidden sm:inline">Panel de Administración Maestro</span>
                   <span className="sm:hidden">Admin Panel</span>
                 </h1>
-                <p className="text-sm sm:text-base text-gray-600 hidden sm:block">
+                <p className="text-base sm:text-lg text-gray-600 hidden sm:block mt-2">
                   Análisis de patrones y gestión de suplementación inteligente
                 </p>
-                <div className="flex flex-wrap gap-1 sm:gap-2 mt-2">
-                  <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <span className="inline-block px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full font-medium">
                     🌐 Conectado
                   </span>
-                  <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA Activa</span>
-                  <span className="inline-block px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
+                  <span className="inline-block px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full font-medium">
+                    🤖 IA Activa
+                  </span>
+                  <span className="inline-block px-3 py-1 text-sm bg-purple-100 text-purple-800 rounded-full font-medium">
                     🚀 Vercel
                   </span>
                 </div>
               </div>
               <button
                 onClick={() => setIsAdmin(false)}
-                className="px-3 py-2 sm:px-4 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 transition-colors text-sm"
+                className="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 flex items-center gap-3 transition-colors text-base font-medium"
               >
-                <span>{Icons.LogOut()}</span>
+                <span className="text-xl">{Icons.LogOut()}</span>
                 <span className="hidden sm:inline">Salir del Admin</span>
                 <span className="sm:hidden">Salir</span>
               </button>
@@ -1886,10 +1875,10 @@ Gracias!`
           </div>
         </div>
 
-        {/* Navegación de tabs responsive */}
+        {/* Navegación de tabs */}
         <div className="bg-white border-b overflow-x-auto">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="flex space-x-4 sm:space-x-8 min-w-max">
+            <div className="flex space-x-8 min-w-max">
               {[
                 { id: "dashboard", name: "Dashboard", icon: Icons.Chart() },
                 { id: "users", name: "Usuarios", icon: Icons.Users() },
@@ -1901,13 +1890,13 @@ Gracias!`
                 <button
                   key={tab.id}
                   onClick={() => setActiveAdminTab(tab.id)}
-                  className={`py-4 px-2 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap ${
+                  className={`py-4 px-2 border-b-2 font-medium text-sm sm:text-base flex items-center gap-3 whitespace-nowrap transition-colors ${
                     activeAdminTab === tab.id
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  <span>{tab.icon}</span>
+                  <span className="text-lg">{tab.icon}</span>
                   <span className="hidden sm:inline">{tab.name}</span>
                 </button>
               ))}
@@ -1915,19 +1904,19 @@ Gracias!`
           </div>
         </div>
 
-        {/* Contenido de administración responsive */}
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Contenido de administración */}
+        <div className="max-w-7xl mx-auto px-4 py-8">
           {/* TAB DASHBOARD */}
           {activeAdminTab === "dashboard" && (
-            <div className="space-y-6">
-              {/* Métricas principales responsive */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="space-y-8">
+              {/* Métricas principales */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm font-medium text-gray-600">Usuarios Totales</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-600">{allUsers.length}</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-sm sm:text-base font-medium text-gray-600">Usuarios Totales</p>
+                      <p className="text-3xl sm:text-4xl font-bold text-blue-600 mt-2">{allUsers.length}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-2">
                         +
                         {
                           allUsers.filter(
@@ -1937,100 +1926,102 @@ Gracias!`
                         esta semana
                       </p>
                     </div>
-                    <span className="text-2xl sm:text-3xl">{Icons.Users()}</span>
+                    <span className="text-4xl sm:text-5xl">{Icons.Users()}</span>
                   </div>
                 </div>
-                <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm font-medium text-gray-600">Suplementos</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-purple-600">{supplements.length}</p>
-                      <p className="text-xs text-gray-500 mt-1">Catálogo completo</p>
+                      <p className="text-sm sm:text-base font-medium text-gray-600">Suplementos</p>
+                      <p className="text-3xl sm:text-4xl font-bold text-purple-600 mt-2">{supplements.length}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-2">Catálogo completo</p>
                     </div>
-                    <span className="text-2xl sm:text-3xl">{Icons.Package()}</span>
+                    <span className="text-4xl sm:text-5xl">{Icons.Package()}</span>
                   </div>
                 </div>
-                <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm font-medium text-gray-600">Tips Activos</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-green-600">{globalTips.length}</p>
-                      <p className="text-xs text-gray-500 mt-1">Contenido educativo</p>
+                      <p className="text-sm sm:text-base font-medium text-gray-600">Tips Activos</p>
+                      <p className="text-3xl sm:text-4xl font-bold text-green-600 mt-2">{globalTips.length}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-2">Contenido educativo</p>
                     </div>
-                    <span className="text-2xl sm:text-3xl">{Icons.Lightbulb()}</span>
+                    <span className="text-4xl sm:text-5xl">{Icons.Lightbulb()}</span>
                   </div>
                 </div>
-                <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm font-medium text-gray-600">Recursos</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-orange-600">{globalResources.length}</p>
-                      <p className="text-xs text-gray-500 mt-1">Videos, PDFs</p>
+                      <p className="text-sm sm:text-base font-medium text-gray-600">Recursos</p>
+                      <p className="text-3xl sm:text-4xl font-bold text-orange-600 mt-2">{globalResources.length}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-2">Videos, PDFs</p>
                     </div>
-                    <span className="text-2xl sm:text-3xl">{Icons.Link()}</span>
+                    <span className="text-4xl sm:text-5xl">{Icons.Link()}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Estado del sistema responsive */}
-              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                  <span>{Icons.Database()}</span>
+              {/* Estado del sistema */}
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                  <span className="text-2xl">{Icons.Database()}</span>
                   Estado del Sistema
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl mb-2">✅</div>
-                    <div className="font-semibold text-green-800">Supabase</div>
-                    <div className="text-xs sm:text-sm text-green-600">Conectado y funcionando</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <div className="text-center p-6 bg-green-50 rounded-xl border border-green-100">
+                    <div className="text-4xl mb-3">✅</div>
+                    <div className="text-lg font-semibold text-green-800">Supabase</div>
+                    <div className="text-sm sm:text-base text-green-600 mt-1">Conectado y funcionando</div>
                   </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl mb-2">🚀</div>
-                    <div className="font-semibold text-blue-800">Vercel</div>
-                    <div className="text-xs sm:text-sm text-blue-600">Desplegado y activo</div>
+                  <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-100">
+                    <div className="text-4xl mb-3">🚀</div>
+                    <div className="text-lg font-semibold text-blue-800">Vercel</div>
+                    <div className="text-sm sm:text-base text-blue-600 mt-1">Desplegado y activo</div>
                   </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl mb-2">🤖</div>
-                    <div className="font-semibold text-purple-800">IA Engine</div>
-                    <div className="text-xs sm:text-sm text-purple-600">Generando recomendaciones</div>
+                  <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-100">
+                    <div className="text-4xl mb-3">🤖</div>
+                    <div className="text-lg font-semibold text-purple-800">IA Engine</div>
+                    <div className="text-sm sm:text-base text-purple-600 mt-1">Generando recomendaciones</div>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB USUARIOS responsive */}
+          {/* TAB USUARIOS */}
           {activeAdminTab === "users" && (
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-4 border-b">
-                <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
-                  <span>{Icons.Users()}</span>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
+              <div className="p-6 border-b border-gray-100">
+                <h3 className="text-xl sm:text-2xl font-semibold flex items-center gap-3">
+                  <span className="text-2xl">{Icons.Users()}</span>
                   Lista de Usuarios ({allUsers.length})
                 </h3>
               </div>
               <div className="max-h-96 overflow-y-auto">
                 {allUsers.map((user) => (
-                  <div key={user.id} className="p-4 border-b hover:bg-gray-50 transition-colors">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                  <div key={user.id} className="p-6 border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                       <div className="flex-1">
-                        <p className="font-medium text-sm sm:text-base">{user.name}</p>
-                        <p className="text-xs sm:text-sm text-gray-600">{user.phone}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="font-semibold text-base sm:text-lg">{user.name}</p>
+                        <p className="text-sm sm:text-base text-gray-600">{user.phone}</p>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
                           Registrado: {new Date(user.created_at).toLocaleDateString()}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs sm:text-sm text-gray-500">
                           Último acceso: {new Date(user.last_login).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="text-left sm:text-right">
-                        <span className="text-xs bg-gray-100 px-2 py-1 rounded mb-1 inline-block">
+                        <span className="text-sm bg-gray-100 px-3 py-1 rounded-full mb-2 inline-block font-medium">
                           {GOALS.find((g) => g.id === user.goal)?.label || user.goal}
                         </span>
-                        <div className="text-xs text-gray-500">
-                          {user.age} años | {user.weight}kg | {user.height}cm
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          Actividad: {ACTIVITY_LEVELS.find((a) => a.value === user.activity_level)?.label}
+                        <div className="text-sm text-gray-500 space-y-1">
+                          <div>
+                            {user.age} años | {user.weight}kg | {user.height}cm
+                          </div>
+                          <div>
+                            Actividad: {ACTIVITY_LEVELS.find((a) => a.value === user.activity_level)?.label}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -2040,54 +2031,273 @@ Gracias!`
             </div>
           )}
 
-          {/* Otros tabs del admin panel con responsive similar... */}
+          {/* TAB IA PATTERNS */}
           {activeAdminTab === "ia-patterns" && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                  <span>{Icons.Robot()}</span>
+            <div className="space-y-8">
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                  <span className="text-2xl">{Icons.Robot()}</span>
                   Sistema de Análisis Inteligente
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl sm:text-3xl mb-2">🧠</div>
-                    <div className="font-semibold text-sm">Análisis de Comportamiento</div>
-                    <div className="text-xs text-gray-600">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-100">
+                    <div className="text-4xl sm:text-5xl mb-4">🧠</div>
+                    <div className="font-semibold text-base sm:text-lg">Análisis de Comportamiento</div>
+                    <div className="text-sm text-gray-600 mt-2">
                       Detecta patrones en hidratación, ejercicio y mindfulness
                     </div>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl sm:text-3xl mb-2">🎯</div>
-                    <div className="font-semibold text-sm">Recomendaciones Personalizadas</div>
-                    <div className="text-xs text-gray-600">Sugiere suplementos basados en déficits detectados</div>
+                  <div className="text-center p-6 bg-green-50 rounded-xl border border-green-100">
+                    <div className="text-4xl sm:text-5xl mb-4">🎯</div>
+                    <div className="font-semibold text-base sm:text-lg">Recomendaciones Personalizadas</div>
+                    <div className="text-sm text-gray-600 mt-2">Sugiere suplementos basados en déficits detectados</div>
                   </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl sm:text-3xl mb-2">📊</div>
-                    <div className="font-semibold text-sm">Scoring de Confianza</div>
-                    <div className="text-xs text-gray-600">Evalúa la precisión de cada recomendación</div>
+                  <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-100">
+                    <div className="text-4xl sm:text-5xl mb-4">📊</div>
+                    <div className="font-semibold text-base sm:text-lg">Scoring de Confianza</div>
+                    <div className="text-sm text-gray-600 mt-2">Evalúa la precisión de cada recomendación</div>
                   </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl sm:text-3xl mb-2">⚡</div>
-                    <div className="font-semibold text-sm">Optimización Temporal</div>
-                    <div className="text-xs text-gray-600">Determina el mejor momento para cada suplemento</div>
+                  <div className="text-center p-6 bg-orange-50 rounded-xl border border-orange-100">
+                    <div className="text-4xl sm:text-5xl mb-4">⚡</div>
+                    <div className="font-semibold text-base sm:text-lg">Optimización Temporal</div>
+                    <div className="text-sm text-gray-600 mt-2">Determina el mejor momento para cada suplemento</div>
+                  </div>
+                </div>
+
+                {/* Algoritmos activos */}
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                  <h4 className="font-semibold text-lg mb-4">🔬 Algoritmos Activos</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+                      <div>
+                        <span className="font-medium text-base">Detector de Deshidratación</span>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Si agua {"<"} 6 vasos/día → Recomienda electrolitos
+                        </p>
+                      </div>
+                      <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full font-medium">
+                        En desarrollo
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Métricas de IA */}
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h3 className="text-xl sm:text-2xl font-semibold mb-6">📈 Métricas de IA</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-6 border border-gray-200 rounded-xl">
+                    <div className="text-3xl sm:text-4xl font-bold text-blue-600">
+                      {allUsers.length > 0 ? Math.round((aiRecommendations.length / allUsers.length) * 100) : 0}%
+                    </div>
+                    <div className="text-sm sm:text-base text-gray-600 mt-2">Usuarios con recomendaciones activas</div>
+                  </div>
+                  <div className="text-center p-6 border border-gray-200 rounded-xl">
+                    <div className="text-3xl sm:text-4xl font-bold text-green-600">85%</div>
+                    <div className="text-sm sm:text-base text-gray-600 mt-2">Precisión promedio del algoritmo</div>
+                  </div>
+                  <div className="text-center p-6 border border-gray-200 rounded-xl">
+                    <div className="text-3xl sm:text-4xl font-bold text-purple-600">12%</div>
+                    <div className="text-sm sm:text-base text-gray-600 mt-2">Tasa de conversión estimada</div>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Continuar con otros tabs... */}
+          {/* TAB RECURSOS */}
+          {activeAdminTab === "resources" && (
+            <div className="space-y-8">
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+                  <h3 className="text-xl sm:text-2xl font-semibold flex items-center gap-3">
+                    <span className="text-2xl">{Icons.Link()}</span>
+                    Gestión de Recursos ({globalResources.length})
+                  </h3>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={() => setShowAddResource(true)}
+                      className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 flex items-center gap-3 text-base font-medium transition-colors"
+                    >
+                      <span className="text-xl">{Icons.Plus()}</span>
+                      Agregar Recurso
+                    </button>
+                    <button
+                      onClick={() => setShowAddTip(true)}
+                      className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 flex items-center gap-3 text-base font-medium transition-colors"
+                    >
+                      <span className="text-xl">{Icons.Plus()}</span>
+                      Agregar Tip
+                    </button>
+                  </div>
+                </div>
+
+                {/* Lista de recursos existentes */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {globalResources.map((resource) => (
+                    <div key={resource.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-2xl">{getResourceTypeIcon(resource.type)}</span>
+                        <span className="text-base font-medium capitalize">{resource.type}</span>
+                      </div>
+                      <h4 className="font-semibold text-lg mb-2">{resource.title}</h4>
+                      <p className="text-sm sm:text-base text-gray-600 mb-3">{resource.description}</p>
+                      <a
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 hover:text-blue-800 break-all underline"
+                      >
+                        {resource.url}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Lista de tips */}
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                  <span className="text-2xl">{Icons.Lightbulb()}</span>
+                  Tips Activos ({globalTips.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {globalTips.map((tip) => (
+                    <div key={tip.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-2xl">{tip.icon}</span>
+                        <span className="text-base font-medium">{tip.category}</span>
+                      </div>
+                      <h4 className="font-semibold text-lg mb-2">{tip.title}</h4>
+                      <p className="text-sm sm:text-base text-gray-600">{tip.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB SUPLEMENTOS */}
+          {activeAdminTab === "supplements" && (
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+                <h3 className="text-xl sm:text-2xl font-semibold flex items-center gap-3">
+                  <span className="text-2xl">{Icons.Package()}</span>
+                  Gestión de Suplementos ({supplements.length})
+                </h3>
+                <button
+                  onClick={() => setShowAddSupplement(true)}
+                  className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 flex items-center gap-3 text-base font-medium transition-colors"
+                >
+                  <span className="text-xl">{Icons.Plus()}</span>
+                  Agregar Suplemento
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {supplements.map((supplement) => (
+                  <div key={supplement.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                    <h4 className="font-semibold text-lg mb-2">{supplement.name}</h4>
+                    <p className="text-sm sm:text-base text-gray-600 mb-3">{supplement.description}</p>
+                    <p className="text-xl font-bold text-green-600 mb-3">${supplement.price.toLocaleString()}</p>
+                    <div className="text-sm text-gray-500">
+                      <p className="font-medium mb-1">Beneficios:</p>
+                      <p>{supplement.benefits.join(", ")}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB ANALYTICS */}
+          {activeAdminTab === "analytics" && (
+            <div className="space-y-8">
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                  <span className="text-2xl">{Icons.TrendingUp()}</span>
+                  Analytics Avanzados
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="font-semibold text-lg mb-4">📊 Distribución de Objetivos</h4>
+                    <div className="space-y-3">
+                      {GOALS.map((goal) => {
+                        const count = allUsers.filter((u) => u.goal === goal.id).length
+                        const percentage = allUsers.length > 0 ? Math.round((count / allUsers.length) * 100) : 0
+                        return (
+                          <div key={goal.id} className="flex items-center justify-between">
+                            <span className="text-sm sm:text-base">{goal.label}</span>
+                            <div className="flex items-center gap-3">
+                              <div className="w-24 bg-gray-200 rounded-full h-3">
+                                <div className="bg-blue-500 h-3 rounded-full transition-all duration-300" style={{ width: `${percentage}%` }}></div>
+                              </div>
+                              <span className="text-sm text-gray-500 w-12 text-right">{count} ({percentage}%)</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-lg mb-4">⚡ Actividad Reciente</h4>
+                    <div className="space-y-3">
+                      {allUsers.slice(0, 8).map((user) => (
+                        <div key={user.id} className="flex items-center justify-between text-sm sm:text-base">
+                          <span className="font-medium">{user.name}</span>
+                          <span className="text-gray-500">{new Date(user.last_login).toLocaleDateString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Métricas de engagement */}
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <h3 className="text-xl sm:text-2xl font-semibold mb-6">🎯 Métricas de Engagement</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-100">
+                    <div className="text-3xl sm:text-4xl font-bold text-blue-600">
+                      {allUsers.length > 0 ? Math.round((allUsers.filter(u => new Date(u.last_login) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length / allUsers.length) * 100) : 0}%
+                    </div>
+                    <div className="text-sm sm:text-base text-gray-600 mt-2">Usuarios activos (7 días)</div>
+                  </div>
+                  <div className="text-center p-6 bg-green-50 rounded-xl border border-green-100">
+                    <div className="text-3xl sm:text-4xl font-bold text-green-600">
+                      {Math.round(supplements.length * 0.8)}
+                    </div>
+                    <div className="text-sm sm:text-base text-gray-600 mt-2">Consultas de suplementos/mes</div>
+                  </div>
+                  <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-100">
+                    <div className="text-3xl sm:text-4xl font-bold text-purple-600">
+                      {Math.round(globalResources.length * 2.3)}
+                    </div>
+                    <div className="text-sm sm:text-base text-gray-600 mt-2">Recursos visualizados/mes</div>
+                  </div>
+                  <div className="text-center p-6 bg-orange-50 rounded-xl border border-orange-100">
+                    <div className="text-3xl sm:text-4xl font-bold text-orange-600">4.8</div>
+                    <div className="text-sm sm:text-base text-gray-600 mt-2">Puntuación de satisfacción</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* MODALES RESPONSIVE */}
+        {/* MODALES FUNCIONALES */}
+        {/* Modal para agregar recurso */}
         {showAddResource && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-            <div className="relative top-4 sm:top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div className="relative top-4 sm:top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white">
               <div className="mt-3">
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Agregar Nuevo Recurso</h3>
-                <div className="space-y-4">
+                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Agregar Nuevo Recurso</h3>
+
+                <div className="space-y-5">
                   <select
-                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={newResource.type}
                     onChange={(e) => setNewResource((prev) => ({ ...prev, type: e.target.value as any }))}
                   >
@@ -2095,36 +2305,41 @@ Gracias!`
                     <option value="nutrition">🥗 Nutrición</option>
                     <option value="exercise">💪 Ejercicio</option>
                   </select>
+
                   <input
-                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Título del recurso"
                     value={newResource.title}
                     onChange={(e) => setNewResource((prev) => ({ ...prev, title: e.target.value }))}
                   />
+
                   <textarea
-                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Descripción"
-                    rows={3}
+                    rows={4}
                     value={newResource.description}
                     onChange={(e) => setNewResource((prev) => ({ ...prev, description: e.target.value }))}
                   />
+
                   <input
-                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="URL (YouTube, PDF, Spotify, etc.)"
                     value={newResource.url}
                     onChange={(e) => setNewResource((prev) => ({ ...prev, url: e.target.value }))}
                   />
+
                   <input
-                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="URL de imagen (opcional)"
                     value={newResource.image_url}
                     onChange={(e) => setNewResource((prev) => ({ ...prev, image_url: e.target.value }))}
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
                   <button
                     onClick={addResource}
-                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 text-sm"
+                    className="bg-blue-500 text-white p-4 rounded-xl hover:bg-blue-600 text-base font-medium transition-colors"
                   >
                     Agregar Recurso
                   </button>
@@ -2139,7 +2354,155 @@ Gracias!`
                         image_url: "",
                       })
                     }}
-                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                    className="bg-gray-500 text-white p-4 rounded-xl hover:bg-gray-600 text-base font-medium transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal para agregar tip */}
+        {showAddTip && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-4 sm:top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white">
+              <div className="mt-3">
+                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Agregar Nuevo Tip</h3>
+
+                <div className="space-y-5">
+                  <input
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Categoría (ej: Hidratación, Ejercicio)"
+                    value={newTip.category}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, category: e.target.value }))}
+                  />
+
+                  <input
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Título del tip"
+                    value={newTip.title}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, title: e.target.value }))}
+                  />
+
+                  <textarea
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Contenido del tip"
+                    rows={5}
+                    value={newTip.content}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, content: e.target.value }))}
+                  />
+
+                  <input
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Emoji/Icono (ej: 💧, 🏃‍♂️, 🧘‍♀️)"
+                    value={newTip.icon}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, icon: e.target.value }))}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                  <button
+                    onClick={addTip}
+                    className="bg-green-500 text-white p-4 rounded-xl hover:bg-green-600 text-base font-medium transition-colors"
+                  >
+                    Agregar Tip
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddTip(false)
+                      setNewTip({
+                        category: "",
+                        title: "",
+                        content: "",
+                        icon: "💡",
+                      })
+                    }}
+                    className="bg-gray-500 text-white p-4 rounded-xl hover:bg-gray-600 text-base font-medium transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal para agregar suplemento */}
+        {showAddSupplement && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-4 sm:top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white">
+              <div className="mt-3">
+                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Agregar Nuevo Suplemento</h3>
+
+                <div className="space-y-5">
+                  <input
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Nombre del suplemento"
+                    value={newSupplement.name}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, name: e.target.value }))}
+                  />
+
+                  <textarea
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Descripción"
+                    rows={4}
+                    value={newSupplement.description}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, description: e.target.value }))}
+                  />
+
+                  <input
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Beneficios (separados por comas)"
+                    value={newSupplement.benefits}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, benefits: e.target.value }))}
+                  />
+
+                  <input
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Precio (solo números)"
+                    type="number"
+                    value={newSupplement.price}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, price: e.target.value }))}
+                  />
+
+                  <input
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="URL de imagen"
+                    value={newSupplement.image_url}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, image_url: e.target.value }))}
+                  />
+
+                  <textarea
+                    className="w-full p-4 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Mensaje personalizado de WhatsApp (opcional)"
+                    rows={4}
+                    value={newSupplement.whatsapp_message}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, whatsapp_message: e.target.value }))}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                  <button
+                    onClick={addSupplement}
+                    className="bg-purple-500 text-white p-4 rounded-xl hover:bg-purple-600 text-base font-medium transition-colors"
+                  >
+                    Agregar Suplemento
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddSupplement(false)
+                      setNewSupplement({
+                        name: "",
+                        description: "",
+                        benefits: "",
+                        price: "",
+                        image_url: "",
+                        whatsapp_message: "",
+                      })
+                    }}
+                    className="bg-gray-500 text-white p-4 rounded-xl hover:bg-gray-600 text-base font-medium transition-colors"
                   >
                     Cancelar
                   </button>
@@ -2160,15 +2523,15 @@ Gracias!`
   }
 
   // ============================================================================
-  // ESTADOS DE CARGA Y ERROR RESPONSIVE
+  // ESTADOS DE CARGA Y ERROR
   // ============================================================================
   if (connectionStatus === "connecting") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8 w-full max-w-md text-center">
-          <div className="text-3xl sm:text-4xl mb-4">{Icons.Loader2()}</div>
-          <h3 className="text-base sm:text-lg font-semibold mb-2">Conectando con Supabase</h3>
-          <p className="text-sm sm:text-base text-gray-600">Inicializando base de datos...</p>
+        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-12 w-full max-w-md text-center">
+          <div className="text-5xl sm:text-6xl mb-6">{Icons.Loader2()}</div>
+          <h3 className="text-xl sm:text-2xl font-semibold mb-3">Conectando con Supabase</h3>
+          <p className="text-base sm:text-lg text-gray-600">Inicializando base de datos...</p>
         </div>
       </div>
     )
@@ -2177,13 +2540,13 @@ Gracias!`
   if (connectionStatus === "error") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8 w-full max-w-md text-center">
-          <div className="text-3xl sm:text-4xl mb-4 text-red-500">{Icons.X()}</div>
-          <h3 className="text-base sm:text-lg font-semibold mb-2">Error de conexión</h3>
-          <p className="text-sm sm:text-base text-gray-600 mb-4">No se pudo conectar con la base de datos</p>
+        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-12 w-full max-w-md text-center">
+          <div className="text-5xl sm:text-6xl mb-6 text-red-500">{Icons.X()}</div>
+          <h3 className="text-xl sm:text-2xl font-semibold mb-3">Error de conexión</h3>
+          <p className="text-base sm:text-lg text-gray-600 mb-6">No se pudo conectar con la base de datos</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm"
+            className="bg-red-500 text-white px-6 py-3 rounded-xl hover:bg-red-600 text-base font-medium transition-colors"
           >
             Reintentar
           </button>
@@ -2193,30 +2556,34 @@ Gracias!`
   }
 
   // ============================================================================
-  // PANTALLA DE LOGIN/REGISTRO RESPONSIVE
+  // PANTALLA DE LOGIN/REGISTRO
   // ============================================================================
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-6 sm:p-8 w-full max-w-md">
-          <div className="text-center mb-6">
+        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-10 w-full max-w-md">
+          <div className="text-center mb-8">
             <div onClick={handleLogoClick} className="cursor-pointer">
-              <h1 className="text-xl sm:text-2xl font-bold text-green-600">VitalMente</h1>
-              <p className="text-sm sm:text-base text-gray-600">Tu compañero de bienestar personalizado</p>
-              <div className="flex flex-wrap justify-center gap-1 sm:gap-2 mt-2">
-                <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded">🌐 Conectado</span>
-                <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA Activa</span>
+              <h1 className="text-3xl sm:text-4xl font-bold text-green-600">VitalMente</h1>
+              <p className="text-base sm:text-lg text-gray-600 mt-2">Tu compañero de bienestar personalizado</p>
+              <div className="flex flex-wrap justify-center gap-2 mt-4">
+                <span className="inline-block px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full font-medium">
+                  🌐 Conectado
+                </span>
+                <span className="inline-block px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full font-medium">
+                  🤖 IA Activa
+                </span>
               </div>
-              {logoClicks > 0 && <div className="mt-2 text-xs text-gray-400">Clics: {logoClicks}/5 para admin</div>}
+              {logoClicks > 0 && <div className="mt-3 text-sm text-gray-400">Clics: {logoClicks}/5 para admin</div>}
             </div>
           </div>
 
-          <div className="space-y-6">
-            {/* Botones de navegación responsive */}
-            <div className="flex rounded-lg bg-gray-100 p-1">
+          <div className="space-y-8">
+            {/* Botones de navegación */}
+            <div className="flex rounded-xl bg-gray-100 p-1">
               <button
                 onClick={() => setShowRegister(false)}
-                className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+                className={`flex-1 py-3 px-4 rounded-lg text-base font-medium transition-colors ${
                   !showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -2224,7 +2591,7 @@ Gracias!`
               </button>
               <button
                 onClick={() => setShowRegister(true)}
-                className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+                className={`flex-1 py-3 px-4 rounded-lg text-base font-medium transition-colors ${
                   showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -2233,15 +2600,15 @@ Gracias!`
             </div>
 
             {!showRegister ? (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                   placeholder="+57 300 123 4567"
                   value={loginForm.phone}
                   onChange={(e) => setLoginForm((prev) => ({ ...prev, phone: e.target.value }))}
                 />
                 <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                   type="password"
                   placeholder="Código de 10 dígitos"
                   maxLength={10}
@@ -2250,12 +2617,12 @@ Gracias!`
                 />
                 <button
                   onClick={handleLogin}
-                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
+                  className="w-full bg-green-500 text-white p-4 rounded-xl hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-3 transition-colors text-base font-medium"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
-                      <span>{Icons.Loader2()}</span>
+                      <span className="text-xl">{Icons.Loader2()}</span>
                       Ingresando...
                     </>
                   ) : (
@@ -2264,30 +2631,30 @@ Gracias!`
                 </button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                   placeholder="Número de teléfono"
                   value={registerForm.phone}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
                 />
                 <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                   placeholder="Nombre completo"
                   value={registerForm.name}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, name: e.target.value }))}
                 />
-                {/* Grid responsive para edad y peso */}
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                {/* Grid para edad y peso */}
+                <div className="grid grid-cols-2 gap-4">
                   <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                     placeholder="Edad"
                     type="number"
                     value={registerForm.age}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, age: e.target.value }))}
                   />
                   <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                     placeholder="Peso (kg)"
                     type="number"
                     value={registerForm.weight}
@@ -2295,14 +2662,14 @@ Gracias!`
                   />
                 </div>
                 <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                   placeholder="Altura (cm)"
                   type="number"
                   value={registerForm.height}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, height: e.target.value }))}
                 />
                 <select
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                   value={registerForm.activityLevel}
                   onChange={(e) =>
                     setRegisterForm((prev) => ({ ...prev, activityLevel: Number.parseFloat(e.target.value) }))
@@ -2315,7 +2682,7 @@ Gracias!`
                   ))}
                 </select>
                 <select
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                  className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                   value={registerForm.goal}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, goal: e.target.value }))}
                 >
@@ -2341,10 +2708,10 @@ Gracias!`
                     ))}
                   </optgroup>
                 </select>
-                {/* Códigos de acceso responsive */}
-                <div className="space-y-3 sm:space-y-4">
+                {/* Códigos de acceso */}
+                <div className="space-y-4">
                   <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                     type="password"
                     placeholder="Código de acceso (10 dígitos)"
                     maxLength={10}
@@ -2352,7 +2719,7 @@ Gracias!`
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, accessCode: e.target.value }))}
                   />
                   <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
+                    className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 text-base"
                     type="password"
                     placeholder="Confirmar código"
                     maxLength={10}
@@ -2362,12 +2729,12 @@ Gracias!`
                 </div>
                 <button
                   onClick={handleRegister}
-                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
+                  className="w-full bg-green-500 text-white p-4 rounded-xl hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-3 transition-colors text-base font-medium"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
-                      <span>{Icons.Loader2()}</span>
+                      <span className="text-xl">{Icons.Loader2()}</span>
                       Creando cuenta...
                     </>
                   ) : (
@@ -2379,23 +2746,23 @@ Gracias!`
           </div>
         </div>
 
-        {/* Modal de acceso administrador responsive */}
+        {/* Modal de acceso administrador */}
         {showAdminLogin && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-            <div className="relative top-4 sm:top-20 mx-auto p-5 border w-full max-w-sm shadow-lg rounded-md bg-white">
+            <div className="relative top-4 sm:top-20 mx-auto p-6 border w-full max-w-sm shadow-xl rounded-2xl bg-white">
               <div className="mt-3">
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Acceso Administrador</h3>
+                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Acceso Administrador</h3>
                 <input
-                  className="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm sm:text-base"
+                  className="w-full p-4 border border-gray-300 rounded-xl mb-6 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   type="password"
                   placeholder="Código de acceso"
                   value={adminCode}
                   onChange={(e) => setAdminCode(e.target.value)}
                 />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button
                     onClick={handleAdminLogin}
-                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                    className="bg-blue-500 text-white p-4 rounded-xl hover:bg-blue-600 transition-colors text-base font-medium"
                   >
                     Ingresar
                   </button>
@@ -2405,7 +2772,7 @@ Gracias!`
                       setAdminCode("")
                       setLogoClicks(0)
                     }}
-                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 transition-colors text-sm"
+                    className="bg-gray-500 text-white p-4 rounded-xl hover:bg-gray-600 transition-colors text-base font-medium"
                   >
                     Cancelar
                   </button>
@@ -2419,7 +2786,7 @@ Gracias!`
   }
 
   // ============================================================================
-  // APLICACIÓN PRINCIPAL RESPONSIVE
+  // APLICACIÓN PRINCIPAL
   // ============================================================================
   const activeTips = globalTips.filter((tip) => tip.is_active)
   const mindfulnessResources = globalResources.filter((r) => r.type === "mindfulness" && r.is_active)
@@ -2432,35 +2799,37 @@ Gracias!`
       <SaveStatusIndicator />
       <FloatingActionButtons />
 
-      {/* Header responsive */}
+      {/* Header */}
       <header className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <h1 className="text-xl sm:text-2xl font-bold text-green-600">VitalMente</h1>
-              <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA</span>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-bold text-green-600">VitalMente</h1>
+              <span className="inline-block px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full font-medium">
+                🤖 IA
+              </span>
             </div>
             <button
               onClick={handleLogout}
-              className="px-3 py-2 sm:px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm flex items-center gap-1 sm:gap-2"
+              className="px-4 py-3 sm:px-6 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors text-base font-medium flex items-center gap-2"
             >
-              <span>{Icons.LogOut()}</span>
+              <span className="text-lg">{Icons.LogOut()}</span>
               <span className="hidden sm:inline">Salir</span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* Contenido principal responsive */}
-      <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
+      {/* Contenido principal */}
+      <main className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
         {activeTab === "inicio" && (
-          <div className="space-y-4 sm:space-y-6">
-            {/* Bienvenida responsive */}
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h2 className="text-base sm:text-lg font-semibold mb-2">
-                ¡Hola, {currentUser?.name}! {Icons.Magic()}
+          <div className="space-y-6 sm:space-y-8">
+            {/* Bienvenida */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-3">
+                ¡Hola, {currentUser?.name}! <span className="text-2xl">{Icons.Magic()}</span>
               </h2>
-              <p className="text-sm sm:text-base text-gray-600">
+              <p className="text-base sm:text-lg text-gray-600">
                 {getMotivationalMessage(currentUser?.goal || "reduce_stress")}
               </p>
             </div>
@@ -2468,34 +2837,36 @@ Gracias!`
             {/* Panel de gamificación */}
             <GamificationPanel />
 
-            {/* Progreso diario responsive */}
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
-                <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
-                  <span>{Icons.Target()}</span>
+            {/* Progreso diario */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+                <h3 className="text-xl sm:text-2xl font-semibold flex items-center gap-3">
+                  <span className="text-2xl">{Icons.Target()}</span>
                   Progreso Diario
                 </h3>
-                <span className="text-xs sm:text-sm text-gray-600">
-                  {getProgressPercentage()}% completado {Icons.CheckCircle()}
+                <span className="text-base sm:text-lg text-gray-600 font-medium">
+                  {getProgressPercentage()}% completado{" "}
+                  <span className="text-xl">{Icons.CheckCircle()}</span>
                 </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {/* Agua */}
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                  <span className="text-xl sm:text-2xl">{Icons.Droplets()}</span>
+                <div className="flex items-center gap-4 p-5 bg-blue-50 rounded-xl border border-blue-100">
+                  <span className="text-3xl sm:text-4xl">{Icons.Droplets()}</span>
                   <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-medium">Agua</p>
-                    <div className="flex items-center gap-2">
+                    <p className="text-base sm:text-lg font-medium">Agua</p>
+                    <div className="flex items-center gap-3 mt-2">
                       <button
                         onClick={() => updateProgress("water", -1)}
-                        className="p-1 rounded-full hover:bg-gray-100 transition-colors text-sm"
+                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
                       >
                         {Icons.Minus()}
                       </button>
-                      <span className="text-lg sm:text-xl font-bold">{dailyProgress.water}</span>
+                      <span className="text-2xl sm:text-3xl font-bold">{dailyProgress.water}</span>
                       <button
                         onClick={() => updateProgress("water", 1)}
-                        className="p-1 rounded-full hover:bg-gray-100 transition-colors text-sm"
+                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
                       >
                         {Icons.Plus()}
                       </button>
@@ -2504,21 +2875,21 @@ Gracias!`
                 </div>
 
                 {/* Ejercicio */}
-                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                  <span className="text-xl sm:text-2xl">{Icons.Activity()}</span>
+                <div className="flex items-center gap-4 p-5 bg-green-50 rounded-xl border border-green-100">
+                  <span className="text-3xl sm:text-4xl">{Icons.Activity()}</span>
                   <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-medium">Ejercicio</p>
-                    <div className="flex items-center gap-2">
+                    <p className="text-base sm:text-lg font-medium">Ejercicio</p>
+                    <div className="flex items-center gap-3 mt-2">
                       <button
                         onClick={() => updateProgress("exercise", -1)}
-                        className="p-1 rounded-full hover:bg-gray-100 transition-colors text-sm"
+                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
                       >
                         {Icons.Minus()}
                       </button>
-                      <span className="text-lg sm:text-xl font-bold">{dailyProgress.exercise}</span>
+                      <span className="text-2xl sm:text-3xl font-bold">{dailyProgress.exercise}</span>
                       <button
                         onClick={() => updateProgress("exercise", 1)}
-                        className="p-1 rounded-full hover:bg-gray-100 transition-colors text-sm"
+                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
                       >
                         {Icons.Plus()}
                       </button>
@@ -2527,21 +2898,21 @@ Gracias!`
                 </div>
 
                 {/* Mindfulness */}
-                <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                  <span className="text-xl sm:text-2xl">{Icons.Brain()}</span>
+                <div className="flex items-center gap-4 p-5 bg-purple-50 rounded-xl border border-purple-100">
+                  <span className="text-3xl sm:text-4xl">{Icons.Brain()}</span>
                   <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-medium">Mindfulness</p>
-                    <div className="flex items-center gap-2">
+                    <p className="text-base sm:text-lg font-medium">Mindfulness</p>
+                    <div className="flex items-center gap-3 mt-2">
                       <button
                         onClick={() => updateProgress("mindfulness", -1)}
-                        className="p-1 rounded-full hover:bg-gray-100 transition-colors text-sm"
+                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
                       >
                         {Icons.Minus()}
                       </button>
-                      <span className="text-lg sm:text-xl font-bold">{dailyProgress.mindfulness}</span>
+                      <span className="text-2xl sm:text-3xl font-bold">{dailyProgress.mindfulness}</span>
                       <button
                         onClick={() => updateProgress("mindfulness", 1)}
-                        className="p-1 rounded-full hover:bg-gray-100 transition-colors text-sm"
+                        className="p-2 rounded-full hover:bg-white/50 transition-colors text-lg"
                       >
                         {Icons.Plus()}
                       </button>
@@ -2550,84 +2921,86 @@ Gracias!`
                 </div>
               </div>
 
-              {/* Botones de acción responsive */}
-              <div className="flex flex-col sm:flex-row justify-between mt-4 gap-2">
+              {/* Botones de acción */}
+              <div className="flex flex-col sm:flex-row justify-between mt-6 gap-3">
                 <button
                   onClick={() => resetProgress("all")}
-                  className="px-3 py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="px-4 py-3 text-base text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium"
                 >
-                  {Icons.RotateCcw()} Reiniciar día
+                  <span className="text-lg mr-2">{Icons.RotateCcw()}</span>
+                  Reiniciar día
                 </button>
                 <button
                   onClick={() => resetProgress("meals")}
-                  className="px-3 py-2 text-xs sm:text-sm text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                  className="px-4 py-3 text-base text-orange-600 hover:bg-orange-50 rounded-xl transition-colors font-medium"
                 >
-                  {Icons.UtensilsCrossed()} Reiniciar comidas
+                  <span className="text-lg mr-2">{Icons.UtensilsCrossed()}</span>
+                  Reiniciar comidas
                 </button>
               </div>
             </div>
 
-            {/* Tips responsive */}
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{Icons.Lightbulb()}</span>
+            {/* Tips */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                <span className="text-2xl">{Icons.Lightbulb()}</span>
                 Tip del día
               </h3>
               {activeTips.length > 0 ? (
                 <>
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg sm:text-xl">{activeTips[currentTipIndex].icon}</span>
-                      <span className="text-sm sm:text-base font-medium">{activeTips[currentTipIndex].category}</span>
+                  <div className="mb-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-2xl sm:text-3xl">{activeTips[currentTipIndex].icon}</span>
+                      <span className="text-lg sm:text-xl font-medium">{activeTips[currentTipIndex].category}</span>
                     </div>
-                    <h4 className="font-semibold text-sm sm:text-base">{activeTips[currentTipIndex].title}</h4>
-                    <p className="text-xs sm:text-sm text-gray-600">{activeTips[currentTipIndex].content}</p>
+                    <h4 className="font-semibold text-lg sm:text-xl mb-2">{activeTips[currentTipIndex].title}</h4>
+                    <p className="text-base sm:text-lg text-gray-600">{activeTips[currentTipIndex].content}</p>
                   </div>
-                  <div className="flex justify-between items-center mt-4">
+                  <div className="flex justify-between items-center">
                     <button
                       onClick={() => setCurrentTipIndex((prev) => (prev === 0 ? activeTips.length - 1 : prev - 1))}
-                      className="flex items-center gap-1 sm:gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border border-gray-300 text-xs sm:text-sm"
+                      className="flex items-center gap-3 px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors border border-gray-300 text-base font-medium"
                     >
-                      <span className="text-sm sm:text-lg">{Icons.ChevronLeft()}</span>
-                      <span className="font-medium">Anterior</span>
+                      <span className="text-xl">{Icons.ChevronLeft()}</span>
+                      <span>Anterior</span>
                     </button>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-sm sm:text-base text-gray-500">
                         {currentTipIndex + 1} de {activeTips.length}
                       </span>
                     </div>
                     <button
                       onClick={() => setCurrentTipIndex((prev) => (prev === activeTips.length - 1 ? 0 : prev + 1))}
-                      className="flex items-center gap-1 sm:gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border border-gray-300 text-xs sm:text-sm"
+                      className="flex items-center gap-3 px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors border border-gray-300 text-base font-medium"
                     >
-                      <span className="font-medium">Siguiente</span>
-                      <span className="text-sm sm:text-lg">{Icons.ChevronRight()}</span>
+                      <span>Siguiente</span>
+                      <span className="text-xl">{Icons.ChevronRight()}</span>
                     </button>
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-gray-500">No hay tips activos disponibles.</p>
+                <p className="text-base text-gray-500">No hay tips activos disponibles.</p>
               )}
             </div>
 
-            {/* Recomendaciones IA responsive */}
+            {/* Recomendaciones IA */}
             {aiRecommendations.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                  <span>{Icons.Robot()}</span>
+              <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+                <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                  <span className="text-2xl">{Icons.Robot()}</span>
                   Recomendaciones Personalizadas
                 </h3>
                 {aiRecommendations.map((rec) => (
-                  <div key={rec.id} className="border border-gray-200 rounded-lg p-3 sm:p-4 mb-3">
-                    <h4 className="font-semibold mb-1 text-sm sm:text-base">{rec.reason}</h4>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                  <div key={rec.id} className="border border-gray-200 rounded-xl p-5 sm:p-6 mb-4">
+                    <h4 className="font-semibold mb-2 text-lg">{rec.reason}</h4>
+                    <p className="text-base text-gray-600 mb-4">
                       Suplementos recomendados: {rec.supplement_names.join(", ")}
                     </p>
                     <button
                       onClick={() => handleRecommendationClick(rec.id)}
-                      className="px-3 py-2 text-xs sm:text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="px-4 py-3 text-base text-blue-600 hover:bg-blue-50 rounded-xl transition-colors font-medium"
                     >
-                      Ver más {Icons.ExternalLink()}
+                      Ver más <span className="text-lg ml-1">{Icons.ExternalLink()}</span>
                     </button>
                   </div>
                 ))}
@@ -2637,74 +3010,76 @@ Gracias!`
         )}
 
         {activeTab === "comida" && (
-          <div className="space-y-4 sm:space-y-6">
-            {/* Resumen de calorías responsive */}
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{Icons.UtensilsCrossed()}</span>
+          <div className="space-y-6 sm:space-y-8">
+            {/* Resumen de calorías */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                <span className="text-2xl">{Icons.UtensilsCrossed()}</span>
                 Resumen de Comida
               </h3>
               {macroResults ? (
                 <>
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-xs sm:text-sm font-medium">Calorías consumidas</p>
-                    <p className="text-lg sm:text-xl font-bold">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-base sm:text-lg font-medium">Calorías consumidas</p>
+                    <p className="text-2xl sm:text-3xl font-bold">
                       {caloriesProgress.consumed} / {caloriesProgress.target}
                     </p>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                  <div className="w-full bg-gray-200 rounded-full h-4 mb-6">
                     <div
-                      className="bg-green-500 h-2.5 rounded-full transition-all duration-300"
+                      className="bg-green-500 h-4 rounded-full transition-all duration-500"
                       style={{ width: `${caloriesProgress.percentage}%` }}
                     ></div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                  <div className="grid grid-cols-3 gap-6 text-center">
                     <div>
-                      <p className="text-xs sm:text-sm font-medium">Proteína</p>
-                      <p className="text-lg sm:text-xl font-bold">{consumedMacros.protein}g</p>
-                      <p className="text-xs text-gray-500">
-                        Meta: {macroResults.protein}g (
-                        {Math.round((consumedMacros.protein / macroResults.protein) * 100)}
-                        %)
+                      <p className="text-base sm:text-lg font-medium">Proteína</p>
+                      <p className="text-2xl sm:text-3xl font-bold">{consumedMacros.protein}g</p>
+                      <p className="text-sm sm:text-base text-gray-500">
+                        Meta: {macroResults.protein}g ({Math.round((consumedMacros.protein / macroResults.protein) * 100)}%)
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm font-medium">Carbohidratos</p>
-                      <p className="text-lg sm:text-xl font-bold">{consumedMacros.carbs}g</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-base sm:text-lg font-medium">Carbohidratos</p>
+                      <p className="text-2xl sm:text-3xl font-bold">{consumedMacros.carbs}g</p>
+                      <p className="text-sm sm:text-base text-gray-500">
                         Meta: {macroResults.carbs}g ({Math.round((consumedMacros.carbs / macroResults.carbs) * 100)}%)
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs sm:text-sm font-medium">Grasas</p>
-                      <p className="text-lg sm:text-xl font-bold">{consumedMacros.fats}g</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-base sm:text-lg font-medium">Grasas</p>
+                      <p className="text-2xl sm:text-3xl font-bold">{consumedMacros.fats}g</p>
+                      <p className="text-sm sm:text-base text-gray-500">
                         Meta: {macroResults.fats}g ({Math.round((consumedMacros.fats / macroResults.fats) * 100)}%)
                       </p>
                     </div>
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-gray-500">Calculando macros...</p>
+                <p className="text-base text-gray-500">Calculando macros...</p>
               )}
             </div>
 
-            {/* Comidas de hoy responsive */}
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{Icons.ChefHat()}</span>
+            {/* Comidas de hoy */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                <span className="text-2xl">{Icons.ChefHat()}</span>
                 Comidas de Hoy
               </h3>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Desayuno */}
                 <div>
-                  <h4 className="font-semibold mb-2 flex flex-col sm:flex-row sm:items-center gap-2">
-                    <span className="flex items-center gap-1">{Icons.UtensilsCrossed()} Desayuno</span>
+                  <h4 className="font-semibold mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <span className="flex items-center gap-2 text-lg">
+                      <span className="text-xl">{Icons.UtensilsCrossed()}</span>
+                      Desayuno
+                    </span>
                     <button
                       onClick={() => openMealCalculator("desayuno")}
-                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="px-3 py-2 text-base text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
                     >
-                      {Icons.Plus()} Agregar
+                      <span className="text-lg mr-1">{Icons.Plus()}</span>
+                      Agregar
                     </button>
                   </h4>
                   {mealCompositions
@@ -2712,19 +3087,19 @@ Gracias!`
                     .map((composition) => (
                       <div
                         key={composition.id}
-                        className="flex items-center justify-between border-b py-2 last:border-b-0"
+                        className="flex items-center justify-between border-b py-3 last:border-b-0"
                       >
                         <div>
-                          <p className="text-xs sm:text-sm font-medium">{composition.food_name}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-base font-medium">{composition.food_name}</p>
+                          <p className="text-sm text-gray-500">
                             {composition.quantity_grams}g - {composition.calories_consumed} cal
                           </p>
                         </div>
                         <button
                           onClick={() => removeFoodFromMeal(composition.id)}
-                          className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
-                          {Icons.Trash2()}
+                          <span className="text-lg">{Icons.Trash2()}</span>
                         </button>
                       </div>
                     ))}
@@ -2732,13 +3107,17 @@ Gracias!`
 
                 {/* Almuerzo */}
                 <div>
-                  <h4 className="font-semibold mb-2 flex flex-col sm:flex-row sm:items-center gap-2">
-                    <span className="flex items-center gap-1">{Icons.UtensilsCrossed()} Almuerzo</span>
+                  <h4 className="font-semibold mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <span className="flex items-center gap-2 text-lg">
+                      <span className="text-xl">{Icons.UtensilsCrossed()}</span>
+                      Almuerzo
+                    </span>
                     <button
                       onClick={() => openMealCalculator("almuerzo")}
-                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="px-3 py-2 text-base text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
                     >
-                      {Icons.Plus()} Agregar
+                      <span className="text-lg mr-1">{Icons.Plus()}</span>
+                      Agregar
                     </button>
                   </h4>
                   {mealCompositions
@@ -2746,19 +3125,19 @@ Gracias!`
                     .map((composition) => (
                       <div
                         key={composition.id}
-                        className="flex items-center justify-between border-b py-2 last:border-b-0"
+                        className="flex items-center justify-between border-b py-3 last:border-b-0"
                       >
                         <div>
-                          <p className="text-xs sm:text-sm font-medium">{composition.food_name}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-base font-medium">{composition.food_name}</p>
+                          <p className="text-sm text-gray-500">
                             {composition.quantity_grams}g - {composition.calories_consumed} cal
                           </p>
                         </div>
                         <button
                           onClick={() => removeFoodFromMeal(composition.id)}
-                          className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
-                          {Icons.Trash2()}
+                          <span className="text-lg">{Icons.Trash2()}</span>
                         </button>
                       </div>
                     ))}
@@ -2766,13 +3145,17 @@ Gracias!`
 
                 {/* Cena */}
                 <div>
-                  <h4 className="font-semibold mb-2 flex flex-col sm:flex-row sm:items-center gap-2">
-                    <span className="flex items-center gap-1">{Icons.UtensilsCrossed()} Cena</span>
+                  <h4 className="font-semibold mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <span className="flex items-center gap-2 text-lg">
+                      <span className="text-xl">{Icons.UtensilsCrossed()}</span>
+                      Cena
+                    </span>
                     <button
                       onClick={() => openMealCalculator("cena")}
-                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="px-3 py-2 text-base text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium"
                     >
-                      {Icons.Plus()} Agregar
+                      <span className="text-lg mr-1">{Icons.Plus()}</span>
+                      Agregar
                     </button>
                   </h4>
                   {mealCompositions
@@ -2780,19 +3163,19 @@ Gracias!`
                     .map((composition) => (
                       <div
                         key={composition.id}
-                        className="flex items-center justify-between border-b py-2 last:border-b-0"
+                        className="flex items-center justify-between border-b py-3 last:border-b-0"
                       >
                         <div>
-                          <p className="text-xs sm:text-sm font-medium">{composition.food_name}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-base font-medium">{composition.food_name}</p>
+                          <p className="text-sm text-gray-500">
                             {composition.quantity_grams}g - {composition.calories_consumed} cal
                           </p>
                         </div>
                         <button
                           onClick={() => removeFoodFromMeal(composition.id)}
-                          className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
-                          {Icons.Trash2()}
+                          <span className="text-lg">{Icons.Trash2()}</span>
                         </button>
                       </div>
                     ))}
@@ -2803,72 +3186,72 @@ Gracias!`
         )}
 
         {activeTab === "entrenamiento" && (
-          <div className="space-y-4 sm:space-y-6">
-            {/* Rutinas de ejercicio responsive */}
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{Icons.Dumbbell()}</span>
+          <div className="space-y-6 sm:space-y-8">
+            {/* Rutinas de ejercicio */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                <span className="text-2xl">{Icons.Dumbbell()}</span>
                 Rutinas de Entrenamiento
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {exerciseResources.map((resource) => (
                   <a
                     key={resource.id}
                     href={resource.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                    className="block border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
                   >
                     <img
                       src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
                       alt={resource.title}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-40 object-cover"
                     />
-                    <div className="p-3 sm:p-4">
-                      <h4 className="font-semibold mb-1 text-sm sm:text-base">{resource.title}</h4>
-                      <p className="text-xs sm:text-sm text-gray-600">{resource.description}</p>
+                    <div className="p-5">
+                      <h4 className="font-semibold mb-2 text-lg">{resource.title}</h4>
+                      <p className="text-base text-gray-600">{resource.description}</p>
                     </div>
                   </a>
                 ))}
               </div>
             </div>
 
-            {/* Progreso de ejercicio responsive */}
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{Icons.Activity()}</span>
+            {/* Progreso de ejercicio */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                <span className="text-2xl">{Icons.Activity()}</span>
                 Tu Progreso de Ejercicio
               </h3>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium">Sesiones completadas hoy</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-green-600">{dailyProgress.exercise}</p>
+                  <p className="text-base sm:text-lg font-medium">Sesiones completadas hoy</p>
+                  <p className="text-4xl sm:text-5xl font-bold text-green-600">{dailyProgress.exercise}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={() => updateProgress("exercise", -1)}
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    className="p-3 rounded-full hover:bg-gray-100 transition-colors text-xl"
                   >
                     {Icons.Minus()}
                   </button>
                   <button
                     onClick={() => updateProgress("exercise", 1)}
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    className="p-3 rounded-full hover:bg-gray-100 transition-colors text-xl"
                   >
                     {Icons.Plus()}
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="p-3 sm:p-4 bg-blue-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl font-bold text-blue-600">{getStreakDays()}</div>
-                  <div className="text-xs sm:text-sm text-gray-600">Días activos</div>
+              <div className="grid grid-cols-2 gap-6 text-center">
+                <div className="p-6 bg-blue-50 rounded-xl border border-blue-100">
+                  <div className="text-3xl sm:text-4xl font-bold text-blue-600">{getStreakDays()}</div>
+                  <div className="text-base sm:text-lg text-gray-600 mt-2">Días activos</div>
                 </div>
-                <div className="p-3 sm:p-4 bg-green-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl font-bold text-green-600">
+                <div className="p-6 bg-green-50 rounded-xl border border-green-100">
+                  <div className="text-3xl sm:text-4xl font-bold text-green-600">
                     {progressHistory.reduce((sum, day) => sum + day.exercise, 0)}
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-600">Total esta semana</div>
+                  <div className="text-base sm:text-lg text-gray-600 mt-2">Total esta semana</div>
                 </div>
               </div>
             </div>
@@ -2876,72 +3259,72 @@ Gracias!`
         )}
 
         {activeTab === "mindfulness" && (
-          <div className="space-y-4 sm:space-y-6">
-            {/* Recursos de mindfulness responsive */}
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{Icons.Brain()}</span>
+          <div className="space-y-6 sm:space-y-8">
+            {/* Recursos de mindfulness */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                <span className="text-2xl">{Icons.Brain()}</span>
                 Mindfulness y Meditación
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {mindfulnessResources.map((resource) => (
                   <a
                     key={resource.id}
                     href={resource.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                    className="block border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
                   >
                     <img
                       src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
                       alt={resource.title}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-40 object-cover"
                     />
-                    <div className="p-3 sm:p-4">
-                      <h4 className="font-semibold mb-1 text-sm sm:text-base">{resource.title}</h4>
-                      <p className="text-xs sm:text-sm text-gray-600">{resource.description}</p>
+                    <div className="p-5">
+                      <h4 className="font-semibold mb-2 text-lg">{resource.title}</h4>
+                      <p className="text-base text-gray-600">{resource.description}</p>
                     </div>
                   </a>
                 ))}
               </div>
             </div>
 
-            {/* Progreso de mindfulness responsive */}
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{Icons.Brain()}</span>
+            {/* Progreso de mindfulness */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                <span className="text-2xl">{Icons.Brain()}</span>
                 Tu Progreso de Mindfulness
               </h3>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="text-xs sm:text-sm font-medium">Sesiones completadas hoy</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-purple-600">{dailyProgress.mindfulness}</p>
+                  <p className="text-base sm:text-lg font-medium">Sesiones completadas hoy</p>
+                  <p className="text-4xl sm:text-5xl font-bold text-purple-600">{dailyProgress.mindfulness}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={() => updateProgress("mindfulness", -1)}
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    className="p-3 rounded-full hover:bg-gray-100 transition-colors text-xl"
                   >
                     {Icons.Minus()}
                   </button>
                   <button
                     onClick={() => updateProgress("mindfulness", 1)}
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    className="p-3 rounded-full hover:bg-gray-100 transition-colors text-xl"
                   >
                     {Icons.Plus()}
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="p-3 sm:p-4 bg-purple-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl font-bold text-purple-600">{getStreakDays()}</div>
-                  <div className="text-xs sm:text-sm text-gray-600">Días de práctica</div>
+              <div className="grid grid-cols-2 gap-6 text-center">
+                <div className="p-6 bg-purple-50 rounded-xl border border-purple-100">
+                  <div className="text-3xl sm:text-4xl font-bold text-purple-600">{getStreakDays()}</div>
+                  <div className="text-base sm:text-lg text-gray-600 mt-2">Días de práctica</div>
                 </div>
-                <div className="p-3 sm:p-4 bg-indigo-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl font-bold text-indigo-600">
+                <div className="p-6 bg-indigo-50 rounded-xl border border-indigo-100">
+                  <div className="text-3xl sm:text-4xl font-bold text-indigo-600">
                     {progressHistory.reduce((sum, day) => sum + day.mindfulness, 0)}
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-600">Total esta semana</div>
+                  <div className="text-base sm:text-lg text-gray-600 mt-2">Total esta semana</div>
                 </div>
               </div>
             </div>
@@ -2949,40 +3332,39 @@ Gracias!`
         )}
 
         {activeTab === "suplementos" && (
-          <div className="space-y-4 sm:space-y-6">
-            {/* Lista de suplementos responsive */}
-            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-              <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>{Icons.Package()}</span>
+          <div className="space-y-6 sm:space-y-8">
+            {/* Lista de suplementos */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center gap-3">
+                <span className="text-2xl">{Icons.Package()}</span>
                 Suplementos
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {supplements.map((supplement) => (
                   <div
                     key={supplement.id}
-                    className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                    className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
                   >
                     <img
                       src={supplement.image_url || "/placeholder.svg?height=200&width=200"}
                       alt={supplement.name}
-                      className="w-full h-32 sm:h-40 object-cover"
+                      className="w-full h-48 object-cover"
                     />
-                    <div className="p-3 sm:p-4">
-                      <h4 className="font-semibold mb-1 text-sm sm:text-base">{supplement.name}</h4>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-2">{supplement.description}</p>
-                      <p className="text-sm sm:text-base font-medium text-green-600 mb-2">
-                        ${supplement.price.toLocaleString()}
-                      </p>
-                      <ul className="text-xs text-gray-500 mb-3">
+                    <div className="p-5">
+                      <h4 className="font-semibold mb-2 text-lg">{supplement.name}</h4>
+                      <p className="text-base text-gray-600 mb-3">{supplement.description}</p>
+                      <p className="text-xl font-medium text-green-600 mb-3">${supplement.price.toLocaleString()}</p>
+                      <ul className="text-sm text-gray-500 mb-4">
                         {supplement.benefits.map((benefit, index) => (
                           <li key={index}>- {benefit}</li>
                         ))}
                       </ul>
                       <button
                         onClick={() => handleSupplementContact(supplement)}
-                        className="w-full px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-xs sm:text-sm"
+                        className="w-full px-4 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-3 text-base font-medium"
                       >
-                        {Icons.MessageSquare()} Contactar
+                        <span className="text-lg">{Icons.MessageSquare()}</span>
+                        Contactar
                       </button>
                     </div>
                   </div>
@@ -2993,18 +3375,18 @@ Gracias!`
         )}
       </main>
 
-      {/* Navegación inferior responsive */}
-      <nav className="bg-white border-t shadow-md fixed bottom-0 left-0 w-full z-30">
+      {/* Navegación inferior */}
+      <nav className="bg-white border-t shadow-lg fixed bottom-0 left-0 w-full z-30">
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
-          <div className="h-16 flex justify-between">
+          <div className="h-20 flex justify-between">
             <button
               onClick={() => setActiveTab("inicio")}
               className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
                 activeTab === "inicio" ? "text-green-600" : "text-gray-500"
               }`}
             >
-              <span className="text-lg sm:text-2xl">{Icons.Home()}</span>
-              <span className="text-xs">Inicio</span>
+              <span className="text-2xl sm:text-3xl">{Icons.Home()}</span>
+              <span className="text-xs sm:text-sm font-medium">Inicio</span>
             </button>
             <button
               onClick={() => setActiveTab("comida")}
@@ -3012,8 +3394,8 @@ Gracias!`
                 activeTab === "comida" ? "text-green-600" : "text-gray-500"
               }`}
             >
-              <span className="text-lg sm:text-2xl">{Icons.UtensilsCrossed()}</span>
-              <span className="text-xs">Alimentación</span>
+              <span className="text-2xl sm:text-3xl">{Icons.UtensilsCrossed()}</span>
+              <span className="text-xs sm:text-sm font-medium">Alimentación</span>
             </button>
             <button
               onClick={() => setActiveTab("entrenamiento")}
@@ -3021,8 +3403,8 @@ Gracias!`
                 activeTab === "entrenamiento" ? "text-green-600" : "text-gray-500"
               }`}
             >
-              <span className="text-lg sm:text-2xl">{Icons.Dumbbell()}</span>
-              <span className="text-xs">Entrenamiento</span>
+              <span className="text-2xl sm:text-3xl">{Icons.Dumbbell()}</span>
+              <span className="text-xs sm:text-sm font-medium">Entrenamiento</span>
             </button>
             <button
               onClick={() => setActiveTab("mindfulness")}
@@ -3030,8 +3412,8 @@ Gracias!`
                 activeTab === "mindfulness" ? "text-green-600" : "text-gray-500"
               }`}
             >
-              <span className="text-lg sm:text-2xl">{Icons.Brain()}</span>
-              <span className="text-xs">Mindfulness</span>
+              <span className="text-2xl sm:text-3xl">{Icons.Brain()}</span>
+              <span className="text-xs sm:text-sm font-medium">Mindfulness</span>
             </button>
             <button
               onClick={() => setActiveTab("suplementos")}
@@ -3039,37 +3421,38 @@ Gracias!`
                 activeTab === "suplementos" ? "text-green-600" : "text-gray-500"
               }`}
             >
-              <span className="text-lg sm:text-2xl">{Icons.Package()}</span>
-              <span className="text-xs">Suplementos</span>
+              <span className="text-2xl sm:text-3xl">{Icons.Package()}</span>
+              <span className="text-xs sm:text-sm font-medium">Suplementos</span>
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Modal de calculadora de comida responsive */}
+      {/* Modal de calculadora de comida */}
       {showMealCalculator && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-          <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+          <div className="relative top-4 sm:top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white">
             <div className="mt-3">
-              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">
                 Agregar comida a {selectedMealType}
               </h3>
-              {/* Selector de comida responsive */}
-              <div className="mb-4">
-                <h4 className="font-semibold mb-2 text-sm sm:text-base">Buscar comida</h4>
-                <div className="space-y-2">
+              {/* Selector de comida */}
+              <div className="mb-6">
+                <h4 className="font-semibold mb-4 text-lg">Buscar comida</h4>
+                <div className="space-y-4">
                   {getFoodsByCategory().map((category) => (
                     <div key={category.id}>
-                      <h5 className="font-medium flex items-center gap-2 text-sm">
-                        {category.icon} {category.name}
+                      <h5 className="font-medium flex items-center gap-3 text-base mb-3">
+                        <span className="text-xl">{category.icon}</span>
+                        {category.name}
                       </h5>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-3">
                         {category.foods.map((food) => (
                           <button
                             key={food.id}
                             onClick={() => selectFood(food)}
-                            className={`px-2 py-2 text-xs border rounded-lg hover:bg-gray-50 transition-colors ${
-                              selectedFood?.id === food.id ? "border-green-500" : "border-gray-300"
+                            className={`px-4 py-3 text-sm border rounded-xl hover:bg-gray-50 transition-colors ${
+                              selectedFood?.id === food.id ? "border-green-500 bg-green-50" : "border-gray-300"
                             }`}
                           >
                             {food.name}
@@ -3080,36 +3463,36 @@ Gracias!`
                   ))}
                 </div>
               </div>
-              {/* Selector de cantidad responsive */}
+              {/* Selector de cantidad */}
               {selectedFood && (
-                <div className="mb-4">
-                  <h4 className="font-semibold mb-2 text-sm sm:text-base">
+                <div className="mb-6">
+                  <h4 className="font-semibold mb-3 text-lg">
                     {selectedFood.name} - {selectedFood.calories} cal / 100g
                   </h4>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <input
                       type="number"
-                      className="w-24 p-2 sm:p-3 border border-gray-300 rounded-lg text-sm"
+                      className="w-32 p-3 border border-gray-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-green-500"
                       placeholder="Cantidad (g)"
                       value={foodQuantity}
                       onChange={(e) => setFoodQuantity(e.target.value)}
                     />
-                    <span className="text-sm">gramos</span>
+                    <span className="text-base">gramos</span>
                   </div>
                 </div>
               )}
-              {/* Botones de acción responsive */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
+              {/* Botones de acción */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
                 <button
                   onClick={addFoodToMeal}
-                  className="bg-green-500 text-white p-2 sm:p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 text-sm"
+                  className="bg-green-500 text-white p-4 rounded-xl hover:bg-green-600 disabled:bg-gray-400 text-base font-medium transition-colors"
                   disabled={!selectedFood || !foodQuantity}
                 >
                   Agregar comida
                 </button>
                 <button
                   onClick={() => setShowMealCalculator(false)}
-                  className="bg-gray-500 text-white p-2 sm:p-3 rounded-lg hover:bg-gray-600 text-sm"
+                  className="bg-gray-500 text-white p-4 rounded-xl hover:bg-gray-600 text-base font-medium transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3120,4 +3503,26 @@ Gracias!`
       )}
     </div>
   )
-}
+}medium text-base">Detector de Déficit de Ejercicio</span>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Si ejercicio promedio {"<"} 0.5 sesiones/día → Recomienda energéticos
+                        </p>
+                      </div>
+                      <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full font-medium">
+                        Activo
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+                      <div>
+                        <span className="font-medium text-base">Detector de Estrés/Ansiedad</span>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Si mindfulness {"<"} 0.5 sesiones/día → Recomienda relajantes
+                        </p>
+                      </div>
+                      <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full font-medium">
+                        Activo
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+                      <div>
+                        <span className="font-
