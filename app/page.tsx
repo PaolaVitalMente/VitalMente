@@ -947,7 +947,7 @@ const dbFunctions = {
       if (error) {
           console.log('No gamification data found for user:', userId)
           return {
-            id: 0,
+            id: `${userId}_gamification`,
             user_id: userId,
             current_level: 1,
             total_points: 0,
@@ -964,7 +964,7 @@ const dbFunctions = {
     } catch (error) {
       console.error('Error loading user gamification:', error)
       return {
-  id: 0,
+  id: `${userId}_gamification`,
   user_id: userId,
   current_level: 1,
   total_points: 0,
