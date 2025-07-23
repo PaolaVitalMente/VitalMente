@@ -335,11 +335,11 @@ const GOALS = [
 const dbFunctions = {
   // 🔐 FUNCIÓN HELPER PARA OBTENER USER_ID AUTENTICADO
   async getAuthenticatedUserId(): Promise<string> {
-    const { data: { session }, error } = await supabase.auth.getSession()
-    if (error || !session?.user?.id) {
+    const result = await supabase.auth.getSession()
+    if (result.error || !result.data.session || !result.data.session.user || !result.data.session.user.id) {
       throw new Error('Usuario no autenticado')
     }
-    return session.user.id
+    return result.data.session.user.id
   },
 
   async findUserByPhone(phone: string): Promise<UserProfile | null> {
@@ -1657,15 +1657,10 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
   }
 
   const handleSupplementContact = (supplement: Supplement) => {
-    const defaultMessage = `Hola! Me interesa el suplemento ${supplement.name} que vi en VitalMente. ¿Podrían darme más información sobre disponibilidad y forma de pago?
-
-Precio mostrado: $${supplement.price.toLocaleString()}
-Beneficios: ${supplement.benefits.join(', ')}
-
-Gracias!`
+    const defaultMessage = "Hola! Me interesa el suplemento " + supplement.name + " que vi en VitalMente. ¿Podrían darme más información sobre disponibilidad y forma de pago?\n\nPrecio mostrado: $" + supplement.price.toLocaleString() + "\nBeneficios: " + supplement.benefits.join(', ') + "\n\nGracias!"
     
     const message = supplement.whatsapp_message || defaultMessage
-    const whatsappUrl = `https://wa.me/573134852878?text=${encodeURIComponent(message)}`
+    const whatsappUrl = "https://wa.me/573134852878?text=" + encodeURIComponent(message)
     window.open(whatsappUrl, '_blank')
   }
 
@@ -3175,7 +3170,7 @@ Gracias!`
                   <div className="w-full bg-white/20 rounded-full h-2 mb-2">
                     <div 
                       className="bg-white h-2 rounded-full transition-all duration-300" 
-                      style={{width: `${caloriesProgress.percentage}%`}}
+                      style={{width: caloriesProgress.percentage + '%'}}
                     ></div>
                   </div>
                   <p className="text-sm text-center">
@@ -3247,7 +3242,7 @@ Gracias!`
                 <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
                   <div 
                     className="bg-green-500 h-3 rounded-full transition-all duration-300" 
-                    style={{width: `${getProgressPercentage()}%`}}
+                    style={{width: getProgressPercentage() + '%'}}
                   ></div>
                 </div>
                 
