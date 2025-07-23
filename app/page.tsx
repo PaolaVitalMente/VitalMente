@@ -305,16 +305,20 @@ const ACTIVITY_LEVELS = [
 ]
 
 const GOALS = [
-  // Objetivos Físicos
-  { id: "lose", label: "💪 Perder peso", protein: 30, carbs: 35, fats: 35, calAdjust: -0.2, type: "physical" },
-  { id: "maintain", label: "⚖️ Mantener peso", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "physical" },
-  { id: "gain", label: "🏋️ Ganar músculo", protein: 30, carbs: 40, fats: 30, calAdjust: 0.15, type: "physical" },
+  // 🎯 TRANSFORMACIÓN FÍSICA
+  { id: "lose_weight", label: "💪 Perder peso y tonificar", protein: 30, carbs: 35, fats: 35, calAdjust: -0.2, type: "physical", category: "physical" },
+  { id: "gain_muscle", label: "🏋️ Ganar músculo y fuerza", protein: 30, carbs: 40, fats: 30, calAdjust: 0.15, type: "physical", category: "physical" },
+  { id: "maintain_weight", label: "⚖️ Mantener mi peso actual", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "physical", category: "physical" },
   
-  // Objetivos Emocionales
-  { id: "feel_good", label: "✨ Sentirse bien", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "emotional" },
-  { id: "find_calm", label: "🧘 Buscar calma", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "emotional" },
-  { id: "balance", label: "⚡ Equilibrio", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "emotional" },
-  { id: "vitalmente", label: "🌟 Sentirme VitalMente", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "emotional" }
+  // 💫 BIENESTAR EMOCIONAL  
+  { id: "reduce_stress", label: "🧘 Reducir estrés y ansiedad", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "emotional", category: "emotional" },
+  { id: "find_calm", label: "☮️ Encontrar calma interior", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "emotional", category: "emotional" },
+  { id: "boost_confidence", label: "✨ Mejorar mi autoestima", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "emotional", category: "emotional" },
+  
+  // ⚖️ EQUILIBRIO TOTAL
+  { id: "life_balance", label: "⚡ Balancear cuerpo y mente", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "holistic", category: "holistic" },
+  { id: "healthy_habits", label: "🌱 Crear hábitos sostenibles", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "holistic", category: "holistic" },
+  { id: "vitalmente", label: "🌟 Sentirme VitalMente", protein: 25, carbs: 45, fats: 30, calAdjust: 0, type: "holistic", category: "holistic" }
 ]
 
 // ============================================================================
@@ -1035,7 +1039,7 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
   const [loginForm, setLoginForm] = useState({ phone: "", accessCode: "" })
   const [registerForm, setRegisterForm] = useState({
     phone: "", accessCode: "", confirmCode: "", name: "", age: "", weight: "", height: "",
-    activityLevel: 1.375, goal: "feel_good"
+    activityLevel: 1.375, goal: "reduce_stress"
   })
   const [showRegister, setShowRegister] = useState(false)
 
@@ -2607,11 +2611,27 @@ Gracias!`
                   value={registerForm.goal}
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, goal: e.target.value }))}
                 >
-                  {GOALS.map(goal => (
+                  <optgroup label="🎯 TRANSFORMACIÓN FÍSICA">
+                  {GOALS.filter(goal => goal.category === 'physical').map(goal => (
                     <option key={goal.id} value={goal.id}>
                       {goal.label}
                     </option>
                   ))}
+                </optgroup>
+                <optgroup label="💫 BIENESTAR EMOCIONAL">
+                  {GOALS.filter(goal => goal.category === 'emotional').map(goal => (
+                    <option key={goal.id} value={goal.id}>
+                      {goal.label}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="⚖️ EQUILIBRIO TOTAL">
+                  {GOALS.filter(goal => goal.category === 'holistic').map(goal => (
+                    <option key={goal.id} value={goal.id}>
+                      {goal.label}
+                    </option>
+                  ))}
+                </optgroup>
                 </select>
                 <input
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
