@@ -1,12 +1,10 @@
 "use client"
-
-import type React from "react"
-
 import { useState, useEffect } from "react"
 import { createClient } from "@supabase/supabase-js"
 
-// ✅ CORRECCIÓN: Reemplazamos los imports problemáticos con HTML + Tailwind CSS
-// Iconos simples como emojis en lugar de lucide-react
+// ============================================================================
+// ICONOS SIMPLES COMO EMOJIS
+// ============================================================================
 const Icons = {
   Home: () => "🏠",
   UtensilsCrossed: () => "🍽️",
@@ -44,9 +42,8 @@ const Icons = {
 }
 
 // ============================================================================
-// CONFIGURACIÓN DE SUPABASE REAL
+// CONFIGURACIÓN DE SUPABASE
 // ============================================================================
-
 const SUPABASE_URL = "https://frzyksfceugddjrerxkf.supabase.co"
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyenlrc2ZjZXVnZGRqcmVyeGtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MzgwMTUsImV4cCI6MjA2NzMxNDAxNX0.E6ZjfC6RJoA98RkDK-I87k2l3d7naK9C-mEC0alH7L8"
@@ -54,73 +51,8 @@ const SUPABASE_ANON_KEY =
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // ============================================================================
-// 🆕 FUNCIONES PARA MINIATURAS MULTIMEDIA
+// TIPOS DE DATOS
 // ============================================================================
-
-const getYouTubeThumbnail = (url: string): string => {
-  // Extraer video ID de diferentes formatos de YouTube
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-    /^([a-zA-Z0-9_-]{11})$/, // ID directo
-  ]
-
-  for (const pattern of patterns) {
-    const match = url.match(pattern)
-    if (match) {
-      const videoId = match[1]
-      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-    }
-  }
-
-  // Si no es YouTube, return placeholder
-  return "/placeholder.svg?height=180&width=320&text=Video"
-}
-
-const getSpotifyThumbnail = (url: string): string => {
-  // Para Spotify usaremos un placeholder con icono de música
-  if (url.includes("spotify.com")) {
-    return "/placeholder.svg?height=180&width=320&text=🎵+Spotify"
-  }
-  return "/placeholder.svg?height=180&width=320&text=Audio"
-}
-
-const isYouTubeUrl = (url: string): boolean => {
-  return url.includes("youtube.com") || url.includes("youtu.be")
-}
-
-const isSpotifyUrl = (url: string): boolean => {
-  return url.includes("spotify.com")
-}
-
-const isPDFUrl = (url: string): boolean => {
-  return url.toLowerCase().includes(".pdf") || url.includes("drive.google.com")
-}
-
-const getResourceThumbnail = (url: string, type: string): string => {
-  if (isYouTubeUrl(url)) {
-    return getYouTubeThumbnail(url)
-  }
-  if (isSpotifyUrl(url)) {
-    return getSpotifyThumbnail(url)
-  }
-  if (isPDFUrl(url)) {
-    return "/placeholder.svg?height=180&width=320&text=📄+PDF"
-  }
-
-  // Default por tipo
-  const typeDefaults = {
-    mindfulness: "/placeholder.svg?height=180&width=320&text=🧘+Mindfulness",
-    nutrition: "/placeholder.svg?height=180&width=320&text=🥗+Nutrición",
-    exercise: "/placeholder.svg?height=180&width=320&text=💪+Ejercicio",
-  }
-
-  return typeDefaults[type as keyof typeof typeDefaults] || "/placeholder.svg?height=180&width=320&text=Recurso"
-}
-
-// ============================================================================
-// TIPOS Y DATOS INICIALES (ACTUALIZADOS CON EXERCISE)
-// ============================================================================
-
 interface UserProfile {
   id: string
   phone: string
@@ -198,14 +130,13 @@ interface GlobalTip {
   created_at: string
 }
 
-// 🆕 ACTUALIZADO: Incluye "exercise"
 interface GlobalResource {
   id: string
   type: "mindfulness" | "nutrition" | "exercise"
   title: string
   description: string
   url: string
-  image_url?: string // 🆕 Para PDFs con imagen personalizada
+  image_url?: string
   is_active: boolean
   created_at: string
 }
@@ -238,67 +169,9 @@ interface ConsumedMacros {
   fats: number
 }
 
-// 🆕 NUEVAS INTERFACES PARA GAMIFICACIÓN
-interface UserGamification {
-  id: string
-  user_id: string
-  total_points: number
-  current_level: number
-  streak_days: number
-  longest_streak: number
-  badges: string[]
-  weekly_points: number
-  monthly_points: number
-  created_at: string
-  updated_at: string
-}
-
-interface UserChallenge {
-  id: string
-  user_id: string
-  challenge_type: string
-  title: string
-  description: string
-  target_value: number
-  current_progress: number
-  reward_points: number
-  difficulty: string
-  week_start: string
-  is_completed: boolean
-  completed_at?: string
-  created_at: string
-}
-
-interface UserAchievement {
-  id: string
-  user_id: string
-  achievement_type: string
-  title: string
-  description: string
-  icon: string
-  points_earned: number
-  rarity: string
-  unlocked_at: string
-}
-
-interface AIRecommendation {
-  id: string
-  user_id: string
-  supplement_names: string[]
-  recommendation_type: string
-  priority: string
-  reason: string
-  sales_angle: string
-  discount_percentage: number
-  optimal_timing: string
-  is_active: boolean
-  shown_count: number
-  clicked: boolean
-  purchased: boolean
-  expires_at?: string
-  created_at: string
-}
-
+// ============================================================================
+// CONFIGURACIÓN DE DATOS
+// ============================================================================
 const ACTIVITY_LEVELS = [
   { value: 1.2, label: "Sedentario", desc: "Poco ejercicio" },
   { value: 1.375, label: "Ligero", desc: "1-3 días/semana" },
@@ -308,7 +181,6 @@ const ACTIVITY_LEVELS = [
 ]
 
 const GOALS = [
-  // 🎯 TRANSFORMACIÓN FÍSICA
   {
     id: "lose_weight",
     label: "💪 Perder peso y tonificar",
@@ -339,8 +211,6 @@ const GOALS = [
     type: "physical",
     category: "physical",
   },
-
-  // 💫 BIENESTAR EMOCIONAL
   {
     id: "reduce_stress",
     label: "🧘 Reducir estrés y ansiedad",
@@ -371,8 +241,6 @@ const GOALS = [
     type: "emotional",
     category: "emotional",
   },
-
-  // ⚖️ EQUILIBRIO TOTAL
   {
     id: "life_balance",
     label: "⚡ Balancear cuerpo y mente",
@@ -403,64 +271,11 @@ const GOALS = [
     type: "holistic",
     category: "holistic",
   },
-
-  // 🔄 COMPATIBILIDAD TOTAL - GOALS LEGACY
-  {
-    id: "lose",
-    label: "💪 Perder peso",
-    protein: 30,
-    carbs: 35,
-    fats: 35,
-    calAdjust: -0.2,
-    type: "physical",
-    category: "physical",
-  },
-  {
-    id: "maintain",
-    label: "⚖️ Mantener peso",
-    protein: 25,
-    carbs: 45,
-    fats: 30,
-    calAdjust: 0,
-    type: "physical",
-    category: "physical",
-  },
-  {
-    id: "gain",
-    label: "🏋️ Ganar músculo",
-    protein: 30,
-    carbs: 40,
-    fats: 30,
-    calAdjust: 0.15,
-    type: "physical",
-    category: "physical",
-  },
-  {
-    id: "feel_good",
-    label: "✨ Sentirse bien",
-    protein: 25,
-    carbs: 45,
-    fats: 30,
-    calAdjust: 0,
-    type: "emotional",
-    category: "emotional",
-  },
-  {
-    id: "balance",
-    label: "⚡ Equilibrio",
-    protein: 25,
-    carbs: 45,
-    fats: 30,
-    calAdjust: 0,
-    type: "emotional",
-    category: "emotional",
-  },
 ]
 
 // ============================================================================
-// 🚀 FUNCIONES DE BASE DE DATOS CORREGIDAS PARA AUTENTICACIÓN PERSONALIZADA
+// FUNCIONES DE BASE DE DATOS MEJORADAS
 // ============================================================================
-
 const dbFunctions = {
   async findUserByPhone(phone: string): Promise<UserProfile | null> {
     try {
@@ -531,7 +346,6 @@ const dbFunctions = {
   async saveProgress(userId: string, progress: Omit<DailyProgress, "id" | "user_id" | "date">): Promise<boolean> {
     try {
       const today = new Date().toISOString().split("T")[0]
-
       console.log("💾 Guardando progreso:", {
         user_id: userId,
         date: today,
@@ -674,7 +488,6 @@ const dbFunctions = {
         .order("created_at", { ascending: true })
 
       if (error) throw error
-
       console.log("✅ Comidas cargadas:", data?.length || 0)
       return data as MealComposition[]
     } catch (error) {
@@ -686,7 +499,6 @@ const dbFunctions = {
   async addMealComposition(composition: Omit<MealComposition, "id" | "created_at">): Promise<MealComposition> {
     try {
       console.log("💾 Guardando composición de comida:", composition)
-
       const { data, error } = await supabase
         .from("meal_compositions")
         .insert({
@@ -697,7 +509,6 @@ const dbFunctions = {
         .single()
 
       if (error) throw error
-
       console.log("✅ Composición guardada:", data)
       return data as MealComposition
     } catch (error) {
@@ -725,71 +536,11 @@ const dbFunctions = {
     return data as GlobalTip[]
   },
 
-  async getAllTips(): Promise<GlobalTip[]> {
-    const { data, error } = await supabase.from("global_tips").select("*")
-
-    if (error) return []
-    return data as GlobalTip[]
-  },
-
-  async addTip(tip: Omit<GlobalTip, "id" | "created_at">): Promise<GlobalTip> {
-    const { data, error } = await supabase
-      .from("global_tips")
-      .insert({
-        ...tip,
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-
-    if (error) throw new Error(error.message)
-    return data as GlobalTip
-  },
-
-  async updateTip(id: string, updates: Partial<GlobalTip>): Promise<void> {
-    await supabase
-      .from("global_tips")
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", id)
-  },
-
-  async deleteTip(id: string): Promise<void> {
-    await supabase.from("global_tips").delete().eq("id", id)
-  },
-
   async getActiveResources(): Promise<GlobalResource[]> {
     const { data, error } = await supabase.from("global_resources").select("*").eq("is_active", true)
 
     if (error) return []
     return data as GlobalResource[]
-  },
-
-  async getAllResources(): Promise<GlobalResource[]> {
-    const { data, error } = await supabase.from("global_resources").select("*")
-
-    if (error) return []
-    return data as GlobalResource[]
-  },
-
-  async addResource(resource: Omit<GlobalResource, "id" | "created_at">): Promise<GlobalResource> {
-    const { data, error } = await supabase
-      .from("global_resources")
-      .insert({
-        ...resource,
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-
-    if (error) throw new Error(error.message)
-    return data as GlobalResource
-  },
-
-  async deleteResource(id: string): Promise<void> {
-    await supabase.from("global_resources").delete().eq("id", id)
   },
 
   async getActiveSupplements(): Promise<Supplement[]> {
@@ -802,63 +553,10 @@ const dbFunctions = {
     })) as Supplement[]
   },
 
-  async getAllSupplements(): Promise<Supplement[]> {
-    const { data, error } = await supabase.from("supplements").select("*")
-
-    if (error) return []
-    return (data || []).map((item: any) => ({
-      ...item,
-      benefits: item.benefits ? item.benefits.split(",") : [],
-    })) as Supplement[]
-  },
-
-  async addSupplement(supplement: Omit<Supplement, "id" | "created_at">): Promise<Supplement> {
-    const { data, error } = await supabase
-      .from("supplements")
-      .insert({
-        ...supplement,
-        benefits: supplement.benefits.join(","),
-        created_at: new Date().toISOString(),
-      })
-      .select()
-      .single()
-
-    if (error) throw new Error(error.message)
-    return { ...data, benefits: data.benefits ? data.benefits.split(",") : [] } as Supplement
-  },
-
-  async updateSupplement(id: string, updates: Partial<Supplement>): Promise<void> {
-    const updateData: any = {
-      ...updates,
-      updated_at: new Date().toISOString(),
-    }
-    if (updates.benefits) {
-      updateData.benefits = updates.benefits.join(",")
-    }
-    await supabase.from("supplements").update(updateData).eq("id", id)
-  },
-
-  async deleteSupplement(id: string): Promise<void> {
-    await supabase.from("supplements").delete().eq("id", id)
-  },
-
-  async getStats() {
-    const today = new Date().toISOString().split("T")[0]
-    const [users, dailyProgress] = await Promise.all([
-      supabase.from("users").select("*"),
-      supabase.from("daily_progress").select("*").eq("date", today),
-    ])
-    return {
-      totalUsers: users.data?.length || 0,
-      activeToday: dailyProgress.data?.length || 0,
-    }
-  },
-
   async initializeDefaultData() {
     try {
       // Verificar si ya hay tips
       const { data: existingTips } = await supabase.from("global_tips").select("*")
-
       if (!existingTips || existingTips.length === 0) {
         const defaultTips = [
           {
@@ -886,13 +584,12 @@ const dbFunctions = {
         ]
 
         for (const tip of defaultTips) {
-          await dbFunctions.addTip(tip)
+          await supabase.from("global_tips").insert(tip)
         }
       }
 
-      // Verificar si ya hay recursos (incluyendo exercise)
+      // Verificar si ya hay recursos
       const { data: existingResources } = await supabase.from("global_resources").select("*")
-
       if (!existingResources || existingResources.length === 0) {
         const defaultResources = [
           {
@@ -916,29 +613,21 @@ const dbFunctions = {
             url: "https://www.youtube.com/watch?v=8dQKcziOQ8I",
             is_active: true,
           },
-          {
-            type: "exercise" as const,
-            title: "Yoga para principiantes",
-            description: "15 minutos de yoga matutino para activar el cuerpo",
-            url: "https://www.youtube.com/watch?v=VaoV1PrYft4",
-            is_active: true,
-          },
         ]
 
         for (const resource of defaultResources) {
-          await dbFunctions.addResource(resource)
+          await supabase.from("global_resources").insert(resource)
         }
       }
 
       // Verificar si ya hay suplementos
       const { data: existingSupplements } = await supabase.from("supplements").select("*")
-
       if (!existingSupplements || existingSupplements.length === 0) {
         const defaultSupplements = [
           {
             name: "VitalEnergy Plus",
             description: "Complejo vitamínico premium para aumentar energía natural y mejorar concentración",
-            benefits: ["Aumenta energía", "Mejora concentración", "Reduce fatiga", "Apoya sistema inmune"],
+            benefits: "Aumenta energía,Mejora concentración,Reduce fatiga,Apoya sistema inmune",
             price: 89000,
             image_url: "/placeholder.svg?height=200&width=200",
             is_active: true,
@@ -948,165 +637,97 @@ const dbFunctions = {
           {
             name: "RelaxMind Pro",
             description: "Suplemento natural avanzado para reducir estrés, ansiedad y mejorar calidad del sueño",
-            benefits: ["Reduce ansiedad", "Mejora sueño", "Calma mental", "Control del estrés"],
+            benefits: "Reduce ansiedad,Mejora sueño,Calma mental,Control del estrés",
             price: 75000,
             image_url: "/placeholder.svg?height=200&width=200",
             is_active: true,
             whatsapp_message:
               "Hola! Me interesa RelaxMind Pro para mejorar mi descanso. ¿Podrían contarme más sobre sus beneficios?",
           },
-          {
-            name: "MusclePro Elite",
-            description: "Proteína premium de alta calidad para desarrollo muscular y recuperación rápida",
-            benefits: ["Desarrollo muscular", "Recuperación rápida", "Aumenta fuerza", "Proteína completa"],
-            price: 120000,
-            image_url: "/placeholder.svg?height=200&width=200",
-            is_active: true,
-            whatsapp_message:
-              "Hola! Me interesa MusclePro Elite para mi entrenamiento. ¿Qué sabores tienen disponibles y cuál es la forma de pago?",
-          },
         ]
 
         for (const supplement of defaultSupplements) {
-          await dbFunctions.addSupplement(supplement)
+          await supabase.from("supplements").insert(supplement)
         }
       }
     } catch (error) {
       console.log("Datos por defecto ya inicializados o error menor:", error)
     }
   },
-
-  async uploadSupplementImage(file: File, supplementName: string): Promise<string> {
-    try {
-      console.log("📤 Iniciando upload de imagen:", file.name)
-
-      const fileExt = file.name.split(".").pop()
-      const fileName = `${supplementName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}.${fileExt}`
-
-      console.log("📝 Nombre generado:", fileName)
-
-      const { data, error } = await supabase.storage.from("supplement-images").upload(fileName, file, {
-        cacheControl: "3600",
-        upsert: false,
-      })
-
-      if (error) {
-        console.error("❌ Error en upload:", error)
-        throw error
-      }
-
-      console.log("✅ Archivo subido:", data)
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("supplement-images").getPublicUrl(fileName)
-
-      console.log("🔗 URL pública generada:", publicUrl)
-      return publicUrl
-    } catch (error) {
-      console.error("💥 Error completo en uploadSupplementImage:", error)
-      throw error
-    }
-  },
-
-  async deleteSupplementImage(imageUrl: string): Promise<void> {
-    try {
-      const fileName = imageUrl.split("/").pop()
-      if (!fileName) return
-
-      const { error } = await supabase.storage.from("supplement-images").remove([fileName])
-
-      if (error) throw error
-      console.log("🗑️ Imagen eliminada:", fileName)
-    } catch (error) {
-      console.error("Error eliminando imagen:", error)
-    }
-  },
-
-  // 🆕 FUNCIONES DE GAMIFICACIÓN - COMPATIBLES CON AUTENTICACIÓN PERSONALIZADA
-  async getUserGamification(userId: string): Promise<UserGamification | null> {
-    try {
-      const { data, error } = await supabase.from("user_gamification").select("*").eq("user_id", userId).single()
-
-      if (error) {
-        console.log("No gamification data found for user:", userId)
-        return {
-          id: `${userId}_gamification`,
-          user_id: userId,
-          current_level: 1,
-          total_points: 0,
-          streak_days: 0,
-          longest_streak: 0,
-          badges: [],
-          weekly_points: 0,
-          monthly_points: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-      }
-      return data as UserGamification
-    } catch (error) {
-      console.error("Error loading user gamification:", error)
-      return {
-        id: `${userId}_gamification`,
-        user_id: userId,
-        current_level: 1,
-        total_points: 0,
-        streak_days: 0,
-        longest_streak: 0,
-        badges: [],
-        weekly_points: 0,
-        monthly_points: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
-    }
-  },
-
-  async getUserChallenges(userId: string): Promise<UserChallenge[]> {
-    try {
-      const { data, error } = await supabase
-        .from("user_challenges")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-
-      if (error) {
-        console.log("No challenges data found for user:", userId)
-        return []
-      }
-      return data as UserChallenge[]
-    } catch (error) {
-      console.error("Error loading user challenges:", error)
-      return []
-    }
-  },
-
-  async getAIRecommendations(userId: string): Promise<AIRecommendation[]> {
-    try {
-      const { data, error } = await supabase
-        .from("ai_supplement_recommendations")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("is_active", true)
-        .order("priority", { ascending: false })
-
-      if (error) {
-        console.log("No AI recommendations found for user:", userId)
-        return []
-      }
-      return data as AIRecommendation[]
-    } catch (error) {
-      console.error("Error loading AI recommendations:", error)
-      return []
-    }
-  },
 }
 
 // ============================================================================
-// COMPONENTE PRINCIPAL CON RECURSOS MULTIMEDIA MEJORADOS
+// FUNCIONES AUXILIARES
 // ============================================================================
+const getYouTubeThumbnail = (url: string): string => {
+  const patterns = [/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/, /^([a-zA-Z0-9_-]{11})$/]
 
+  for (const pattern of patterns) {
+    const match = url.match(pattern)
+    if (match) {
+      const videoId = match[1]
+      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+    }
+  }
+
+  return "/placeholder.svg?height=180&width=320&text=Video"
+}
+
+const getSpotifyThumbnail = (url: string): string => {
+  if (url.includes("spotify.com")) {
+    return "/placeholder.svg?height=180&width=320&text=🎵+Spotify"
+  }
+  return "/placeholder.svg?height=180&width=320&text=Audio"
+}
+
+const isYouTubeUrl = (url: string): boolean => {
+  return url.includes("youtube.com") || url.includes("youtu.be")
+}
+
+const isSpotifyUrl = (url: string): boolean => {
+  return url.includes("spotify.com")
+}
+
+const isPDFUrl = (url: string): boolean => {
+  return url.toLowerCase().includes(".pdf") || url.includes("drive.google.com")
+}
+
+const getResourceThumbnail = (url: string, type: string): string => {
+  if (isYouTubeUrl(url)) {
+    return getYouTubeThumbnail(url)
+  }
+  if (isSpotifyUrl(url)) {
+    return getSpotifyThumbnail(url)
+  }
+  if (isPDFUrl(url)) {
+    return "/placeholder.svg?height=180&width=320&text=📄+PDF"
+  }
+
+  const typeDefaults = {
+    mindfulness: "/placeholder.svg?height=180&width=320&text=🧘+Mindfulness",
+    nutrition: "/placeholder.svg?height=180&width=320&text=🥗+Nutrición",
+    exercise: "/placeholder.svg?height=180&width=320&text=💪+Ejercicio",
+  }
+
+  return typeDefaults[type as keyof typeof typeDefaults] || "/placeholder.svg?height=180&width=320&text=Recurso"
+}
+
+const getResourceTypeIcon = (type: string) => {
+  switch (type) {
+    case "mindfulness":
+      return "🧘‍♀️"
+    case "nutrition":
+      return "🥗"
+    case "exercise":
+      return "💪"
+    default:
+      return "📝"
+  }
+}
+
+// ============================================================================
+// COMPONENTE PRINCIPAL
+// ============================================================================
 export default function VitalMenteApp() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     if (typeof window !== "undefined") {
@@ -1115,11 +736,11 @@ export default function VitalMenteApp() {
     }
     return null
   })
+
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("inicio")
   const [macroResults, setMacroResults] = useState<MacroResult | null>(null)
   const [connectionStatus, setConnectionStatus] = useState("connecting")
-
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
 
@@ -1142,7 +763,6 @@ export default function VitalMenteApp() {
   const [globalResources, setGlobalResources] = useState<GlobalResource[]>([])
   const [supplements, setSupplements] = useState<Supplement[]>([])
   const [currentTipIndex, setCurrentTipIndex] = useState(0)
-
   const [mealCompositions, setMealCompositions] = useState<MealComposition[]>([])
   const [consumedMacros, setConsumedMacros] = useState<ConsumedMacros>({
     calories: 0,
@@ -1150,11 +770,11 @@ export default function VitalMenteApp() {
     carbs: 0,
     fats: 0,
   })
+
   const [showMealCalculator, setShowMealCalculator] = useState(false)
   const [selectedMealType, setSelectedMealType] = useState<"desayuno" | "almuerzo" | "cena">("desayuno")
   const [selectedFood, setSelectedFood] = useState<UserFood | GlobalFood | null>(null)
   const [foodQuantity, setFoodQuantity] = useState<string>("100")
-
   const [logoClicks, setLogoClicks] = useState(0)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -1172,20 +792,12 @@ export default function VitalMenteApp() {
     activityLevel: 1.375,
     goal: "reduce_stress",
   })
-  const [showRegister, setShowRegister] = useState(false)
 
+  const [showRegister, setShowRegister] = useState(false)
   const [showFoodDialog, setShowFoodDialog] = useState(false)
   const [selectedMeal, setSelectedMeal] = useState<"desayuno" | "almuerzo" | "cena" | null>(null)
   const [newFood, setNewFood] = useState({ name: "", calories: "", protein: "", carbs: "", fats: "" })
-
   const [showFloatingMenu, setShowFloatingMenu] = useState(false)
-
-  // 🆕 ESTADOS PARA GAMIFICACIÓN
-  const [userGamification, setUserGamification] = useState<UserGamification | null>(null)
-  const [userChallenges, setUserChallenges] = useState<UserChallenge[]>([])
-  const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>([])
-  const [showGamificationPanel, setShowGamificationPanel] = useState(false)
-  const [showAchievementNotification, setShowAchievementNotification] = useState<UserAchievement | null>(null)
 
   useEffect(() => {
     initializeApp()
@@ -1219,6 +831,7 @@ export default function VitalMenteApp() {
         dbFunctions.getActiveSupplements(),
         dbFunctions.getGlobalFoods(),
       ])
+
       setGlobalTips(tips)
       setGlobalResources(resources)
       setSupplements(activeSupplements)
@@ -1282,7 +895,6 @@ export default function VitalMenteApp() {
     setIsLoading(true)
     try {
       console.log("🔍 Iniciando registro...")
-
       const existingUser = await dbFunctions.findUserByPhone(registerForm.phone)
       if (existingUser) {
         alert("Este número ya está registrado. Usa la opción de Ingresar.")
@@ -1303,15 +915,14 @@ export default function VitalMenteApp() {
       }
 
       console.log("🚀 Datos a enviar:", userData)
-
       const newUser = await dbFunctions.createUser(userData)
-
       console.log("✅ Usuario creado:", newUser)
 
       setCurrentUser(newUser)
       localStorage.setItem("vitalmente_user", JSON.stringify(newUser))
       setDailyProgress((prev) => ({ ...prev, user_id: newUser.id }))
       calculateMacros(newUser)
+
       setRegisterForm({
         phone: "",
         accessCode: "",
@@ -1321,7 +932,7 @@ export default function VitalMenteApp() {
         weight: "",
         height: "",
         activityLevel: 1.375,
-        goal: "feel_good",
+        goal: "reduce_stress",
       })
     } catch (error: any) {
       console.error("❌ Error detallado en registro:", error)
@@ -1335,7 +946,6 @@ export default function VitalMenteApp() {
     try {
       console.log("🔍 Iniciando carga de datos para usuario:", userId)
 
-      // ✅ CAMBIO APLICADO: Pasando userId a getTodayProgress
       const todayProgress = await dbFunctions.getTodayProgress(userId)
       if (todayProgress) {
         console.log("✅ Progreso cargado desde BD:", todayProgress)
@@ -1345,26 +955,16 @@ export default function VitalMenteApp() {
         setDailyProgress((prev) => ({ ...prev, user_id: userId }))
       }
 
-      // ✅ CAMBIOS APLICADOS: Pasando userId a todas las funciones
-      const [foods, history, compositions, gamification, challenges, recommendations] = await Promise.all([
+      const [foods, history, compositions] = await Promise.all([
         dbFunctions.getUserFoods(userId),
         dbFunctions.getProgressHistory(userId),
         dbFunctions.getTodayMealCompositions(userId),
-        dbFunctions.getUserGamification(userId),
-        dbFunctions.getUserChallenges(userId),
-        dbFunctions.getAIRecommendations(userId),
       ])
 
       setUserFoods(foods)
       setProgressHistory(history)
       setMealCompositions(compositions)
-
       calculateConsumedMacros(compositions)
-
-      // 🆕 Establecer datos de gamificación
-      setUserGamification(gamification)
-      setUserChallenges(challenges)
-      setAiRecommendations(recommendations)
 
       console.log("✅ Todos los datos cargados exitosamente")
     } catch (error) {
@@ -1407,12 +1007,6 @@ export default function VitalMenteApp() {
     setConsumedMacros({ calories: 0, protein: 0, carbs: 0, fats: 0 })
     setSaveStatus("idle")
     setLastSaveTime(null)
-    // 🆕 Limpiar estados de gamificación
-    setUserGamification(null)
-    setUserChallenges([])
-    setAiRecommendations([])
-    setShowGamificationPanel(false)
-    setShowAchievementNotification(null)
   }
 
   const handleLogoClick = () => {
@@ -1454,15 +1048,15 @@ export default function VitalMenteApp() {
 
   const getMotivationalMessage = (goal: string) => {
     const messages: Record<string, string> = {
-      lose: "¡Cada paso te acerca a tu mejor versión! 💪",
-      maintain: "Mantener el equilibrio es la clave del éxito ⚖️",
-      gain: "Construyendo fuerza, construyendo futuro 🏋️",
-      feel_good: "Hoy es un gran día para sentirte increíble ✨",
+      lose_weight: "¡Cada paso te acerca a tu mejor versión! 💪",
+      maintain_weight: "Mantener el equilibrio es la clave del éxito ⚖️",
+      gain_muscle: "Construyendo fuerza, construyendo futuro 🏋️",
+      reduce_stress: "Hoy es un gran día para sentirte increíble ✨",
       find_calm: "Respira profundo, la calma está en ti 🧘",
-      balance: "El equilibrio perfecto entre cuerpo y mente ⚡",
+      life_balance: "El equilibrio perfecto entre cuerpo y mente ⚡",
       vitalmente: "¡Eres la mejor versión de ti mismo! 🌟 #VitalMente",
     }
-    return messages[goal] || messages.feel_good
+    return messages[goal] || messages.reduce_stress
   }
 
   const updateProgress = async (field: keyof DailyProgress, increment: number) => {
@@ -1472,12 +1066,11 @@ export default function VitalMenteApp() {
       ...dailyProgress,
       [field]: Math.max(0, (dailyProgress as any)[field] + increment),
     }
-    setDailyProgress(newProgress)
 
+    setDailyProgress(newProgress)
     setSaveStatus("saving")
 
     try {
-      // ✅ CAMBIO APLICADO: Pasando userId a saveProgress
       const success = await dbFunctions.saveProgress(currentUser.id, {
         water: newProgress.water,
         exercise: newProgress.exercise,
@@ -1488,14 +1081,11 @@ export default function VitalMenteApp() {
       })
 
       if (success) {
-        // ✅ CAMBIO APLICADO: Pasando userId a verifyProgressSaved
         const verified = await dbFunctions.verifyProgressSaved(currentUser.id, newProgress)
-
         if (verified) {
           setSaveStatus("saved")
           setLastSaveTime(new Date())
           console.log("✅ Progreso guardado y verificado")
-
           setTimeout(() => setSaveStatus("idle"), 2000)
         } else {
           throw new Error("Los datos no se guardaron correctamente")
@@ -1506,11 +1096,8 @@ export default function VitalMenteApp() {
     } catch (error) {
       console.error("❌ Error guardando progreso:", error)
       setSaveStatus("error")
-
       setDailyProgress(dailyProgress)
-
       alert("Error al guardar progreso. Por favor intenta de nuevo.")
-
       setTimeout(() => setSaveStatus("idle"), 3000)
     }
   }
@@ -1535,8 +1122,6 @@ export default function VitalMenteApp() {
       }
 
       setDailyProgress((prev) => ({ ...prev, ...typicalProgress }))
-
-      // ✅ CAMBIO APLICADO: Pasando userId a saveProgress
       const success = await dbFunctions.saveProgress(currentUser.id, typicalProgress)
 
       if (success) {
@@ -1551,7 +1136,6 @@ export default function VitalMenteApp() {
       setSaveStatus("error")
       setTimeout(() => setSaveStatus("idle"), 3000)
     }
-
     setShowFloatingMenu(false)
   }
 
@@ -1592,7 +1176,6 @@ export default function VitalMenteApp() {
     setSaveStatus("saving")
 
     try {
-      // ✅ CAMBIO APLICADO: Pasando userId a saveProgress
       const success = await dbFunctions.saveProgress(currentUser.id, {
         water: newProgress.water,
         exercise: newProgress.exercise,
@@ -1679,9 +1262,7 @@ export default function VitalMenteApp() {
 
       const newComposition = await dbFunctions.addMealComposition(composition)
       setMealCompositions((prev) => [...prev, newComposition])
-
       calculateConsumedMacros([...mealCompositions, newComposition])
-
       await updateProgress(selectedMealType, 1)
 
       setShowMealCalculator(false)
@@ -1738,6 +1319,7 @@ export default function VitalMenteApp() {
 
   const getStreakDays = () => {
     if (progressHistory.length === 0) return 0
+
     let streak = 0
     const sortedHistory = [...progressHistory].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
@@ -1750,12 +1332,14 @@ export default function VitalMenteApp() {
         progress.desayuno > 0 ||
         progress.almuerzo > 0 ||
         progress.cena > 0
+
       if (hasActivity) {
         streak++
       } else {
         break
       }
     }
+
     return streak
   }
 
@@ -1772,20 +1356,9 @@ Gracias!`
     window.open(whatsappUrl, "_blank")
   }
 
-  // 🆕 FUNCIÓN PARA OBTENER ICONO SEGÚN TIPO DE RECURSO
-  const getResourceTypeIcon = (type: string) => {
-    switch (type) {
-      case "mindfulness":
-        return "🧘‍♀️"
-      case "nutrition":
-        return "🥗"
-      case "exercise":
-        return "💪"
-      default:
-        return "📝"
-    }
-  }
-
+  // ============================================================================
+  // COMPONENTES DE UI
+  // ============================================================================
   const SaveStatusIndicator = () => {
     if (saveStatus === "idle") return null
 
@@ -1845,7 +1418,6 @@ Gracias!`
             </button>
           </div>
         )}
-
         <button
           onClick={() => setShowFloatingMenu(!showFloatingMenu)}
           className={`bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-all duration-200 ${
@@ -1858,810 +1430,9 @@ Gracias!`
     )
   }
 
-  // PANEL DE ADMINISTRACIÓN COMPLETO CON CATEGORÍA EXERCISE
-  const AdminPanel = () => {
-    const [activeAdminTab, setActiveAdminTab] = useState("overview")
-    const [showTipDialog, setShowTipDialog] = useState(false)
-    const [showResourceDialog, setShowResourceDialog] = useState(false)
-    const [showSupplementDialog, setShowSupplementDialog] = useState(false)
-    // 🔧 ACTUALIZADO: Incluye "exercise"
-    const [resourceType, setResourceType] = useState<"mindfulness" | "nutrition" | "exercise">("mindfulness")
-    const [adminStats, setAdminStats] = useState({ totalUsers: 0, activeToday: 0 })
-
-    const [newTip, setNewTip] = useState({ category: "", title: "", content: "", icon: "💡" })
-    const [newResource, setNewResource] = useState({ title: "", description: "", url: "", image_url: "" })
-    const [newSupplement, setNewSupplement] = useState({
-      name: "",
-      description: "",
-      benefits: "",
-      price: "",
-      image_url: "",
-      whatsapp_message: "",
-    })
-
-    const [imageFile, setImageFile] = useState<File | null>(null)
-    const [uploading, setUploading] = useState(false)
-    const [imagePreview, setImagePreview] = useState<string>("")
-
-    const [allTips, setAllTips] = useState<GlobalTip[]>([])
-    const [allResources, setAllResources] = useState<GlobalResource[]>([])
-    const [allSupplements, setAllSupplements] = useState<Supplement[]>([])
-
-    useEffect(() => {
-      if (isAdmin) loadAdminData()
-    }, [isAdmin])
-
-    const loadAdminData = async () => {
-      try {
-        const [tips, resources, supplements, stats] = await Promise.all([
-          dbFunctions.getAllTips(),
-          dbFunctions.getAllResources(),
-          dbFunctions.getAllSupplements(),
-          dbFunctions.getStats(),
-        ])
-        setAllTips(tips)
-        setAllResources(resources)
-        setAllSupplements(supplements)
-        setAdminStats(stats)
-      } catch (error) {
-        console.error("Error loading admin data:", error)
-      }
-    }
-
-    const addGlobalTip = async () => {
-      if (!newTip.title || !newTip.content) {
-        alert("Por favor completa título y contenido")
-        return
-      }
-
-      try {
-        await dbFunctions.addTip({
-          category: newTip.category || "General",
-          title: newTip.title,
-          content: newTip.content,
-          icon: newTip.icon || "💡",
-          is_active: true,
-        })
-
-        setNewTip({ category: "", title: "", content: "", icon: "💡" })
-        setShowTipDialog(false)
-        loadAdminData()
-        loadGlobalContent()
-      } catch (error: any) {
-        console.error("Error adding tip:", error)
-        alert("Error al agregar tip: " + error.message)
-      }
-    }
-
-    const addGlobalResource = async () => {
-      if (!newResource.title || !newResource.url) {
-        alert("Por favor completa título y URL")
-        return
-      }
-
-      try {
-        await dbFunctions.addResource({
-          type: resourceType,
-          title: newResource.title,
-          description: newResource.description,
-          url: newResource.url,
-          image_url: newResource.image_url || undefined,
-          is_active: true,
-        })
-
-        setNewResource({ title: "", description: "", url: "", image_url: "" })
-        setShowResourceDialog(false)
-        loadAdminData()
-        loadGlobalContent()
-      } catch (error: any) {
-        console.error("Error adding resource:", error)
-        alert("Error al agregar recurso: " + error.message)
-      }
-    }
-
-    const addSupplementAdmin = async () => {
-      if (!newSupplement.name || !newSupplement.description || !newSupplement.price) {
-        alert("Por favor completa nombre, descripción y precio")
-        return
-      }
-
-      setUploading(true)
-      try {
-        let imageUrl = newSupplement.image_url || "/placeholder.svg?height=200&width=200"
-
-        if (imageFile) {
-          console.log("📤 Subiendo imagen del suplemento...")
-          imageUrl = await dbFunctions.uploadSupplementImage(imageFile, newSupplement.name)
-          console.log("✅ Imagen subida exitosamente:", imageUrl)
-        }
-
-        const benefits = newSupplement.benefits
-          .split(",")
-          .map((b) => b.trim())
-          .filter((b) => b)
-
-        await dbFunctions.addSupplement({
-          name: newSupplement.name,
-          description: newSupplement.description,
-          benefits,
-          price: Number.parseInt(newSupplement.price),
-          image_url: imageUrl,
-          is_active: true,
-          whatsapp_message: newSupplement.whatsapp_message,
-        })
-
-        resetSupplementForm()
-        setShowSupplementDialog(false)
-        loadAdminData()
-        loadGlobalContent()
-      } catch (error: any) {
-        console.error("Error adding supplement:", error)
-        alert("Error al agregar suplemento: " + error.message)
-      } finally {
-        setUploading(false)
-      }
-    }
-
-    const handleImageFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0]
-      if (file) {
-        setImageFile(file)
-
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          setImagePreview(e.target?.result as string)
-        }
-        reader.readAsDataURL(file)
-      }
-    }
-
-    const resetSupplementForm = () => {
-      setNewSupplement({
-        name: "",
-        description: "",
-        benefits: "",
-        price: "",
-        image_url: "",
-        whatsapp_message: "",
-      })
-      setImageFile(null)
-      setImagePreview("")
-    }
-
-    const toggleTipStatus = async (id: string) => {
-      try {
-        const tip = allTips.find((t) => t.id === id)
-        if (tip) {
-          await dbFunctions.updateTip(id, { is_active: !tip.is_active })
-          loadAdminData()
-          loadGlobalContent()
-        }
-      } catch (error) {
-        console.error("Error updating tip:", error)
-      }
-    }
-
-    const deleteTip = async (id: string) => {
-      if (confirm("¿Estás seguro de eliminar este tip? Esta acción no se puede deshacer.")) {
-        try {
-          await dbFunctions.deleteTip(id)
-          loadAdminData()
-          loadGlobalContent()
-        } catch (error) {
-          console.error("Error deleting tip:", error)
-          alert("Error al eliminar tip")
-        }
-      }
-    }
-
-    const deleteResource = async (id: string) => {
-      if (confirm("¿Estás seguro de eliminar este recurso? Esta acción no se puede deshacer.")) {
-        try {
-          await dbFunctions.deleteResource(id)
-          loadAdminData()
-          loadGlobalContent()
-        } catch (error) {
-          console.error("Error deleting resource:", error)
-          alert("Error al eliminar recurso")
-        }
-      }
-    }
-
-    const toggleSupplementStatus = async (id: string) => {
-      try {
-        const supplement = allSupplements.find((s) => s.id === id)
-        if (supplement) {
-          await dbFunctions.updateSupplement(id, { is_active: !supplement.is_active })
-          loadAdminData()
-          loadGlobalContent()
-        }
-      } catch (error) {
-        console.error("Error updating supplement:", error)
-      }
-    }
-
-    const deleteSupplement = async (id: string) => {
-      if (confirm("¿Estás seguro de eliminar este suplemento? Esta acción no se puede deshacer.")) {
-        try {
-          const supplement = allSupplements.find((s) => s.id === id)
-
-          if (supplement?.image_url && !supplement.image_url.includes("placeholder")) {
-            await dbFunctions.deleteSupplementImage(supplement.image_url)
-          }
-
-          await dbFunctions.deleteSupplement(id)
-          loadAdminData()
-          loadGlobalContent()
-        } catch (error) {
-          console.error("Error deleting supplement:", error)
-          alert("Error al eliminar suplemento")
-        }
-      }
-    }
-
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="border-b bg-white">
-          <div className="max-w-6xl mx-auto px-4 py-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Panel de Administración</h1>
-                <p className="text-gray-600">Gestiona el contenido global de VitalMente</p>
-                <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
-                  🌐 Conectado a Supabase
-                </span>
-              </div>
-              <button
-                onClick={() => setIsAdmin(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-              >
-                <span>{Icons.LogOut()}</span>
-                Salir
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="border-b border-gray-200 mb-6">
-            <nav className="flex space-x-8">
-              {["overview", "tips", "resources", "supplements"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveAdminTab(tab)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm capitalize ${
-                    activeAdminTab === tab
-                      ? "border-green-500 text-green-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  {tab === "overview"
-                    ? "Resumen"
-                    : tab === "tips"
-                      ? "Tips"
-                      : tab === "resources"
-                        ? "Recursos"
-                        : "Suplementos"}
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          {activeAdminTab === "overview" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Tips Activos</p>
-                      <p className="text-2xl font-bold text-green-600">{allTips.filter((t) => t.is_active).length}</p>
-                    </div>
-                    <span className="text-2xl">{Icons.MessageSquare()}</span>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Recursos Activos</p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        {allResources.filter((r) => r.is_active).length}
-                      </p>
-                    </div>
-                    <span className="text-2xl">{Icons.Link()}</span>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Suplementos Activos</p>
-                      <p className="text-2xl font-bold text-amber-600">
-                        {allSupplements.filter((s) => s.is_active).length}
-                      </p>
-                    </div>
-                    <span className="text-2xl">{Icons.Package()}</span>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Usuarios Registrados</p>
-                      <p className="text-2xl font-bold text-purple-600">{adminStats.totalUsers}</p>
-                    </div>
-                    <span className="text-2xl">{Icons.Users()}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 🆕 ESTADÍSTICAS POR CATEGORÍA DE RECURSOS INCLUYENDO EXERCISE */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold mb-4">Recursos por Categoría</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl mb-2">🧘‍♀️</div>
-                    <div className="text-lg font-bold text-purple-600">
-                      {allResources.filter((r) => r.type === "mindfulness" && r.is_active).length}
-                    </div>
-                    <div className="text-sm text-gray-600">Mindfulness</div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl mb-2">🥗</div>
-                    <div className="text-lg font-bold text-green-600">
-                      {allResources.filter((r) => r.type === "nutrition" && r.is_active).length}
-                    </div>
-                    <div className="text-sm text-gray-600">Nutrición</div>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl mb-2">💪</div>
-                    <div className="text-lg font-bold text-blue-600">
-                      {allResources.filter((r) => r.type === "exercise" && r.is_active).length}
-                    </div>
-                    <div className="text-sm text-gray-600">Ejercicio</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeAdminTab === "tips" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Tips de Bienestar</h2>
-                <button
-                  onClick={() => setShowTipDialog(true)}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
-                >
-                  <span>{Icons.Plus()}</span>
-                  Nuevo Tip
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {allTips.map((tip) => (
-                  <div key={tip.id} className="bg-white rounded-lg shadow p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">{tip.icon}</span>
-                        <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">{tip.category}</span>
-                        <span
-                          className={`px-2 py-1 text-xs rounded ${tip.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
-                        >
-                          {tip.is_active ? "Activo" : "Inactivo"}
-                        </span>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => toggleTipStatus(tip.id)}
-                          className="p-1 text-gray-400 hover:text-gray-600"
-                          title={tip.is_active ? "Desactivar" : "Activar"}
-                        >
-                          {Icons.Eye()}
-                        </button>
-                        <button
-                          onClick={() => deleteTip(tip.id)}
-                          className="p-1 text-gray-400 hover:text-red-600"
-                          title="Eliminar permanentemente"
-                        >
-                          {Icons.Trash2()}
-                        </button>
-                      </div>
-                    </div>
-                    <h3 className="font-semibold mb-2">{tip.title}</h3>
-                    <p className="text-sm text-gray-600">{tip.content}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeAdminTab === "resources" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Recursos y Enlaces</h2>
-                <button
-                  onClick={() => setShowResourceDialog(true)}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
-                >
-                  <span>{Icons.Plus()}</span>
-                  Nuevo Recurso
-                </button>
-              </div>
-
-              {/* 🆕 RECURSOS CON MINIATURAS Y CATEGORÍAS INCLUYENDO EXERCISE */}
-              <div className="space-y-4">
-                {allResources.map((resource) => (
-                  <div key={resource.id} className="bg-white rounded-lg shadow p-4">
-                    <div className="flex gap-4">
-                      {/* 🆕 MINIATURA CON SOPORTE PARA TODOS LOS TIPOS */}
-                      <div className="relative w-32 h-20 flex-shrink-0">
-                        <img
-                          src={getResourceThumbnail(resource.url, resource.type) || "/placeholder.svg"}
-                          alt={resource.title}
-                          className="w-full h-full object-cover rounded-lg"
-                          onError={(e) => {
-                            ;(e.target as HTMLImageElement).src = getResourceThumbnail("", resource.type)
-                          }}
-                        />
-                        {/* Overlay de tipo de contenido */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="bg-black/60 text-white rounded-full p-2">
-                            {isYouTubeUrl(resource.url) && <span className="text-xs">{Icons.Play()}</span>}
-                            {isSpotifyUrl(resource.url) && <span className="text-xs">{Icons.Music()}</span>}
-                            {isPDFUrl(resource.url) && <span className="text-xs">📄</span>}
-                            {!isYouTubeUrl(resource.url) && !isSpotifyUrl(resource.url) && !isPDFUrl(resource.url) && (
-                              <span className="text-xs">{getResourceTypeIcon(resource.type)}</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* CONTENIDO */}
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h4 className="font-semibold">{resource.title}</h4>
-                            <p className="text-sm text-gray-600">{resource.description}</p>
-                          </div>
-                          <div className="flex gap-2 ml-4">
-                            <button
-                              onClick={() => window.open(resource.url, "_blank")}
-                              className="p-2 text-gray-400 hover:text-gray-600"
-                              title="Abrir enlace"
-                            >
-                              {Icons.ExternalLink()}
-                            </button>
-                            <button
-                              onClick={() => deleteResource(resource.id)}
-                              className="p-2 text-gray-400 hover:text-red-600"
-                              title="Eliminar recurso"
-                            >
-                              {Icons.Trash2()}
-                            </button>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <span
-                            className={`px-2 py-1 text-xs rounded ${
-                              resource.type === "mindfulness"
-                                ? "bg-purple-100 text-purple-800"
-                                : resource.type === "nutrition"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-blue-100 text-blue-800"
-                            }`}
-                          >
-                            {resource.type === "mindfulness"
-                              ? "🧘‍♀️ Mindfulness"
-                              : resource.type === "nutrition"
-                                ? "🥗 Nutrición"
-                                : "💪 Ejercicio"}
-                          </span>
-                          <span
-                            className={`px-2 py-1 text-xs rounded ${resource.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
-                          >
-                            {resource.is_active ? "Activo" : "Inactivo"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeAdminTab === "supplements" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Gestión de Suplementos</h2>
-                <button
-                  onClick={() => setShowSupplementDialog(true)}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
-                >
-                  <span>{Icons.Plus()}</span>
-                  Nuevo Suplemento
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                {allSupplements.map((supplement) => (
-                  <div key={supplement.id} className="bg-white rounded-lg shadow p-4">
-                    <img
-                      src={supplement.image_url || "/placeholder.svg"}
-                      alt={supplement.name}
-                      className="w-full h-32 object-cover rounded-lg mb-3 bg-gray-100"
-                    />
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h4 className="font-semibold">{supplement.name}</h4>
-                        <p className="text-lg font-bold text-green-600">${supplement.price.toLocaleString()}</p>
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => toggleSupplementStatus(supplement.id)}
-                          className="p-1 text-gray-400 hover:text-gray-600"
-                          title={supplement.is_active ? "Desactivar" : "Activar"}
-                        >
-                          {Icons.Eye()}
-                        </button>
-                        <button
-                          onClick={() => deleteSupplement(supplement.id)}
-                          className="p-1 text-gray-400 hover:text-red-600"
-                          title="Eliminar suplemento"
-                        >
-                          {Icons.Trash2()}
-                        </button>
-                      </div>
-                    </div>
-                    <span
-                      className={`inline-block px-2 py-1 text-xs rounded mb-2 ${supplement.is_active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
-                    >
-                      {supplement.is_active ? "Activo" : "Inactivo"}
-                    </span>
-                    <p className="text-sm text-gray-600 mb-2">{supplement.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* DIALOGS DE ADMINISTRACIÓN */}
-        {showTipDialog && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Nuevo Tip</h3>
-              <div className="space-y-4">
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="Categoría"
-                  value={newTip.category}
-                  onChange={(e) => setNewTip((prev) => ({ ...prev, category: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="Título"
-                  value={newTip.title}
-                  onChange={(e) => setNewTip((prev) => ({ ...prev, title: e.target.value }))}
-                />
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg h-24"
-                  placeholder="Contenido"
-                  value={newTip.content}
-                  onChange={(e) => setNewTip((prev) => ({ ...prev, content: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="Emoji"
-                  value={newTip.icon}
-                  onChange={(e) => setNewTip((prev) => ({ ...prev, icon: e.target.value }))}
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={addGlobalTip}
-                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
-                  >
-                    Agregar Tip
-                  </button>
-                  <button
-                    onClick={() => setShowTipDialog(false)}
-                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showResourceDialog && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Nuevo Recurso</h3>
-              <div className="space-y-4">
-                {/* 🆕 SELECTOR CON EXERCISE INCLUIDO */}
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  value={resourceType}
-                  onChange={(e) => setResourceType(e.target.value as "mindfulness" | "nutrition" | "exercise")}
-                >
-                  <option value="mindfulness">🧘‍♀️ Mindfulness</option>
-                  <option value="nutrition">🥗 Nutrición</option>
-                  <option value="exercise">💪 Ejercicio</option>
-                </select>
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="Título"
-                  value={newResource.title}
-                  onChange={(e) => setNewResource((prev) => ({ ...prev, title: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="Descripción"
-                  value={newResource.description}
-                  onChange={(e) => setNewResource((prev) => ({ ...prev, description: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="URL (YouTube, Spotify, PDF, etc.)"
-                  value={newResource.url}
-                  onChange={(e) => setNewResource((prev) => ({ ...prev, url: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="URL de imagen personalizada (opcional)"
-                  value={newResource.image_url}
-                  onChange={(e) => setNewResource((prev) => ({ ...prev, image_url: e.target.value }))}
-                />
-                <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
-                  💡 <strong>Miniaturas automáticas:</strong> YouTube y Spotify se detectan automáticamente. Para PDFs
-                  puedes agregar una imagen personalizada.
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={addGlobalResource}
-                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
-                  >
-                    Agregar Recurso
-                  </button>
-                  <button
-                    onClick={() => setShowResourceDialog(false)}
-                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showSupplementDialog && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Suplemento</h3>
-              <div className="space-y-4">
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="Nombre"
-                  value={newSupplement.name}
-                  onChange={(e) => setNewSupplement((prev) => ({ ...prev, name: e.target.value }))}
-                />
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg h-20"
-                  placeholder="Descripción"
-                  value={newSupplement.description}
-                  onChange={(e) => setNewSupplement((prev) => ({ ...prev, description: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="Beneficios (separados por comas)"
-                  value={newSupplement.benefits}
-                  onChange={(e) => setNewSupplement((prev) => ({ ...prev, benefits: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="Precio"
-                  type="number"
-                  value={newSupplement.price}
-                  onChange={(e) => setNewSupplement((prev) => ({ ...prev, price: e.target.value }))}
-                />
-
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">Imagen del producto:</label>
-
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageFileSelect}
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center space-y-2">
-                      {imagePreview ? (
-                        <img
-                          src={imagePreview || "/placeholder.svg"}
-                          alt="Preview"
-                          className="w-32 h-32 object-cover rounded-lg border"
-                        />
-                      ) : (
-                        <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center border">
-                          <span className="text-gray-400 text-3xl">📷</span>
-                        </div>
-                      )}
-                      <span className="text-sm text-blue-600 font-medium">
-                        {imageFile ? "Cambiar imagen" : "Seleccionar imagen"}
-                      </span>
-                      <span className="text-xs text-gray-500">JPG, PNG, WebP o GIF (máx. 50MB)</span>
-                    </label>
-                  </div>
-
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300" />
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-gray-500">o</span>
-                    </div>
-                  </div>
-
-                  <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="URL de imagen externa (opcional)"
-                    value={newSupplement.image_url}
-                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, image_url: e.target.value }))}
-                  />
-                </div>
-
-                <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg h-20"
-                  placeholder="Mensaje WhatsApp personalizado"
-                  value={newSupplement.whatsapp_message}
-                  onChange={(e) => setNewSupplement((prev) => ({ ...prev, whatsapp_message: e.target.value }))}
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={addSupplementAdmin}
-                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors"
-                    disabled={uploading}
-                  >
-                    {uploading ? (
-                      <>
-                        <span className="animate-spin">⏳</span>
-                        Subiendo imagen...
-                      </>
-                    ) : (
-                      <>
-                        <span>📦</span>
-                        Agregar Suplemento
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowSupplementDialog(false)
-                      resetSupplementForm()
-                    }}
-                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  if (isAdmin) {
-    return <AdminPanel />
-  }
-
+  // ============================================================================
+  // ESTADOS DE CARGA Y ERROR
+  // ============================================================================
   if (connectionStatus === "connecting") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
@@ -2692,6 +1463,9 @@ Gracias!`
     )
   }
 
+  // ============================================================================
+  // PANTALLA DE LOGIN/REGISTRO
+  // ============================================================================
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
@@ -2707,10 +1481,11 @@ Gracias!`
           </div>
 
           <div className="space-y-6">
+            {/* Botones de navegación mejorados con simetría */}
             <div className="flex rounded-lg bg-gray-100 p-1">
               <button
                 onClick={() => setShowRegister(false)}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
                   !showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -2718,7 +1493,7 @@ Gracias!`
               </button>
               <button
                 onClick={() => setShowRegister(true)}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
                   showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
                 }`}
               >
@@ -2744,7 +1519,7 @@ Gracias!`
                 />
                 <button
                   onClick={handleLogin}
-                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2"
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -2771,6 +1546,8 @@ Gracias!`
                   value={registerForm.name}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, name: e.target.value }))}
                 />
+
+                {/* Grid simétrico para edad y peso */}
                 <div className="grid grid-cols-2 gap-4">
                   <input
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -2787,6 +1564,7 @@ Gracias!`
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, weight: e.target.value }))}
                   />
                 </div>
+
                 <input
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="Altura (cm)"
@@ -2794,6 +1572,7 @@ Gracias!`
                   value={registerForm.height}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, height: e.target.value }))}
                 />
+
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   value={registerForm.activityLevel}
@@ -2807,6 +1586,7 @@ Gracias!`
                     </option>
                   ))}
                 </select>
+
                 <select
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   value={registerForm.goal}
@@ -2834,25 +1614,30 @@ Gracias!`
                     ))}
                   </optgroup>
                 </select>
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  type="password"
-                  placeholder="Código de acceso (10 dígitos)"
-                  maxLength={10}
-                  value={registerForm.accessCode}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, accessCode: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  type="password"
-                  placeholder="Confirmar código"
-                  maxLength={10}
-                  value={registerForm.confirmCode}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, confirmCode: e.target.value }))}
-                />
+
+                {/* Grid simétrico para códigos de acceso */}
+                <div className="grid grid-cols-1 gap-4">
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    type="password"
+                    placeholder="Código de acceso (10 dígitos)"
+                    maxLength={10}
+                    value={registerForm.accessCode}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, accessCode: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    type="password"
+                    placeholder="Confirmar código"
+                    maxLength={10}
+                    value={registerForm.confirmCode}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, confirmCode: e.target.value }))}
+                  />
+                </div>
+
                 <button
                   onClick={handleRegister}
-                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2"
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -2869,6 +1654,7 @@ Gracias!`
           </div>
         </div>
 
+        {/* Modal de acceso administrador */}
         {showAdminLogin && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-80 shadow-lg rounded-md bg-white">
@@ -2881,16 +1667,17 @@ Gracias!`
                   value={adminCode}
                   onChange={(e) => setAdminCode(e.target.value)}
                 />
-                <div className="flex gap-2">
+                {/* Botones simétricos */}
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={handleAdminLogin}
-                    className="flex-1 bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
+                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors"
                   >
                     Ingresar
                   </button>
                   <button
                     onClick={() => setShowAdminLogin(false)}
-                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 transition-colors"
                   >
                     Cancelar
                   </button>
@@ -2903,28 +1690,32 @@ Gracias!`
     )
   }
 
+  // ============================================================================
+  // APLICACIÓN PRINCIPAL
+  // ============================================================================
   const activeTips = globalTips.filter((tip) => tip.is_active)
   const mindfulnessResources = globalResources.filter((r) => r.type === "mindfulness" && r.is_active)
   const nutritionResources = globalResources.filter((r) => r.type === "nutrition" && r.is_active)
-  const exerciseResources = globalResources.filter((r) => r.type === "exercise" && r.is_active) // 🆕 NUEVO
+  const exerciseResources = globalResources.filter((r) => r.type === "exercise" && r.is_active)
   const caloriesProgress = getCaloriesProgress()
 
   return (
     <div className="min-h-screen bg-gray-50">
       <SaveStatusIndicator />
-
       {currentUser && <FloatingActionButtons />}
 
       <div className="pb-20">
-        {/* Navegación de tabs */}
-        <div className="bg-white border-b">
+        {/* Navegación de tabs mejorada */}
+        <div className="bg-white border-b sticky top-0 z-30">
           <div className="flex">
             {["inicio", "nutricion", "ejercicio", "mindfulness", "suplementos"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-4 px-2 text-sm font-medium capitalize ${
-                  activeTab === tab ? "text-green-600 border-b-2 border-green-500" : "text-gray-500 hover:text-gray-700"
+                className={`flex-1 py-4 px-2 text-sm font-medium capitalize transition-colors ${
+                  activeTab === tab
+                    ? "text-green-600 border-b-2 border-green-500 bg-green-50"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 <div className="flex flex-col items-center space-y-1">
@@ -2946,6 +1737,7 @@ Gracias!`
           {/* TAB INICIO */}
           {activeTab === "inicio" && (
             <div className="space-y-6">
+              {/* Header mejorado */}
               <div className="flex justify-between items-center">
                 <div className="text-center flex-1">
                   <h2 className="text-2xl font-bold text-gray-800">¡Hola {currentUser?.name}! 👋</h2>
@@ -2959,17 +1751,18 @@ Gracias!`
                     </span>
                   )}
                 </div>
+                {/* Botones de acción simétricos */}
                 <div className="flex gap-2">
                   <button
                     onClick={() => resetProgress("all")}
-                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     title="Reiniciar todo el progreso"
                   >
                     {Icons.RotateCcw()}
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     title="Cerrar sesión"
                   >
                     {Icons.LogOut()}
@@ -2999,121 +1792,143 @@ Gracias!`
                 </div>
               )}
 
-              {/* 🆕 PANEL DE GAMIFICACIÓN */}
-              {userGamification && (
-                <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">🎮</span>
-                      <span className="font-semibold">Tu Progreso</span>
-                    </div>
-                    <span className="text-lg font-bold">Nivel {userGamification.current_level}</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className="text-lg font-bold">{userGamification.total_points}</div>
-                      <div className="text-xs">Puntos Totales</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold">{userGamification.streak_days}</div>
-                      <div className="text-xs">Días Seguidos</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold">{userGamification.weekly_points}</div>
-                      <div className="text-xs">Puntos Semana</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 🆕 RECOMENDACIONES DE IA */}
-              {aiRecommendations.length > 0 && (
-                <div className="space-y-3">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <span>🤖</span>
-                    Recomendaciones Personalizadas
-                  </h3>
-                  {aiRecommendations.slice(0, 1).map((rec) => (
-                    <div key={rec.id} className="bg-white rounded-lg shadow p-4">
-                      <h4 className="font-semibold">{rec.supplement_names.join(", ")}</h4>
-                      <p className="text-sm text-gray-600">{rec.reason}</p>
-                      <p className="text-sm text-green-600">{rec.sales_angle}</p>
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-xs text-gray-500">Prioridad: {rec.priority}</span>
-                        <span className="text-xs text-blue-500">Descuento: {rec.discount_percentage}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Panel de progreso diario */}
+              {/* Panel de progreso diario MEJORADO CON SIMETRÍA */}
               <div className="bg-white rounded-lg shadow p-4">
-                <h3 className="font-semibold mb-3">Progreso Diario</h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold">Progreso Diario</h3>
+                  <div className="text-sm text-gray-500">{getProgressPercentage()}% completado</div>
+                </div>
+
+                {/* Grid simétrico 3x2 para mejor organización */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  {/* Fila superior: Actividades principales */}
                   <div className="text-center">
                     <button
                       onClick={() => updateProgress("water", 1)}
-                      className="p-3 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
+                      className="w-full p-4 border-2 border-blue-300 rounded-lg hover:bg-blue-50 transition-colors group"
                     >
-                      <span className="text-2xl">{Icons.Droplets()}</span>
-                      <p className="text-sm">Agua: {dailyProgress.water}/8</p>
+                      <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">
+                        {Icons.Droplets()}
+                      </span>
+                      <p className="text-sm font-medium">Agua</p>
+                      <p className="text-xs text-gray-600">{dailyProgress.water}/8 vasos</p>
+                      <div className="w-full bg-blue-100 rounded-full h-1 mt-2">
+                        <div
+                          className="bg-blue-500 h-1 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.min((dailyProgress.water / 8) * 100, 100)}%` }}
+                        ></div>
+                      </div>
                     </button>
                   </div>
+
                   <div className="text-center">
                     <button
                       onClick={() => updateProgress("exercise", 1)}
-                      className="p-3 border border-green-300 rounded-lg hover:bg-green-50 transition-colors"
+                      className="w-full p-4 border-2 border-green-300 rounded-lg hover:bg-green-50 transition-colors group"
                     >
-                      <span className="text-2xl">{Icons.Activity()}</span>
-                      <p className="text-sm">Ejercicio: {dailyProgress.exercise}/1</p>
+                      <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">
+                        {Icons.Activity()}
+                      </span>
+                      <p className="text-sm font-medium">Ejercicio</p>
+                      <p className="text-xs text-gray-600">{dailyProgress.exercise}/1 sesión</p>
+                      <div className="w-full bg-green-100 rounded-full h-1 mt-2">
+                        <div
+                          className="bg-green-500 h-1 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.min((dailyProgress.exercise / 1) * 100, 100)}%` }}
+                        ></div>
+                      </div>
                     </button>
                   </div>
+
                   <div className="text-center">
                     <button
                       onClick={() => updateProgress("mindfulness", 1)}
-                      className="p-3 border border-purple-300 rounded-lg hover:bg-purple-50 transition-colors"
+                      className="w-full p-4 border-2 border-purple-300 rounded-lg hover:bg-purple-50 transition-colors group"
                     >
-                      <span className="text-2xl">{Icons.Brain()}</span>
-                      <p className="text-sm">Mindfulness: {dailyProgress.mindfulness}/1</p>
+                      <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">
+                        {Icons.Brain()}
+                      </span>
+                      <p className="text-sm font-medium">Mindfulness</p>
+                      <p className="text-xs text-gray-600">{dailyProgress.mindfulness}/1 sesión</p>
+                      <div className="w-full bg-purple-100 rounded-full h-1 mt-2">
+                        <div
+                          className="bg-purple-500 h-1 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.min((dailyProgress.mindfulness / 1) * 100, 100)}%` }}
+                        ></div>
+                      </div>
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4 mt-4">
+
+                {/* Fila inferior: Comidas */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
                   <div className="text-center">
                     <button
                       onClick={() => updateProgress("desayuno", 1)}
-                      className="p-3 border border-orange-300 rounded-lg hover:bg-orange-50 transition-colors"
+                      className="w-full p-4 border-2 border-orange-300 rounded-lg hover:bg-orange-50 transition-colors group"
                     >
-                      <span className="text-2xl">{Icons.UtensilsCrossed()}</span>
-                      <p className="text-sm">Desayuno: {dailyProgress.desayuno}/1</p>
+                      <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">🌅</span>
+                      <p className="text-sm font-medium">Desayuno</p>
+                      <p className="text-xs text-gray-600">{dailyProgress.desayuno}/1</p>
+                      <div className="w-full bg-orange-100 rounded-full h-1 mt-2">
+                        <div
+                          className="bg-orange-500 h-1 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.min((dailyProgress.desayuno / 1) * 100, 100)}%` }}
+                        ></div>
+                      </div>
                     </button>
                   </div>
+
                   <div className="text-center">
                     <button
                       onClick={() => updateProgress("almuerzo", 1)}
-                      className="p-3 border border-orange-300 rounded-lg hover:bg-orange-50 transition-colors"
+                      className="w-full p-4 border-2 border-yellow-300 rounded-lg hover:bg-yellow-50 transition-colors group"
                     >
-                      <span className="text-2xl">{Icons.UtensilsCrossed()}</span>
-                      <p className="text-sm">Almuerzo: {dailyProgress.almuerzo}/1</p>
+                      <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">☀️</span>
+                      <p className="text-sm font-medium">Almuerzo</p>
+                      <p className="text-xs text-gray-600">{dailyProgress.almuerzo}/1</p>
+                      <div className="w-full bg-yellow-100 rounded-full h-1 mt-2">
+                        <div
+                          className="bg-yellow-500 h-1 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.min((dailyProgress.almuerzo / 1) * 100, 100)}%` }}
+                        ></div>
+                      </div>
                     </button>
                   </div>
+
                   <div className="text-center">
                     <button
                       onClick={() => updateProgress("cena", 1)}
-                      className="p-3 border border-orange-300 rounded-lg hover:bg-orange-50 transition-colors"
+                      className="w-full p-4 border-2 border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors group"
                     >
-                      <span className="text-2xl">{Icons.UtensilsCrossed()}</span>
-                      <p className="text-sm">Cena: {dailyProgress.cena}/1</p>
+                      <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">🌙</span>
+                      <p className="text-sm font-medium">Cena</p>
+                      <p className="text-xs text-gray-600">{dailyProgress.cena}/1</p>
+                      <div className="w-full bg-indigo-100 rounded-full h-1 mt-2">
+                        <div
+                          className="bg-indigo-500 h-1 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.min((dailyProgress.cena / 1) * 100, 100)}%` }}
+                        ></div>
+                      </div>
                     </button>
                   </div>
                 </div>
-                <div className="mt-4">
+
+                {/* Botones de acción simétricos */}
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => resetProgress("meals")}
-                    className="w-full p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                   >
-                    {Icons.RotateCcw()} Reiniciar Comidas
+                    <span>{Icons.RotateCcw()}</span>
+                    <span className="text-sm">Reiniciar Comidas</span>
+                  </button>
+                  <button
+                    onClick={() => resetProgress("all")}
+                    className="p-3 border border-red-300 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-red-600"
+                  >
+                    <span>{Icons.X()}</span>
+                    <span className="text-sm">Reiniciar Todo</span>
                   </button>
                 </div>
               </div>
@@ -3149,37 +1964,37 @@ Gracias!`
                 <h2 className="text-xl font-semibold">Nutrición</h2>
                 <button
                   onClick={() => setShowFoodDialog(true)}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 transition-colors"
                 >
                   <span>{Icons.Plus()}</span>
                   Agregar Alimento
                 </button>
               </div>
 
-              {/* Calculadora de comidas */}
+              {/* Calculadora de comidas con botones simétricos */}
               <div className="bg-white rounded-lg shadow p-4">
                 <h3 className="font-semibold mb-3">Calculadora de Comidas</h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   <button
                     onClick={() => openMealCalculator("desayuno")}
-                    className="p-3 border border-orange-300 rounded-lg hover:bg-orange-50 transition-colors"
+                    className="p-4 border-2 border-orange-300 rounded-lg hover:bg-orange-50 transition-colors group"
                   >
-                    <span className="text-2xl">{Icons.UtensilsCrossed()}</span>
-                    <p className="text-sm">Desayuno</p>
+                    <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">🌅</span>
+                    <p className="text-sm font-medium">Desayuno</p>
                   </button>
                   <button
                     onClick={() => openMealCalculator("almuerzo")}
-                    className="p-3 border border-orange-300 rounded-lg hover:bg-orange-50 transition-colors"
+                    className="p-4 border-2 border-yellow-300 rounded-lg hover:bg-yellow-50 transition-colors group"
                   >
-                    <span className="text-2xl">{Icons.UtensilsCrossed()}</span>
-                    <p className="text-sm">Almuerzo</p>
+                    <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">☀️</span>
+                    <p className="text-sm font-medium">Almuerzo</p>
                   </button>
                   <button
                     onClick={() => openMealCalculator("cena")}
-                    className="p-3 border border-orange-300 rounded-lg hover:bg-orange-50 transition-colors"
+                    className="p-4 border-2 border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors group"
                   >
-                    <span className="text-2xl">{Icons.UtensilsCrossed()}</span>
-                    <p className="text-sm">Cena</p>
+                    <span className="text-3xl block mb-2 group-hover:scale-110 transition-transform">🌙</span>
+                    <p className="text-sm font-medium">Cena</p>
                   </button>
                 </div>
               </div>
@@ -3188,23 +2003,23 @@ Gracias!`
               <div className="bg-white rounded-lg shadow p-4">
                 <h3 className="font-semibold mb-3">Comidas de Hoy</h3>
                 {mealCompositions.length === 0 ? (
-                  <p className="text-gray-600">No has agregado comidas hoy</p>
+                  <p className="text-gray-600 text-center py-4">No has agregado comidas hoy</p>
                 ) : (
                   <div className="space-y-3">
                     {mealCompositions.map((comp) => (
                       <div
                         key={comp.id}
-                        className="flex justify-between items-center p-3 border border-gray-200 rounded-lg"
+                        className="flex justify-between items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         <div>
                           <p className="font-medium">{comp.food_name}</p>
                           <p className="text-sm text-gray-600">
-                            {comp.quantity_grams}g - {comp.meal_type}
+                            {comp.quantity_grams}g - {comp.meal_type} - {comp.calories_consumed} cal
                           </p>
                         </div>
                         <button
                           onClick={() => removeFoodFromMeal(comp.id)}
-                          className="p-2 text-gray-400 hover:text-red-600"
+                          className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                         >
                           {Icons.Trash2()}
                         </button>
@@ -3214,35 +2029,68 @@ Gracias!`
                 )}
               </div>
 
-              {/* Resumen de macros */}
+              {/* Resumen de macros mejorado */}
               {macroResults && (
                 <div className="bg-white rounded-lg shadow p-4">
                   <h3 className="font-semibold mb-3">Resumen de Macros</h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-green-50 rounded-lg">
                       <p className="text-sm font-medium text-gray-600">Calorías</p>
-                      <p className="text-lg font-bold">
-                        {consumedMacros.calories}/{macroResults.calories}
-                      </p>
+                      <p className="text-lg font-bold text-green-600">{consumedMacros.calories}</p>
+                      <p className="text-xs text-gray-500">de {macroResults.calories}</p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center p-3 bg-blue-50 rounded-lg">
                       <p className="text-sm font-medium text-gray-600">Proteínas</p>
-                      <p className="text-lg font-bold">
-                        {consumedMacros.protein}/{macroResults.protein}g
-                      </p>
+                      <p className="text-lg font-bold text-blue-600">{consumedMacros.protein}g</p>
+                      <p className="text-xs text-gray-500">de {macroResults.protein}g</p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center p-3 bg-yellow-50 rounded-lg">
                       <p className="text-sm font-medium text-gray-600">Carbohidratos</p>
-                      <p className="text-lg font-bold">
-                        {consumedMacros.carbs}/{macroResults.carbs}g
-                      </p>
+                      <p className="text-lg font-bold text-yellow-600">{consumedMacros.carbs}g</p>
+                      <p className="text-xs text-gray-500">de {macroResults.carbs}g</p>
                     </div>
-                    <div className="text-center">
+                    <div className="text-center p-3 bg-purple-50 rounded-lg">
                       <p className="text-sm font-medium text-gray-600">Grasas</p>
-                      <p className="text-lg font-bold">
-                        {consumedMacros.fats}/{macroResults.fats}g
-                      </p>
+                      <p className="text-lg font-bold text-purple-600">{consumedMacros.fats}g</p>
+                      <p className="text-xs text-gray-500">de {macroResults.fats}g</p>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Recursos de nutrición */}
+              {nutritionResources.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-4">
+                  <h3 className="font-semibold mb-3">Recursos de Nutrición</h3>
+                  <div className="space-y-3">
+                    {nutritionResources.map((resource) => (
+                      <div
+                        key={resource.id}
+                        className="flex gap-4 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="relative w-20 h-16 flex-shrink-0">
+                          <img
+                            src={getResourceThumbnail(resource.url, resource.type) || "/placeholder.svg"}
+                            alt={resource.title}
+                            className="w-full h-full object-cover rounded-lg"
+                            onError={(e) => {
+                              ;(e.target as HTMLImageElement).src = getResourceThumbnail("", resource.type)
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium">{resource.title}</h4>
+                          <p className="text-sm text-gray-600">{resource.description}</p>
+                          <button
+                            onClick={() => window.open(resource.url, "_blank")}
+                            className="mt-2 text-sm text-green-600 hover:text-green-700 flex items-center gap-1"
+                          >
+                            <span>{Icons.ExternalLink()}</span>
+                            Ver recurso
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -3253,14 +2101,17 @@ Gracias!`
           {activeTab === "ejercicio" && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold">Ejercicio</h2>
+
               {exerciseResources.length === 0 ? (
-                <p className="text-gray-600">No hay recursos de ejercicio disponibles</p>
+                <div className="bg-white rounded-lg shadow p-8 text-center">
+                  <span className="text-4xl block mb-4">💪</span>
+                  <p className="text-gray-600">No hay recursos de ejercicio disponibles</p>
+                </div>
               ) : (
                 <div className="space-y-4">
                   {exerciseResources.map((resource) => (
                     <div key={resource.id} className="bg-white rounded-lg shadow p-4">
                       <div className="flex gap-4">
-                        {/* 🆕 MINIATURA CON SOPORTE PARA TODOS LOS TIPOS */}
                         <div className="relative w-32 h-20 flex-shrink-0">
                           <img
                             src={getResourceThumbnail(resource.url, resource.type) || "/placeholder.svg"}
@@ -3270,7 +2121,6 @@ Gracias!`
                               ;(e.target as HTMLImageElement).src = getResourceThumbnail("", resource.type)
                             }}
                           />
-                          {/* Overlay de tipo de contenido */}
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="bg-black/60 text-white rounded-full p-2">
                               {isYouTubeUrl(resource.url) && <span className="text-xs">{Icons.Play()}</span>}
@@ -3284,24 +2134,21 @@ Gracias!`
                             </div>
                           </div>
                         </div>
-
-                        {/* CONTENIDO */}
                         <div className="flex-1">
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <h4 className="font-semibold">{resource.title}</h4>
                               <p className="text-sm text-gray-600">{resource.description}</p>
                             </div>
-                            <div className="flex gap-2 ml-4">
-                              <button
-                                onClick={() => window.open(resource.url, "_blank")}
-                                className="p-2 text-gray-400 hover:text-gray-600"
-                                title="Abrir enlace"
-                              >
-                                {Icons.ExternalLink()}
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => window.open(resource.url, "_blank")}
+                              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                              title="Abrir enlace"
+                            >
+                              {Icons.ExternalLink()}
+                            </button>
                           </div>
+                          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">💪 Ejercicio</span>
                         </div>
                       </div>
                     </div>
@@ -3315,14 +2162,17 @@ Gracias!`
           {activeTab === "mindfulness" && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold">Mindfulness</h2>
+
               {mindfulnessResources.length === 0 ? (
-                <p className="text-gray-600">No hay recursos de mindfulness disponibles</p>
+                <div className="bg-white rounded-lg shadow p-8 text-center">
+                  <span className="text-4xl block mb-4">🧘‍♀️</span>
+                  <p className="text-gray-600">No hay recursos de mindfulness disponibles</p>
+                </div>
               ) : (
                 <div className="space-y-4">
                   {mindfulnessResources.map((resource) => (
                     <div key={resource.id} className="bg-white rounded-lg shadow p-4">
                       <div className="flex gap-4">
-                        {/* 🆕 MINIATURA CON SOPORTE PARA TODOS LOS TIPOS */}
                         <div className="relative w-32 h-20 flex-shrink-0">
                           <img
                             src={getResourceThumbnail(resource.url, resource.type) || "/placeholder.svg"}
@@ -3332,7 +2182,6 @@ Gracias!`
                               ;(e.target as HTMLImageElement).src = getResourceThumbnail("", resource.type)
                             }}
                           />
-                          {/* Overlay de tipo de contenido */}
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="bg-black/60 text-white rounded-full p-2">
                               {isYouTubeUrl(resource.url) && <span className="text-xs">{Icons.Play()}</span>}
@@ -3346,24 +2195,23 @@ Gracias!`
                             </div>
                           </div>
                         </div>
-
-                        {/* CONTENIDO */}
                         <div className="flex-1">
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <h4 className="font-semibold">{resource.title}</h4>
                               <p className="text-sm text-gray-600">{resource.description}</p>
                             </div>
-                            <div className="flex gap-2 ml-4">
-                              <button
-                                onClick={() => window.open(resource.url, "_blank")}
-                                className="p-2 text-gray-400 hover:text-gray-600"
-                                title="Abrir enlace"
-                              >
-                                {Icons.ExternalLink()}
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => window.open(resource.url, "_blank")}
+                              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                              title="Abrir enlace"
+                            >
+                              {Icons.ExternalLink()}
+                            </button>
                           </div>
+                          <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
+                            🧘‍♀️ Mindfulness
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -3377,31 +2225,47 @@ Gracias!`
           {activeTab === "suplementos" && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold">Suplementos</h2>
+
               {supplements.length === 0 ? (
-                <p className="text-gray-600">No hay suplementos disponibles</p>
+                <div className="bg-white rounded-lg shadow p-8 text-center">
+                  <span className="text-4xl block mb-4">📦</span>
+                  <p className="text-gray-600">No hay suplementos disponibles</p>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {supplements.map((supplement) => (
-                    <div key={supplement.id} className="bg-white rounded-lg shadow p-4">
+                    <div
+                      key={supplement.id}
+                      className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow"
+                    >
                       <img
-                        src={supplement.image_url || "/placeholder.svg"}
+                        src={supplement.image_url || "/placeholder.svg?height=200&width=200"}
                         alt={supplement.name}
                         className="w-full h-32 object-cover rounded-lg mb-3 bg-gray-100"
                       />
-                      <h4 className="font-semibold">{supplement.name}</h4>
-                      <p className="text-lg font-bold text-green-600">${supplement.price.toLocaleString()}</p>
-                      <p className="text-sm text-gray-600 mb-2">{supplement.description}</p>
-                      <ul className="list-disc list-inside text-sm text-gray-600 mb-3">
-                        {supplement.benefits.map((benefit, index) => (
-                          <li key={index}>{benefit}</li>
-                        ))}
-                      </ul>
+                      <h4 className="font-semibold mb-1">{supplement.name}</h4>
+                      <p className="text-lg font-bold text-green-600 mb-2">${supplement.price.toLocaleString()}</p>
+                      <p className="text-sm text-gray-600 mb-3">{supplement.description}</p>
+
+                      {supplement.benefits.length > 0 && (
+                        <div className="mb-3">
+                          <p className="text-xs font-medium text-gray-700 mb-1">Beneficios:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {supplement.benefits.slice(0, 3).map((benefit, index) => (
+                              <span key={index} className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
+                                {benefit}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       <button
                         onClick={() => handleSupplementContact(supplement)}
                         className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
                       >
                         <span>{Icons.Phone()}</span>
-                        Contactar
+                        Contactar por WhatsApp
                       </button>
                     </div>
                   ))}
@@ -3412,64 +2276,81 @@ Gracias!`
         </div>
       </div>
 
-      {/* DIALOGS */}
+      {/* DIALOGS MEJORADOS CON BOTONES SIMÉTRICOS */}
       {showFoodDialog && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Alimento</h3>
             <div className="space-y-4">
               <select
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 value={selectedMeal || ""}
                 onChange={(e) => setSelectedMeal(e.target.value as "desayuno" | "almuerzo" | "cena")}
               >
                 <option value="" disabled>
                   Selecciona la comida
                 </option>
-                <option value="desayuno">Desayuno</option>
-                <option value="almuerzo">Almuerzo</option>
-                <option value="cena">Cena</option>
+                <option value="desayuno">🌅 Desayuno</option>
+                <option value="almuerzo">☀️ Almuerzo</option>
+                <option value="cena">🌙 Cena</option>
               </select>
+
               <input
-                className="w-full p-3 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="Nombre del alimento"
                 value={newFood.name}
                 onChange={(e) => setNewFood((prev) => ({ ...prev, name: e.target.value }))}
               />
-              <input
-                className="w-full p-3 border border-gray-300 rounded-lg"
-                placeholder="Calorías"
-                value={newFood.calories}
-                onChange={(e) => setNewFood((prev) => ({ ...prev, calories: e.target.value }))}
-              />
-              <input
-                className="w-full p-3 border border-gray-300 rounded-lg"
-                placeholder="Proteínas (g)"
-                value={newFood.protein}
-                onChange={(e) => setNewFood((prev) => ({ ...prev, protein: e.target.value }))}
-              />
-              <input
-                className="w-full p-3 border border-gray-300 rounded-lg"
-                placeholder="Carbohidratos (g)"
-                value={newFood.carbs}
-                onChange={(e) => setNewFood((prev) => ({ ...prev, carbs: e.target.value }))}
-              />
-              <input
-                className="w-full p-3 border border-gray-300 rounded-lg"
-                placeholder="Grasas (g)"
-                value={newFood.fats}
-                onChange={(e) => setNewFood((prev) => ({ ...prev, fats: e.target.value }))}
-              />
-              <div className="flex gap-2">
+
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Calorías"
+                  type="number"
+                  value={newFood.calories}
+                  onChange={(e) => setNewFood((prev) => ({ ...prev, calories: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Proteínas (g)"
+                  type="number"
+                  value={newFood.protein}
+                  onChange={(e) => setNewFood((prev) => ({ ...prev, protein: e.target.value }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Carbohidratos (g)"
+                  type="number"
+                  value={newFood.carbs}
+                  onChange={(e) => setNewFood((prev) => ({ ...prev, carbs: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Grasas (g)"
+                  type="number"
+                  value={newFood.fats}
+                  onChange={(e) => setNewFood((prev) => ({ ...prev, fats: e.target.value }))}
+                />
+              </div>
+
+              {/* Botones simétricos */}
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={addUserFood}
-                  className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
+                  className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition-colors"
                 >
                   Agregar Alimento
                 </button>
                 <button
-                  onClick={() => setShowFoodDialog(false)}
-                  className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                  onClick={() => {
+                    setShowFoodDialog(false)
+                    setSelectedMeal(null)
+                    setNewFood({ name: "", calories: "", protein: "", carbs: "", fats: "" })
+                  }}
+                  className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 transition-colors"
                 >
                   Cancelar
                 </button>
@@ -3503,38 +2384,72 @@ Gracias!`
 
               {selectedFood ? (
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <h4 className="font-semibold">{selectedFood.name}</h4>
                     <span className="text-sm text-gray-600">{selectedFood.calories} cal / 100g</span>
                   </div>
+
                   <input
-                    className="w-full p-3 border border-gray-300 rounded-lg"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="Cantidad (gramos)"
+                    type="number"
                     value={foodQuantity}
                     onChange={(e) => setFoodQuantity(e.target.value)}
                   />
-                  <button
-                    onClick={addFoodToMeal}
-                    className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600"
-                  >
-                    Agregar a la comida
-                  </button>
+
+                  {/* Información nutricional calculada */}
+                  {foodQuantity && Number(foodQuantity) > 0 && (
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <p className="text-sm font-medium mb-2">Información nutricional para {foodQuantity}g:</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <span>
+                          Calorías: {Math.round((Number(selectedFood.calories) * Number(foodQuantity)) / 100)}
+                        </span>
+                        <span>
+                          Proteínas: {Math.round((Number(selectedFood.protein) * Number(foodQuantity)) / 100)}g
+                        </span>
+                        <span>
+                          Carbohidratos: {Math.round((Number(selectedFood.carbs) * Number(foodQuantity)) / 100)}g
+                        </span>
+                        <span>Grasas: {Math.round((Number(selectedFood.fats) * Number(foodQuantity)) / 100)}g</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Botones simétricos */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={addFoodToMeal}
+                      className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition-colors"
+                    >
+                      Agregar a la comida
+                    </button>
+                    <button
+                      onClick={() => setSelectedFood(null)}
+                      className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 transition-colors"
+                    >
+                      Volver
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-96 overflow-y-auto">
                   {getFoodsByCategory().map((category) => (
                     <div key={category.id} className="space-y-2">
-                      <h4 className="font-semibold flex items-center gap-2">
+                      <h4 className="font-semibold flex items-center gap-2 sticky top-0 bg-white py-2">
                         {category.icon} {category.name}
                       </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 gap-2">
                         {category.foods.map((food) => (
                           <button
                             key={food.id}
                             onClick={() => selectFood(food)}
                             className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
                           >
-                            {food.name} - {food.calories} cal
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium">{food.name}</span>
+                              <span className="text-sm text-gray-600">{food.calories} cal</span>
+                            </div>
                           </button>
                         ))}
                       </div>
@@ -3543,14 +2458,16 @@ Gracias!`
                 </div>
               )}
 
-              <div className="flex justify-end mt-4">
-                <button
-                  onClick={() => setShowMealCalculator(false)}
-                  className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
-                >
-                  Cancelar
-                </button>
-              </div>
+              {!selectedFood && (
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowMealCalculator(false)}
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
