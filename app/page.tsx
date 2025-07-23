@@ -329,10 +329,19 @@ const GOALS = [
 ]
 
 // ============================================================================
-// 🚀 FUNCIONES DE BASE DE DATOS MEJORADAS
+// 🚀 FUNCIONES DE BASE DE DATOS CORREGIDAS PARA RLS
 // ============================================================================
 
 const dbFunctions = {
+  // 🔐 FUNCIÓN HELPER PARA OBTENER USER_ID AUTENTICADO
+  async getAuthenticatedUserId(): Promise<string> {
+    const { data: { session }, error } = await supabase.auth.getSession()
+    if (error || !session?.user?.id) {
+      throw new Error('Usuario no autenticado')
+    }
+    return session.user.id
+  },
+
   async findUserByPhone(phone: string): Promise<UserProfile | null> {
     try {
       const { data, error } = await supabase
@@ -378,8 +387,9 @@ const dbFunctions = {
     }
   },
 
-  async getTodayProgress(userId: string): Promise<DailyProgress | null> {
+  async getTodayProgress(): Promise<DailyProgress | null> {
     try {
+      const userId = await this.getAuthenticatedUserId()
       const today = new Date().toISOString().split('T')[0]
       console.log('🔍 Cargando progreso para:', userId, 'fecha:', today)
       
@@ -406,8 +416,9 @@ const dbFunctions = {
     }
   },
 
-  async saveProgress(userId: string, progress: Omit<DailyProgress, 'id' | 'user_id' | 'date'>): Promise<boolean> {
+  async saveProgress(progress: Omit<DailyProgress, 'id' | 'user_id' | 'date'>): Promise<boolean> {
     try {
+      const userId = await this.getAuthenticatedUserId()
       const today = new Date().toISOString().split('T')[0]
       
       console.log('💾 Guardando progreso:', {
@@ -446,8 +457,9 @@ const dbFunctions = {
     }
   },
 
-  async verifyProgressSaved(userId: string, expectedData: any): Promise<boolean> {
+  async verifyProgressSaved(expectedData: any): Promise<boolean> {
     try {
+      const userId = await this.getAuthenticatedUserId()
       const today = new Date().toISOString().split('T')[0]
       const { data, error } = await supabase
         .from('daily_progress')
@@ -478,8 +490,9 @@ const dbFunctions = {
     }
   },
 
-  async getProgressHistory(userId: string, days: number = 7): Promise<DailyProgress[]> {
+  async getProgressHistory(days: number = 7): Promise<DailyProgress[]> {
     try {
+      const userId = await this.getAuthenticatedUserId()
       const { data, error } = await supabase
         .from('daily_progress')
         .select('*')
@@ -935,9 +948,10 @@ const dbFunctions = {
     }
   },
 
-  // 🆕 FUNCIONES DE GAMIFICACIÓN
-  async getUserGamification(userId: string): Promise<UserGamification | null> {
+  // 🆕 FUNCIONES DE GAMIFICACIÓN - COMPATIBLES CON RLS
+  async getUserGamification(): Promise<UserGamification | null> {
     try {
+      const userId = await this.getAuthenticatedUserId()
       const { data, error } = await supabase
         .from('user_gamification')
         .select('*')
@@ -963,6 +977,7 @@ const dbFunctions = {
       return data as UserGamification
     } catch (error) {
       console.error('Error loading user gamification:', error)
+      const userId = 'fallback_user'
       return {
         id: `${userId}_gamification`,
         user_id: userId,
@@ -979,8 +994,9 @@ const dbFunctions = {
     }
   },
 
-  async getUserChallenges(userId: string): Promise<UserChallenge[]> {
+  async getUserChallenges(): Promise<UserChallenge[]> {
     try {
+      const userId = await this.getAuthenticatedUserId()
       const { data, error } = await supabase
         .from('user_challenges')
         .select('*')
@@ -998,8 +1014,9 @@ const dbFunctions = {
     }
   },
 
-  async getAIRecommendations(userId: string): Promise<AIRecommendation[]> {
+  async getAIRecommendations(): Promise<AIRecommendation[]> {
     try {
+      const userId = await this.getAuthenticatedUserId()
       const { data, error } = await supabase
         .from('ai_supplement_recommendations')
         .select('*')
@@ -1228,7 +1245,8 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     try {
       console.log('🔍 Iniciando carga de datos para usuario:', userId)
       
-      const todayProgress = await dbFunctions.getTodayProgress(userId)
+      // ✅ CAMBIO APLICADO: Sin userId en getTodayProgress
+      const todayProgress = await dbFunctions.getTodayProgress()
       if (todayProgress) {
         console.log('✅ Progreso cargado desde BD:', todayProgress)
         setDailyProgress(todayProgress)
@@ -1237,15 +1255,15 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
         setDailyProgress(prev => ({ ...prev, user_id: userId }))
       }
 
-      // Cargar otros datos en paralelo
-const [foods, history, compositions, gamification, challenges, recommendations] = await Promise.all([
-  dbFunctions.getUserFoods(userId),
-  dbFunctions.getProgressHistory(userId),
-  dbFunctions.getTodayMealCompositions(userId),
-  dbFunctions.getUserGamification(userId),
-  dbFunctions.getUserChallenges(userId),
-  dbFunctions.getAIRecommendations(userId)
-])
+      // ✅ CAMBIOS APLICADOS: Funciones RLS sin userId
+      const [foods, history, compositions, gamification, challenges, recommendations] = await Promise.all([
+        dbFunctions.getUserFoods(userId), // ✅ Esta SÍ mantiene userId
+        dbFunctions.getProgressHistory(), // ✅ Sin userId
+        dbFunctions.getTodayMealCompositions(userId), // ✅ Esta SÍ mantiene userId
+        dbFunctions.getUserGamification(), // ✅ Sin userId
+        dbFunctions.getUserChallenges(), // ✅ Sin userId
+        dbFunctions.getAIRecommendations() // ✅ Sin userId
+      ])
       
       setUserFoods(foods)
       setProgressHistory(history)
@@ -1362,7 +1380,8 @@ const [foods, history, compositions, gamification, challenges, recommendations] 
     setSaveStatus('saving')
 
     try {
-      const success = await dbFunctions.saveProgress(currentUser.id, {
+      // ✅ CAMBIO APLICADO: Sin userId en saveProgress
+      const success = await dbFunctions.saveProgress({
         water: newProgress.water,
         exercise: newProgress.exercise,
         mindfulness: newProgress.mindfulness,
@@ -1372,7 +1391,8 @@ const [foods, history, compositions, gamification, challenges, recommendations] 
       })
 
       if (success) {
-        const verified = await dbFunctions.verifyProgressSaved(currentUser.id, newProgress)
+        // ✅ CAMBIO APLICADO: Sin userId en verifyProgressSaved
+        const verified = await dbFunctions.verifyProgressSaved(newProgress)
         
         if (verified) {
           setSaveStatus('saved')
@@ -1420,7 +1440,8 @@ const [foods, history, compositions, gamification, challenges, recommendations] 
       
       setDailyProgress(prev => ({ ...prev, ...typicalProgress }))
       
-      const success = await dbFunctions.saveProgress(currentUser.id, typicalProgress)
+      // ✅ CAMBIO APLICADO: Sin userId en saveProgress
+      const success = await dbFunctions.saveProgress(typicalProgress)
       
       if (success) {
         setSaveStatus('saved')
@@ -1474,7 +1495,8 @@ const [foods, history, compositions, gamification, challenges, recommendations] 
     setSaveStatus('saving')
 
     try {
-      const success = await dbFunctions.saveProgress(currentUser.id, {
+      // ✅ CAMBIO APLICADO: Sin userId en saveProgress
+      const success = await dbFunctions.saveProgress({
         water: newProgress.water,
         exercise: newProgress.exercise,
         mindfulness: newProgress.mindfulness,
@@ -1678,6 +1700,331 @@ Gracias!`
           </span>
         )}
       </div>
+
+      {/* MODAL DE CALCULADORA DE MACROS */}
+      {showMealCalculator && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                <span>{Icons.Calculator()}</span>
+                Calculadora de macros - {selectedMealType}
+              </h3>
+              <button 
+                onClick={() => setShowMealCalculator(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                {Icons.X()}
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Selecciona un alimento y especifica la cantidad para calcular los macros automáticamente
+            </p>
+            
+            <div className="space-y-4">
+              {!selectedFood ? (
+                <div>
+                  <h4 className="font-semibold mb-3">Selecciona un alimento:</h4>
+                  <div className="max-h-80 overflow-y-auto space-y-4">
+                    
+                    {getFoodsByCategory().map(category => (
+                      category.foods.length > 0 && (
+                        <div key={category.id}>
+                          <h5 className="font-semibold text-sm flex items-center gap-2 mb-2 px-2 py-1 bg-gray-100 rounded">
+                            <span>{category.icon}</span>
+                            {category.name}
+                          </h5>
+                          <div className="space-y-1 ml-2">
+                            {category.foods.map(food => (
+                              <div 
+                                key={food.id} 
+                                className="p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
+                                onClick={() => setSelectedFood(food)}
+                              >
+                                <h6 className="font-semibold">{food.name}</h6>
+                                <p className="text-sm text-gray-600">
+                                  {Number(food.calories)} cal | P: {Number(food.protein)}g | C: {Number(food.carbs)}g | G: {Number(food.fats)}g
+                                  <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    ))}
+
+                    {userFoods.length > 0 && (
+                      <div>
+                        <h5 className="font-semibold text-sm flex items-center gap-2 mb-2 px-2 py-1 bg-green-100 rounded">
+                          <span>👨‍🍳</span>
+                          Mis Alimentos Personalizados
+                        </h5>
+                        <div className="space-y-1 ml-2">
+                          {userFoods.map(food => (
+                            <div 
+                              key={food.id} 
+                              className="p-3 border border-green-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors"
+                              onClick={() => setSelectedFood(food)}
+                            >
+                              <h6 className="font-semibold">{food.name}</h6>
+                              <p className="text-sm text-gray-600">
+                                {Number(food.calories)} cal | P: {Number(food.protein)}g | C: {Number(food.carbs)}g | G: {Number(food.fats)}g
+                                <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="border-t pt-4">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600 mb-3">¿No encuentras tu alimento?</p>
+                        <button 
+                          onClick={() => {
+                            setShowMealCalculator(false)
+                            setSelectedMeal(selectedMealType)
+                            setShowFoodDialog(true)
+                          }}
+                          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2 mx-auto"
+                        >
+                          <span>{Icons.Plus()}</span>
+                          Crear alimento personalizado
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <h4 className="font-semibold">{selectedFood.name}</h4>
+                      <p className="text-sm text-gray-600">Valores por 100g</p>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedFood(null)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      {Icons.X()}
+                    </button>
+                  </div>
+
+                  <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                    <div className="grid grid-cols-4 gap-2 text-center text-sm">
+                      <div>
+                        <div className="font-bold">{Number(selectedFood.calories)}</div>
+                        <div className="text-gray-600">cal</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-blue-600">{Number(selectedFood.protein)}g</div>
+                        <div className="text-gray-600">Proteína</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-green-600">{Number(selectedFood.carbs)}g</div>
+                        <div className="text-gray-600">Carbos</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-yellow-600">{Number(selectedFood.fats)}g</div>
+                        <div className="text-gray-600">Grasas</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700">Cantidad consumida (gramos):</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setFoodQuantity(prev => Math.max(10, parseInt(prev) - 10).toString())}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        {Icons.Minus()}
+                      </button>
+                      <input
+                        type="number"
+                        value={foodQuantity}
+                        onChange={(e) => setFoodQuantity(e.target.value)}
+                        className="flex-1 p-2 border border-gray-300 rounded-lg text-center font-bold focus:outline-none focus:ring-2 focus:ring-green-500"
+                        min="1"
+                      />
+                      <button
+                        onClick={() => setFoodQuantity(prev => (parseInt(prev) + 10).toString())}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                      >
+                        {Icons.Plus()}
+                      </button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <button onClick={() => setFoodQuantity('50')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">50g</button>
+                      <button onClick={() => setFoodQuantity('100')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">100g</button>
+                      <button onClick={() => setFoodQuantity('150')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">150g</button>
+                      <button onClick={() => setFoodQuantity('200')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">200g</button>
+                    </div>
+                  </div>
+
+                  {parseInt(foodQuantity) > 0 && (
+                    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+                      <h5 className="font-semibold mb-2 text-center">Macros calculados para {foodQuantity}g:</h5>
+                      <div className="grid grid-cols-4 gap-2 text-center">
+                        <div>
+                          <div className="text-lg font-bold text-green-600">
+                            {Math.round(Number(selectedFood.calories) * parseInt(foodQuantity) / 100)}
+                          </div>
+                          <div className="text-xs text-gray-600">calorías</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-blue-600">
+                            {Math.round(Number(selectedFood.protein) * parseInt(foodQuantity) / 100)}g
+                          </div>
+                          <div className="text-xs text-gray-600">proteína</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-green-600">
+                            {Math.round(Number(selectedFood.carbs) * parseInt(foodQuantity) / 100)}g
+                          </div>
+                          <div className="text-xs text-gray-600">carbos</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-yellow-600">
+                            {Math.round(Number(selectedFood.fats) * parseInt(foodQuantity) / 100)}g
+                          </div>
+                          <div className="text-xs text-gray-600">grasas</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-4">
+                    <button 
+                      onClick={() => setSelectedFood(null)} 
+                      className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                    >
+                      Cambiar alimento
+                    </button>
+                    <button 
+                      onClick={addFoodToMeal} 
+                      className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-300"
+                      disabled={!parseInt(foodQuantity) || parseInt(foodQuantity) <= 0}
+                    >
+                      Agregar a {selectedMealType}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PARA AGREGAR ALIMENTOS PERSONALIZADOS */}
+      {showFoodDialog && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Agregar alimento personalizado</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Crea un alimento con sus valores nutricionales por 100g
+            </p>
+            <div className="space-y-4">
+              <input
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Nombre del alimento"
+                value={newFood.name}
+                onChange={(e) => setNewFood(prev => ({ ...prev, name: e.target.value }))}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Calorías (por 100g)"
+                  type="number"
+                  value={newFood.calories}
+                  onChange={(e) => setNewFood(prev => ({ ...prev, calories: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Proteínas (g)"
+                  type="number"
+                  value={newFood.protein}
+                  onChange={(e) => setNewFood(prev => ({ ...prev, protein: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Carbohidratos (g)"
+                  type="number"
+                  value={newFood.carbs}
+                  onChange={(e) => setNewFood(prev => ({ ...prev, carbs: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Grasas (g)"
+                  type="number"
+                  value={newFood.fats}
+                  onChange={(e) => setNewFood(prev => ({ ...prev, fats: e.target.value }))}
+                />
+              </div>
+              
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  💡 <strong>Tip:</strong> Todos los valores deben ser por 100g del alimento. 
+                  La calculadora ajustará automáticamente según la cantidad que consumas.
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <button 
+                  onClick={addUserFood} 
+                  className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
+                  disabled={!newFood.name}
+                >
+                  <span>{Icons.Plus()}</span>
+                  Crear alimento
+                </button>
+                <button 
+                  onClick={() => setShowFoodDialog(false)}
+                  className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DIALOG DE LOGIN ADMIN */}
+      {showAdminLogin && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-80 shadow-lg rounded-md bg-white">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Acceso Administrador</h3>
+            <input
+              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
+              type="password"
+              placeholder="Código de acceso"
+              value={adminCode}
+              onChange={(e) => setAdminCode(e.target.value)}
+            />
+            <div className="flex gap-2">
+              <button 
+                onClick={handleAdminLogin} 
+                className="flex-1 bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
+              >
+                Ingresar
+              </button>
+              <button 
+                onClick={() => setShowAdminLogin(false)}
+                className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
     )
   }
 
@@ -2938,966 +3285,3 @@ Gracias!`
                   </div>
                 </div>
               </div>
-
-              {/* Controles rápidos mejorados */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-lg shadow p-4 text-center">
-                  <span className="text-2xl">{Icons.Droplets()}</span>
-                  <div className="flex justify-center items-center gap-2 mt-2">
-                    <button 
-                      onClick={() => updateProgress('water', -1)}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:bg-gray-300"
-                      disabled={saveStatus === 'saving'}
-                    >
-                      {Icons.Minus()}
-                    </button>
-                    <span className="font-bold text-lg min-w-[2rem]">{dailyProgress.water}</span>
-                    <button 
-                      onClick={() => updateProgress('water', 1)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 disabled:bg-gray-300"
-                      disabled={saveStatus === 'saving'}
-                    >
-                      {Icons.Plus()}
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-600 mt-1">Vasos de agua</p>
-                </div>
-                
-                <div className="bg-white rounded-lg shadow p-4 text-center">
-                  <span className="text-2xl">{Icons.Activity()}</span>
-                  <div className="flex justify-center items-center gap-2 mt-2">
-                    <button 
-                      onClick={() => updateProgress('exercise', -1)}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:bg-gray-300"
-                      disabled={saveStatus === 'saving'}
-                    >
-                      {Icons.Minus()}
-                    </button>
-                    <span className="font-bold text-lg min-w-[2rem]">{dailyProgress.exercise}</span>
-                    <button 
-                      onClick={() => updateProgress('exercise', 1)}
-                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 disabled:bg-gray-300"
-                      disabled={saveStatus === 'saving'}
-                    >
-                      {Icons.Plus()}
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-600 mt-1">Ejercicios</p>
-                </div>
-              </div>
-
-              {/* Historial de progreso */}
-              {progressHistory.length > 0 && (
-                <div className="bg-white rounded-lg shadow p-4">
-                  <h3 className="font-semibold mb-3">Progreso reciente</h3>
-                  <div className="space-y-2">
-                    {progressHistory.slice(0, 5).map(progress => {
-                      const date = new Date(progress.date).toLocaleDateString()
-                      const total = progress.water + progress.exercise + progress.mindfulness + 
-                                   progress.desayuno + progress.almuerzo + progress.cena
-                      return (
-                        <div key={progress.id} className="flex justify-between items-center p-2 border rounded">
-                          <span className="text-sm">{date}</span>
-                          <span className="text-sm font-medium">{total} actividades</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB NUTRICIÓN */}
-          {activeTab === 'nutricion' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">🍽 Nutrición</h2>
-                <button 
-                  onClick={() => resetProgress('meals')} 
-                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  title="Reiniciar comidas del día"
-                >
-                  {Icons.RotateCcw()}
-                </button>
-              </div>
-
-              {/* 🆕 RECURSOS DE NUTRICIÓN CON MINIATURAS */}
-              {nutritionResources.length > 0 && (
-                <div className="bg-white rounded-lg shadow p-4">
-                  <h3 className="font-semibold mb-4">Recursos recomendados</h3>
-                  <div className="space-y-3">
-                    {nutritionResources.map(resource => (
-                      <div key={resource.id} className="flex gap-4 p-3 bg-green-50 rounded-lg">
-                        {/* MINIATURA */}
-                        <div className="relative w-20 h-16 flex-shrink-0">
-                          <img
-                            src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
-                            alt={resource.title}
-                            className="w-full h-full object-cover rounded-lg"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = getResourceThumbnail("", resource.type)
-                            }}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="bg-black/60 text-white rounded-full p-1">
-                              {isPDFUrl(resource.url) ? (
-                                <span className="text-xs">📄</span>
-                              ) : isYouTubeUrl(resource.url) ? (
-                                <span className="text-xs">{Icons.Play()}</span>
-                              ) : (
-                                <span className="text-xs">🔗</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        {/* CONTENIDO */}
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-semibold">{resource.title}</h4>
-                              <p className="text-sm text-gray-600">{resource.description}</p>
-                            </div>
-                            <button 
-                              onClick={() => window.open(resource.url, '_blank')}
-                              className="p-2 text-gray-400 hover:text-gray-600 ml-2"
-                            >
-                              {Icons.ExternalLink()}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Progreso de macros */}
-              {macroResults && currentUser && (
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold">
-                      {macroResults.goalType === 'emotional' ? 'Tu alimentación balanceada' : 'Tus macros diarios'}
-                    </h3>
-                    <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">{macroResults.goalLabel}</span>
-                  </div>
-                  
-                  {/* Progreso de macros vs objetivo */}
-                  <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg mb-4">
-                    <h4 className="font-semibold mb-3 text-center">Progreso vs Objetivo</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{consumedMacros.calories}</div>
-                        <div className="text-sm text-gray-600">Consumidas</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">{macroResults.calories}</div>
-                        <div className="text-sm text-gray-600">Objetivo</div>
-                      </div>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-                      <div 
-                        className="bg-green-500 h-2 rounded-full transition-all duration-300" 
-                        style={{width: `${caloriesProgress.percentage}%`}}
-                      ></div>
-                    </div>
-                    <p className="text-center text-sm text-gray-600 mt-2">
-                      {caloriesProgress.percentage}% del objetivo diario
-                    </p>
-                  </div>
-                  
-                  {macroResults.goalType === 'emotional' && (
-                    <div className="text-center mb-4 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
-                      <p className="text-sm text-purple-700">
-                        🌟 Alimentación balanceada para tu bienestar emocional
-                      </p>
-                    </div>
-                  )}
-                  
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-blue-600">{macroResults.protein}g</div>
-                      <div className="text-xs text-gray-600">Objetivo</div>
-                      <div className="text-sm font-medium text-blue-800">{consumedMacros.protein}g</div>
-                      <div className="text-xs text-gray-600">Consumido</div>
-                      <div className="text-xs">Proteínas</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-green-600">{macroResults.carbs}g</div>
-                      <div className="text-xs text-gray-600">Objetivo</div>
-                      <div className="text-sm font-medium text-green-800">{consumedMacros.carbs}g</div>
-                      <div className="text-xs text-gray-600">Consumido</div>
-                      <div className="text-xs">Carbohidratos</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-yellow-600">{macroResults.fats}g</div>
-                      <div className="text-xs text-gray-600">Objetivo</div>
-                      <div className="text-sm font-medium text-yellow-800">{consumedMacros.fats}g</div>
-                      <div className="text-xs text-gray-600">Consumido</div>
-                      <div className="text-xs">Grasas</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Registro de comidas con calculadora */}
-              <div className="bg-white rounded-lg shadow p-4">
-                <h3 className="font-semibold mb-4">Registro del día</h3>
-                <div className="space-y-4">
-                  {['desayuno', 'almuerzo', 'cena'].map(meal => (
-                    <div key={meal} className="border rounded-lg p-4">
-                      <div className="flex justify-between items-center mb-3">
-                        <div>
-                          <h4 className="font-semibold capitalize">{meal}</h4>
-                          <p className="text-sm text-gray-600">
-                            {dailyProgress[meal as keyof DailyProgress]} registro(s)
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button 
-                            onClick={() => openMealCalculator(meal as 'desayuno' | 'almuerzo' | 'cena')}
-                            className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 flex items-center gap-1 disabled:bg-gray-300"
-                            disabled={saveStatus === 'saving'}
-                          >
-                            <span>{Icons.Calculator()}</span>
-                            <span className="text-sm">Agregar</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Mostrar alimentos consumidos en esta comida */}
-                      {mealCompositions.filter(comp => comp.meal_type === meal).length > 0 && (
-                        <div className="space-y-2">
-                          <h5 className="text-sm font-medium text-gray-700">Alimentos consumidos:</h5>
-                          {mealCompositions
-                            .filter(comp => comp.meal_type === meal)
-                            .map(comp => (
-                              <div key={comp.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                                <div>
-                                  <span className="font-medium">{comp.food_name}</span>
-                                  <span className="text-sm text-gray-600 ml-2">({comp.quantity_grams}g)</span>
-                                  <div className="text-xs text-gray-500">
-                                    {comp.calories_consumed} cal | P: {comp.protein_consumed}g | C: {comp.carbs_consumed}g | G: {comp.fats_consumed}g
-                                  </div>
-                                </div>
-                                <button 
-                                  onClick={() => removeFoodFromMeal(comp.id)}
-                                  className="p-1 text-red-400 hover:text-red-600"
-                                >
-                                  {Icons.X()}
-                                </button>
-                              </div>
-                            ))
-                          }
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Lista de alimentos personalizados */}
-              {userFoods.length > 0 && (
-                <div className="bg-white rounded-lg shadow p-4">
-                  <h3 className="font-semibold mb-4">Mis alimentos personalizados</h3>
-                  <div className="space-y-2">
-                    {userFoods.map(food => (
-                      <div key={food.id} className="p-3 border rounded-lg">
-                        <h4 className="font-semibold">{food.name}</h4>
-                        <p className="text-sm text-gray-600">
-                          {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | G: {food.fats}g
-                        </p>
-                        <span className="inline-block mt-1 px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">{food.category}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Botón para agregar alimentos personalizados */}
-              <div className="bg-white rounded-lg shadow p-4 text-center">
-                <h4 className="font-semibold mb-2">¿No encuentras tu alimento?</h4>
-                <p className="text-sm text-gray-600 mb-3">Crea tu propio alimento personalizado</p>
-                <button 
-                  onClick={() => {
-                    setSelectedMeal('desayuno')
-                    setShowFoodDialog(true)
-                  }}
-                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2 mx-auto"
-                >
-                  <span>{Icons.Plus()}</span>
-                  Crear alimento personalizado
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* 🆕 TAB EJERCICIO MEJORADO CON RECURSOS MULTIMEDIA */}
-          {activeTab === 'ejercicio' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">💪 Ejercicio</h2>
-                <button 
-                  onClick={() => resetProgress('exercise')} 
-                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  title="Reiniciar ejercicios"
-                >
-                  {Icons.RotateCcw()}
-                </button>
-              </div>
-
-              {/* 🆕 RECURSOS DE EJERCICIO CON MINIATURAS */}
-              {exerciseResources.length > 0 && (
-                <div className="bg-white rounded-lg shadow p-4">
-                  <h3 className="font-semibold mb-4">Videos de entrenamiento</h3>
-                  <div className="space-y-3">
-                    {exerciseResources.map(resource => (
-                      <div key={resource.id} className="flex gap-4 p-3 bg-blue-50 rounded-lg">
-                        {/* MINIATURA */}
-                        <div className="relative w-24 h-16 flex-shrink-0">
-                          <img
-                            src={getResourceThumbnail(resource.url, resource.type)}
-                            alt={resource.title}
-                            className="w-full h-full object-cover rounded-lg"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "/placeholder.svg?height=64&width=96&text=💪+Video"
-                            }}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="bg-red-600 text-white rounded-full p-2">
-                              {isYouTubeUrl(resource.url) && <span className="text-xs">{Icons.Play()}</span>}
-                              {isSpotifyUrl(resource.url) && <span className="text-xs">{Icons.Music()}</span>}
-                              {!isYouTubeUrl(resource.url) && !isSpotifyUrl(resource.url) && (
-                                <span className="text-xs">{Icons.Dumbbell()}</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        {/* CONTENIDO */}
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-semibold text-blue-800">{resource.title}</h4>
-                              <p className="text-sm text-gray-600">{resource.description}</p>
-                              {isYouTubeUrl(resource.url) && (
-                                <span className="inline-block mt-1 px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
-                                  📹 YouTube
-                                </span>
-                              )}
-                              {isSpotifyUrl(resource.url) && (
-                                <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
-                                  🎵 Spotify
-                                </span>
-                              )}
-                            </div>
-                            <button 
-                              onClick={() => window.open(resource.url, '_blank')}
-                              className="p-2 text-blue-400 hover:text-blue-600 ml-2"
-                            >
-                              {Icons.ExternalLink()}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="bg-white rounded-lg shadow p-6 text-center">
-                <span className="text-4xl">{Icons.Activity()}</span>
-                <h3 className="text-xl font-bold mb-2 mt-4">Ejercicios completados</h3>
-                <div className="text-3xl font-bold text-green-600 mb-4">{dailyProgress.exercise}</div>
-                
-                <div className="flex justify-center items-center gap-4">
-                  <button 
-                    onClick={() => updateProgress('exercise', -1)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:bg-gray-300"
-                    disabled={saveStatus === 'saving'}
-                  >
-                    {Icons.Minus()}
-                  </button>
-                  <button 
-                    onClick={() => updateProgress('exercise', 1)}
-                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 disabled:bg-gray-300"
-                    disabled={saveStatus === 'saving'}
-                  >
-                    Agregar ejercicio
-                  </button>
-                </div>
-              </div>
-
-              {/* Ejercicios sugeridos mantenidos */}
-              <div className="bg-white rounded-lg shadow p-4">
-                <h3 className="font-semibold mb-4">Ejercicios sugeridos</h3>
-                <div className="space-y-3">
-                  <div className="p-3 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold">Caminar 15 min</h4>
-                    <p className="text-sm text-gray-600">Ideal para comenzar el día</p>
-                  </div>
-                  <div className="p-3 bg-green-50 rounded-lg">
-                    <h4 className="font-semibold">Estiramientos</h4>
-                    <p className="text-sm text-gray-600">Perfecto para cualquier momento</p>
-                  </div>
-                  <div className="p-3 bg-purple-50 rounded-lg">
-                    <h4 className="font-semibold">Ejercicios de fuerza</h4>
-                    <p className="text-sm text-gray-600">20 min, sin equipamiento</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 🆕 TAB MINDFULNESS MEJORADO CON RECURSOS MULTIMEDIA */}
-          {activeTab === 'mindfulness' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">🧘‍♀️ Mindfulness</h2>
-                <button 
-                  onClick={() => resetProgress('mindfulness')} 
-                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  title="Reiniciar mindfulness"
-                >
-                  {Icons.RotateCcw()}
-                </button>
-              </div>
-
-              {/* Mensaje especial para objetivos emocionales */}
-              {currentUser && GOALS.find(g => g.id === currentUser.goal)?.type === 'emotional' && (
-                <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-4 text-center">
-                  <h3 className="font-bold text-purple-800 mb-1">
-                    ¡Perfecto para tu objetivo!
-                  </h3>
-                  <p className="text-sm text-purple-700">
-                    {currentUser.goal === 'find_calm' && "El mindfulness es ideal para encontrar la calma que buscas 🧘"}
-                    {currentUser.goal === 'balance' && "Las prácticas de mindfulness te ayudarán a encontrar el equilibrio perfecto ⚡"}
-                    {currentUser.goal === 'feel_good' && "Estas sesiones te harán sentir increíble ✨"}
-                    {currentUser.goal === 'vitalmente' && "¡El mindfulness es esencial para sentirte VitalMente! 🌟"}
-                  </p>
-                </div>
-              )}
-
-              {/* 🆕 RECURSOS DE MINDFULNESS CON MINIATURAS */}
-              {mindfulnessResources.length > 0 && (
-                <div className="bg-white rounded-lg shadow p-4">
-                  <h3 className="font-semibold mb-4">Recursos de mindfulness</h3>
-                  <div className="space-y-3">
-                    {mindfulnessResources.map(resource => (
-                      <div key={resource.id} className="flex gap-4 p-3 bg-purple-50 rounded-lg">
-                        {/* MINIATURA */}
-                        <div className="relative w-24 h-16 flex-shrink-0">
-                          <img
-                            src={getResourceThumbnail(resource.url, resource.type)}
-                            alt={resource.title}
-                            className="w-full h-full object-cover rounded-lg"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "/placeholder.svg?height=64&width=96&text=🧘+Audio"
-                            }}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="bg-purple-600 text-white rounded-full p-2">
-                              {isYouTubeUrl(resource.url) && <span className="text-xs">{Icons.Play()}</span>}
-                              {isSpotifyUrl(resource.url) && <span className="text-xs">{Icons.Music()}</span>}
-                              {!isYouTubeUrl(resource.url) && !isSpotifyUrl(resource.url) && (
-                                <span className="text-xs">🧘</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        {/* CONTENIDO */}
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-semibold text-purple-800">{resource.title}</h4>
-                              <p className="text-sm text-gray-600">{resource.description}</p>
-                              {isYouTubeUrl(resource.url) && (
-                                <span className="inline-block mt-1 px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
-                                  📹 YouTube
-                                </span>
-                              )}
-                              {isSpotifyUrl(resource.url) && (
-                                <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
-                                  🎵 Spotify
-                                </span>
-                              )}
-                            </div>
-                            <button 
-                              onClick={() => window.open(resource.url, '_blank')}
-                              className="p-2 text-purple-400 hover:text-purple-600 ml-2"
-                            >
-                              {Icons.ExternalLink()}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Contador de sesiones */}
-              <div className="bg-white rounded-lg shadow p-6 text-center">
-                <span className="text-4xl">{Icons.Brain()}</span>
-                <h3 className="text-xl font-bold mb-2 mt-4">Sesiones completadas</h3>
-                <div className="text-3xl font-bold text-purple-600 mb-4">{dailyProgress.mindfulness}</div>
-                
-                <div className="flex justify-center items-center gap-4">
-                  <button 
-                    onClick={() => updateProgress('mindfulness', -1)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:bg-gray-300"
-                    disabled={saveStatus === 'saving'}
-                  >
-                    {Icons.Minus()}
-                  </button>
-                  <button 
-                    onClick={() => updateProgress('mindfulness', 1)}
-                    className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 disabled:bg-gray-300"
-                    disabled={saveStatus === 'saving'}
-                  >
-                    Completar sesión
-                  </button>
-                </div>
-              </div>
-
-              {/* Tips de bienestar */}
-              {activeTips.length > 0 && (
-                <div className="bg-white rounded-lg shadow p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold flex items-center gap-2">
-                      <span>Tips de bienestar</span>
-                      <span>{Icons.Lightbulb()}</span>
-                    </h3>
-                  </div>
-                  
-                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 rounded-lg">
-                    <div className="text-2xl mb-2">{activeTips[currentTipIndex]?.icon}</div>
-                    <h3 className="font-bold mb-2">{activeTips[currentTipIndex]?.title}</h3>
-                    <p className="text-sm mb-4">{activeTips[currentTipIndex]?.content}</p>
-                    <span className="inline-block px-2 py-1 text-xs bg-white/20 rounded">
-                      {activeTips[currentTipIndex]?.category}
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center mt-4">
-                    <button
-                      onClick={() => setCurrentTipIndex(prev => prev > 0 ? prev - 1 : activeTips.length - 1)}
-                      className="p-2 text-gray-400 hover:text-gray-600"
-                    >
-                      {Icons.ChevronLeft()}
-                    </button>
-                    <span className="text-sm text-gray-500">
-                      {currentTipIndex + 1} / {activeTips.length}
-                    </span>
-                    <button
-                      onClick={() => setCurrentTipIndex(prev => prev < activeTips.length - 1 ? prev + 1 : 0)}
-                      className="p-2 text-gray-400 hover:text-gray-600"
-                    >
-                      {Icons.ChevronRight()}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB SUPLEMENTOS */}
-          {activeTab === 'suplementos' && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-center">💊 Suplementos Recomendados</h2>
-
-              <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg p-4 text-center">
-                <span className="text-2xl">{Icons.Package()}</span>
-                <h3 className="font-bold mb-1 mt-2">Productos Premium</h3>
-                <p className="text-sm">Suplementos seleccionados para potenciar tu bienestar</p>
-              </div>
-
-              {supplements.length > 0 ? (
-                <div className="space-y-4">
-                  {supplements.map(supplement => (
-                    <div key={supplement.id} className="bg-white rounded-lg shadow p-4">
-                      <div className="flex gap-4">
-                        <img
-                          src={supplement.image_url}
-                          alt={supplement.name}
-                          className="w-20 h-20 object-cover rounded-lg bg-gray-100 flex-shrink-0"
-                        />
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h3 className="font-bold text-lg">{supplement.name}</h3>
-                              <p className="text-2xl font-bold text-green-600">${supplement.price.toLocaleString()}</p>
-                            </div>
-                            <button 
-                              onClick={() => handleSupplementContact(supplement)} 
-                              className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 flex items-center gap-1"
-                            >
-                              <span>{Icons.Phone()}</span>
-                              <span className="text-sm">Contactar</span>
-                            </button>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3">{supplement.description}</p>
-                          <div className="flex flex-wrap gap-1">
-                            {supplement.benefits.map((benefit, index) => (
-                              <span key={index} className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">
-                                {benefit}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-white rounded-lg shadow p-6 text-center">
-                  <span className="text-4xl text-gray-400">{Icons.Package()}</span>
-                  <h3 className="text-lg font-semibold mb-2 mt-4">Próximamente</h3>
-                  <p className="text-gray-600">Estamos preparando una selección especial de suplementos para ti.</p>
-                </div>
-              )}
-
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-semibold mb-2">💬 ¿Tienes dudas?</h4>
-                <p className="text-sm text-gray-600 mb-3">
-                  Nuestro equipo está listo para asesorarte sobre el suplemento ideal para tus objetivos.
-                </p>
-                <button 
-                  onClick={() => {
-                    const whatsappUrl = `https://wa.me/573134852878?text=${encodeURIComponent("Hola! Me gustaría recibir asesoría sobre suplementos desde VitalMente. ¿Podrían ayudarme?")}`
-                    window.open(whatsappUrl, '_blank')
-                  }}
-                  className="w-full bg-white border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2"
-                >
-                  <span>{Icons.Phone()}</span>
-                  Asesoría personalizada
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* MODAL DE CALCULADORA DE MACROS */}
-      {showMealCalculator && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                <span>{Icons.Calculator()}</span>
-                Calculadora de macros - {selectedMealType}
-              </h3>
-              <button 
-                onClick={() => setShowMealCalculator(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                {Icons.X()}
-              </button>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Selecciona un alimento y especifica la cantidad para calcular los macros automáticamente
-            </p>
-            
-            <div className="space-y-4">
-              {!selectedFood ? (
-                <div>
-                  <h4 className="font-semibold mb-3">Selecciona un alimento:</h4>
-                  <div className="max-h-80 overflow-y-auto space-y-4">
-                    
-                    {getFoodsByCategory().map(category => (
-                      category.foods.length > 0 && (
-                        <div key={category.id}>
-                          <h5 className="font-semibold text-sm flex items-center gap-2 mb-2 px-2 py-1 bg-gray-100 rounded">
-                            <span>{category.icon}</span>
-                            {category.name}
-                          </h5>
-                          <div className="space-y-1 ml-2">
-                            {category.foods.map(food => (
-                              <div 
-                                key={food.id} 
-                                className="p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
-                                onClick={() => setSelectedFood(food)}
-                              >
-                                <h6 className="font-semibold">{food.name}</h6>
-                                <p className="text-sm text-gray-600">
-                                  {Number(food.calories)} cal | P: {Number(food.protein)}g | C: {Number(food.carbs)}g | G: {Number(food.fats)}g
-                                  <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )
-                    ))}
-
-                    {userFoods.length > 0 && (
-                      <div>
-                        <h5 className="font-semibold text-sm flex items-center gap-2 mb-2 px-2 py-1 bg-green-100 rounded">
-                          <span>👨‍🍳</span>
-                          Mis Alimentos Personalizados
-                        </h5>
-                        <div className="space-y-1 ml-2">
-                          {userFoods.map(food => (
-                            <div 
-                              key={food.id} 
-                              className="p-3 border border-green-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors"
-                              onClick={() => setSelectedFood(food)}
-                            >
-                              <h6 className="font-semibold">{food.name}</h6>
-                              <p className="text-sm text-gray-600">
-                                {Number(food.calories)} cal | P: {Number(food.protein)}g | C: {Number(food.carbs)}g | G: {Number(food.fats)}g
-                                <span className="text-xs text-gray-500 ml-2">(por 100g)</span>
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="border-t pt-4">
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600 mb-3">¿No encuentras tu alimento?</p>
-                        <button 
-                          onClick={() => {
-                            setShowMealCalculator(false)
-                            setSelectedMeal(selectedMealType)
-                            setShowFoodDialog(true)
-                          }}
-                          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2 mx-auto"
-                        >
-                          <span>{Icons.Plus()}</span>
-                          Crear alimento personalizado
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <h4 className="font-semibold">{selectedFood.name}</h4>
-                      <p className="text-sm text-gray-600">Valores por 100g</p>
-                    </div>
-                    <button 
-                      onClick={() => setSelectedFood(null)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      {Icons.X()}
-                    </button>
-                  </div>
-
-                  <div className="bg-gray-50 p-3 rounded-lg mb-4">
-                    <div className="grid grid-cols-4 gap-2 text-center text-sm">
-                      <div>
-                        <div className="font-bold">{Number(selectedFood.calories)}</div>
-                        <div className="text-gray-600">cal</div>
-                      </div>
-                      <div>
-                        <div className="font-bold text-blue-600">{Number(selectedFood.protein)}g</div>
-                        <div className="text-gray-600">Proteína</div>
-                      </div>
-                      <div>
-                        <div className="font-bold text-green-600">{Number(selectedFood.carbs)}g</div>
-                        <div className="text-gray-600">Carbos</div>
-                      </div>
-                      <div>
-                        <div className="font-bold text-yellow-600">{Number(selectedFood.fats)}g</div>
-                        <div className="text-gray-600">Grasas</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700">Cantidad consumida (gramos):</label>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setFoodQuantity(prev => Math.max(10, parseInt(prev) - 10).toString())}
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                      >
-                        {Icons.Minus()}
-                      </button>
-                      <input
-                        type="number"
-                        value={foodQuantity}
-                        onChange={(e) => setFoodQuantity(e.target.value)}
-                        className="flex-1 p-2 border border-gray-300 rounded-lg text-center font-bold focus:outline-none focus:ring-2 focus:ring-green-500"
-                        min="1"
-                      />
-                      <button
-                        onClick={() => setFoodQuantity(prev => (parseInt(prev) + 10).toString())}
-                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                      >
-                        {Icons.Plus()}
-                      </button>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <button onClick={() => setFoodQuantity('50')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">50g</button>
-                      <button onClick={() => setFoodQuantity('100')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">100g</button>
-                      <button onClick={() => setFoodQuantity('150')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">150g</button>
-                      <button onClick={() => setFoodQuantity('200')} className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">200g</button>
-                    </div>
-                  </div>
-
-                  {parseInt(foodQuantity) > 0 && (
-                    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
-                      <h5 className="font-semibold mb-2 text-center">Macros calculados para {foodQuantity}g:</h5>
-                      <div className="grid grid-cols-4 gap-2 text-center">
-                        <div>
-                          <div className="text-lg font-bold text-green-600">
-                            {Math.round(Number(selectedFood.calories) * parseInt(foodQuantity) / 100)}
-                          </div>
-                          <div className="text-xs text-gray-600">calorías</div>
-                        </div>
-                        <div>
-                          <div className="text-lg font-bold text-blue-600">
-                            {Math.round(Number(selectedFood.protein) * parseInt(foodQuantity) / 100)}g
-                          </div>
-                          <div className="text-xs text-gray-600">proteína</div>
-                        </div>
-                        <div>
-                          <div className="text-lg font-bold text-green-600">
-                            {Math.round(Number(selectedFood.carbs) * parseInt(foodQuantity) / 100)}g
-                          </div>
-                          <div className="text-xs text-gray-600">carbos</div>
-                        </div>
-                        <div>
-                          <div className="text-lg font-bold text-yellow-600">
-                            {Math.round(Number(selectedFood.fats) * parseInt(foodQuantity) / 100)}g
-                          </div>
-                          <div className="text-xs text-gray-600">grasas</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex gap-2 pt-4">
-                    <button 
-                      onClick={() => setSelectedFood(null)} 
-                      className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
-                    >
-                      Cambiar alimento
-                    </button>
-                    <button 
-                      onClick={addFoodToMeal} 
-                      className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-300"
-                      disabled={!parseInt(foodQuantity) || parseInt(foodQuantity) <= 0}
-                    >
-                      Agregar a {selectedMealType}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL PARA AGREGAR ALIMENTOS PERSONALIZADOS */}
-      {showFoodDialog && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Agregar alimento personalizado</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Crea un alimento con sus valores nutricionales por 100g
-            </p>
-            <div className="space-y-4">
-              <input
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Nombre del alimento"
-                value={newFood.name}
-                onChange={(e) => setNewFood(prev => ({ ...prev, name: e.target.value }))}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Calorías (por 100g)"
-                  type="number"
-                  value={newFood.calories}
-                  onChange={(e) => setNewFood(prev => ({ ...prev, calories: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Proteínas (g)"
-                  type="number"
-                  value={newFood.protein}
-                  onChange={(e) => setNewFood(prev => ({ ...prev, protein: e.target.value }))}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Carbohidratos (g)"
-                  type="number"
-                  value={newFood.carbs}
-                  onChange={(e) => setNewFood(prev => ({ ...prev, carbs: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Grasas (g)"
-                  type="number"
-                  value={newFood.fats}
-                  onChange={(e) => setNewFood(prev => ({ ...prev, fats: e.target.value }))}
-                />
-              </div>
-              
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-sm text-blue-700">
-                  💡 <strong>Tip:</strong> Todos los valores deben ser por 100g del alimento. 
-                  La calculadora ajustará automáticamente según la cantidad que consumas.
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <button 
-                  onClick={addUserFood} 
-                  className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2" 
-                  disabled={!newFood.name}
-                >
-                  <span>{Icons.Plus()}</span>
-                  Crear alimento
-                </button>
-                <button 
-                  onClick={() => setShowFoodDialog(false)}
-                  className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* DIALOG DE LOGIN ADMIN */}
-      {showAdminLogin && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-80 shadow-lg rounded-md bg-white">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Acceso Administrador</h3>
-            <input
-              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
-              type="password"
-              placeholder="Código de acceso"
-              value={adminCode}
-              onChange={(e) => setAdminCode(e.target.value)}
-            />
-            <div className="flex gap-2">
-              <button 
-                onClick={handleAdminLogin} 
-                className="flex-1 bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
-              >
-                Ingresar
-              </button>
-              <button 
-                onClick={() => setShowAdminLogin(false)}
-                className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
