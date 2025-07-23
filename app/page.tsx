@@ -235,6 +235,67 @@ interface ConsumedMacros {
   fats: number
 }
 
+// 🆕 NUEVAS INTERFACES PARA GAMIFICACIÓN
+interface UserGamification {
+  id: string
+  user_id: string  
+  total_points: number
+  current_level: number
+  streak_days: number
+  longest_streak: number
+  badges: string[]
+  weekly_points: number
+  monthly_points: number
+  created_at: string
+  updated_at: string
+}
+
+interface UserChallenge {
+  id: string
+  user_id: string
+  challenge_type: string
+  title: string
+  description: string
+  target_value: number
+  current_progress: number
+  reward_points: number
+  difficulty: string
+  week_start: string
+  is_completed: boolean
+  completed_at?: string
+  created_at: string
+}
+
+interface UserAchievement {
+  id: string
+  user_id: string
+  achievement_type: string
+  title: string
+  description: string
+  icon: string
+  points_earned: number
+  rarity: string
+  unlocked_at: string
+}
+
+interface AIRecommendation {
+  id: string
+  user_id: string
+  supplement_names: string[]
+  recommendation_type: string
+  priority: string
+  reason: string
+  sales_angle: string
+  discount_percentage: number
+  optimal_timing: string
+  is_active: boolean
+  shown_count: number
+  clicked: boolean
+  purchased: boolean
+  expires_at?: string
+  created_at: string
+}
+
 const ACTIVITY_LEVELS = [
   { value: 1.2, label: "Sedentario", desc: "Poco ejercicio" },
   { value: 1.375, label: "Ligero", desc: "1-3 días/semana" },
@@ -861,7 +922,59 @@ const dbFunctions = {
       console.log('🗑️ Imagen eliminada:', fileName)
     } catch (error) {
       console.error('Error eliminando imagen:', error)
+    },
+// 🆕 FUNCIONES DE GAMIFICACIÓN
+  async getUserGamification(userId: string): Promise<UserGamification | null> {
+    try {
+      const { data, error } = await supabase
+        .from('user_gamification')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+      
+      if (error) {
+        console.log('No gamification data found for user:', userId)
+        return null
+      }
+      return data as UserGamification
+    } catch (error) {
+      console.error('Error loading user gamification:', error)
+      return null
     }
+  },
+
+  async getUserChallenges(userId: string): Promise<UserChallenge[]> {
+    try {
+      const { data, error } = await supabase
+        .from('user_challenges')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      return data as UserChallenge[]
+    } catch (error) {
+      console.error('Error loading user challenges:', error)
+      return []
+    }
+  },
+
+  async getAIRecommendations(userId: string): Promise<AIRecommendation[]> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_supplement_recommendations')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('priority', { ascending: false })
+      
+      if (error) throw error
+      return data as AIRecommendation[]
+    } catch (error) {
+      console.error('Error loading AI recommendations:', error)
+      return []
+    }
+  }
   }
 }
 
@@ -931,6 +1044,13 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
   const [newFood, setNewFood] = useState({ name: "", calories: "", protein: "", carbs: "", fats: "" })
 
   const [showFloatingMenu, setShowFloatingMenu] = useState(false)
+
+  // 🆕 ESTADOS PARA GAMIFICACIÓN
+  const [userGamification, setUserGamification] = useState<UserGamification | null>(null)
+  const [userChallenges, setUserChallenges] = useState<UserChallenge[]>([])
+  const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>([])
+  const [showGamificationPanel, setShowGamificationPanel] = useState(false)
+  const [showAchievementNotification, setShowAchievementNotification] = useState<UserAchievement | null>(null)
 
   useEffect(() => {
     initializeApp()
@@ -1076,17 +1196,26 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
         setDailyProgress(prev => ({ ...prev, user_id: userId }))
       }
 
-      const [foods, history, compositions] = await Promise.all([
-        dbFunctions.getUserFoods(userId),
-        dbFunctions.getProgressHistory(userId),
-        dbFunctions.getTodayMealCompositions(userId)
-      ])
+      // Cargar otros datos en paralelo
+const [foods, history, compositions, gamification, challenges, recommendations] = await Promise.all([
+  dbFunctions.getUserFoods(userId),
+  dbFunctions.getProgressHistory(userId),
+  dbFunctions.getTodayMealCompositions(userId),
+  dbFunctions.getUserGamification(userId),
+  dbFunctions.getUserChallenges(userId),
+  dbFunctions.getAIRecommendations(userId)
+])
       
       setUserFoods(foods)
       setProgressHistory(history)
       setMealCompositions(compositions)
       
       calculateConsumedMacros(compositions)
+      
+      // 🆕 Establecer datos de gamificación
+      setUserGamification(gamification)
+      setUserChallenges(challenges)
+      setAiRecommendations(recommendations)
       
       console.log('✅ Todos los datos cargados exitosamente')
     } catch (error) {
@@ -1122,6 +1251,12 @@ const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     setConsumedMacros({ calories: 0, protein: 0, carbs: 0, fats: 0 })
     setSaveStatus('idle')
     setLastSaveTime(null)
+    // 🆕 Limpiar estados de gamificación
+    setUserGamification(null)
+    setUserChallenges([])
+    setAiRecommendations([])
+    setShowGamificationPanel(false)
+    setShowAchievementNotification(null)
   }
 
   const handleLogoClick = () => {
@@ -2642,6 +2777,61 @@ Gracias!`
                   <p className="text-sm text-center">
                     {caloriesProgress.percentage}% de tu objetivo diario
                   </p>
+                </div>
+              )}
+
+              {/* 🆕 PANEL DE GAMIFICACIÓN */}
+              {userGamification && (
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">🎮</span>
+                      <span className="font-semibold">Tu Progreso</span>
+                    </div>
+                    <span className="text-lg font-bold">
+                      Nivel {userGamification.current_level}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="text-lg font-bold">{userGamification.total_points}</div>
+                      <div className="text-xs">Puntos Totales</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold">{userGamification.streak_days}</div>
+                      <div className="text-xs">Días Seguidos</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold">{userGamification.weekly_points}</div>
+                      <div className="text-xs">Puntos Semana</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 🆕 RECOMENDACIONES DE IA */}
+              {aiRecommendations.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <span>🤖</span>
+                    Recomendaciones Personalizadas
+                  </h3>
+                  {aiRecommendations.slice(0, 1).map(rec => (
+                    <div key={rec.id} className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-medium text-gray-900">
+                          {rec.supplement_names.join(" + ")}
+                        </h4>
+                        {rec.discount_percentage > 0 && (
+                          <span className="bg-red-500 text-white px-2 py-1 rounded text-sm">
+                            -{rec.discount_percentage}%
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{rec.reason}</p>
+                      <p className="text-sm font-medium text-blue-600">{rec.sales_angle}</p>
+                    </div>
+                  ))}
                 </div>
               )}
 
