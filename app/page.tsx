@@ -2166,7 +2166,9 @@ Gracias!`
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
                     <div className="text-3xl mb-2">🧠</div>
                     <div className="font-semibold">Análisis de Comportamiento</div>
-                    <div className="text-sm text-gray-600">Detecta patrones en hidratación, ejercicio y mindfulness</div>
+                    <div className="text-sm text-gray-600">
+                      Detecta patrones en hidratación, ejercicio y mindfulness
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <div className="text-3xl mb-2">🎯</div>
@@ -2210,9 +2212,7 @@ Gracias!`
                     <div className="flex items-center justify-between p-3 bg-white rounded border">
                       <div>
                         <span className="font-medium">Detector de Deshidratación</span>
-                        <p className="text-sm text-gray-600">
-                          Si agua {"<"} 6 vasos/día → Recomienda electrolitos
-                        </p>
+                        <p className="text-sm text-gray-600">Si agua {"<"} 6 vasos/día → Recomienda electrolitos</p>
                       </div>
                       <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">En desarrollo</span>
                     </div>
@@ -2367,10 +2367,7 @@ Gracias!`
                             <span className="text-sm">{goal.label}</span>
                             <div className="flex items-center gap-2">
                               <div className="w-20 bg-gray-200 rounded-full h-2">
-                                <div
-                                  className="bg-blue-500 h-2 rounded-full"
-                                  style={{ width: `${percentage}%` }}
-                                ></div>
+                                <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${percentage}%` }}></div>
                               </div>
                               <span className="text-xs text-gray-500 w-8">{count}</span>
                             </div>
@@ -2957,4 +2954,570 @@ Gracias!`
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Agua */}
                 <div className="flex items-center gap-3">
-                  \
+                  <span className="text-2xl">{Icons.Droplets()}</span>
+                  <div>
+                    <p className="text-sm font-medium">Agua</p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateProgress("water", -1)}
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                      >
+                        {Icons.Minus()}
+                      </button>
+                      <span className="text-xl font-bold">{dailyProgress.water}</span>
+                      <button
+                        onClick={() => updateProgress("water", 1)}
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                      >
+                        {Icons.Plus()}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ejercicio */}
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{Icons.Activity()}</span>
+                  <div>
+                    <p className="text-sm font-medium">Ejercicio</p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateProgress("exercise", -1)}
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                      >
+                        {Icons.Minus()}
+                      </button>
+                      <span className="text-xl font-bold">{dailyProgress.exercise}</span>
+                      <button
+                        onClick={() => updateProgress("exercise", 1)}
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                      >
+                        {Icons.Plus()}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mindfulness */}
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{Icons.Brain()}</span>
+                  <div>
+                    <p className="text-sm font-medium">Mindfulness</p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateProgress("mindfulness", -1)}
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                      >
+                        {Icons.Minus()}
+                      </button>
+                      <span className="text-xl font-bold">{dailyProgress.mindfulness}</span>
+                      <button
+                        onClick={() => updateProgress("mindfulness", 1)}
+                        className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                      >
+                        {Icons.Plus()}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botones de acción */}
+              <div className="flex justify-between mt-4">
+                <button
+                  onClick={() => resetProgress("all")}
+                  className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  {Icons.RotateCcw()} Reiniciar día
+                </button>
+                <button
+                  onClick={() => resetProgress("meals")}
+                  className="px-3 py-2 text-sm text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                >
+                  {Icons.UtensilsCrossed()} Reiniciar comidas
+                </button>
+              </div>
+            </div>
+
+            {/* Tips aleatorios */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>{Icons.Lightbulb()}</span>
+                Tip del día
+              </h3>
+              {activeTips.length > 0 ? (
+                <>
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xl">{activeTips[currentTipIndex].icon}</span>
+                      <span className="font-medium">{activeTips[currentTipIndex].category}</span>
+                    </div>
+                    <h4 className="font-semibold">{activeTips[currentTipIndex].title}</h4>
+                    <p className="text-gray-600">{activeTips[currentTipIndex].content}</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <button
+                      onClick={() => setCurrentTipIndex((prev) => (prev === 0 ? activeTips.length - 1 : prev - 1))}
+                      className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      {Icons.ChevronLeft()} Anterior
+                    </button>
+                    <button
+                      onClick={() => setCurrentTipIndex((prev) => (prev === activeTips.length - 1 ? 0 : prev + 1))}
+                      className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      Siguiente {Icons.ChevronRight()}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-500">No hay tips activos disponibles.</p>
+              )}
+            </div>
+
+            {/* Recomendaciones IA */}
+            {aiRecommendations.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <span>{Icons.Robot()}</span>
+                  Recomendaciones Personalizadas
+                </h3>
+                {aiRecommendations.map((rec) => (
+                  <div key={rec.id} className="border border-gray-200 rounded-lg p-4 mb-3">
+                    <h4 className="font-semibold mb-1">{rec.reason}</h4>
+                    <p className="text-sm text-gray-600 mb-2">
+                      Suplementos recomendados: {rec.supplement_names.join(", ")}
+                    </p>
+                    <button
+                      onClick={() => handleRecommendationClick(rec.id)}
+                      className="px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      Ver más {Icons.ExternalLink()}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "comida" && (
+          <div className="space-y-6">
+            {/* Resumen de calorías */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>{Icons.UtensilsCrossed()}</span>
+                Resumen de Comida
+              </h3>
+              {macroResults ? (
+                <>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-medium">Calorías consumidas</p>
+                    <p className="text-xl font-bold">
+                      {caloriesProgress.consumed} / {caloriesProgress.target}
+                    </p>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                    <div
+                      className="bg-green-500 h-2.5 rounded-full"
+                      style={{ width: `${caloriesProgress.percentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <p className="text-sm font-medium">Proteína</p>
+                      <p className="text-xl font-bold">{consumedMacros.protein}g</p>
+                      <p className="text-xs text-gray-500">
+                        Meta: {macroResults.protein}g (
+                        {Math.round((consumedMacros.protein / macroResults.protein) * 100)}
+                        %)
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Carbohidratos</p>
+                      <p className="text-xl font-bold">{consumedMacros.carbs}g</p>
+                      <p className="text-xs text-gray-500">
+                        Meta: {macroResults.carbs}g ({Math.round((consumedMacros.carbs / macroResults.carbs) * 100)}%)
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Grasas</p>
+                      <p className="text-xl font-bold">{consumedMacros.fats}g</p>
+                      <p className="text-xs text-gray-500">
+                        Meta: {macroResults.fats}g ({Math.round((consumedMacros.fats / macroResults.fats) * 100)}%)
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-500">Calculando macros...</p>
+              )}
+            </div>
+
+            {/* Comidas de hoy */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>{Icons.ChefHat()}</span>
+                Comidas de Hoy
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Desayuno */}
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    {Icons.UtensilsCrossed()} Desayuno
+                    <button
+                      onClick={() => openMealCalculator("desayuno")}
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      {Icons.Plus()} Agregar
+                    </button>
+                  </h4>
+                  {mealCompositions
+                    .filter((c) => c.meal_type === "desayuno")
+                    .map((composition) => (
+                      <div
+                        key={composition.id}
+                        className="flex items-center justify-between border-b py-2 last:border-b-0"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{composition.food_name}</p>
+                          <p className="text-xs text-gray-500">
+                            {composition.quantity_grams}g - {composition.calories_consumed} cal
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => removeFoodFromMeal(composition.id)}
+                          className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          {Icons.Trash2()}
+                        </button>
+                      </div>
+                    ))}
+                </div>
+
+                {/* Almuerzo */}
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    {Icons.UtensilsCrossed()} Almuerzo
+                    <button
+                      onClick={() => openMealCalculator("almuerzo")}
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      {Icons.Plus()} Agregar
+                    </button>
+                  </h4>
+                  {mealCompositions
+                    .filter((c) => c.meal_type === "almuerzo")
+                    .map((composition) => (
+                      <div
+                        key={composition.id}
+                        className="flex items-center justify-between border-b py-2 last:border-b-0"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{composition.food_name}</p>
+                          <p className="text-xs text-gray-500">
+                            {composition.quantity_grams}g - {composition.calories_consumed} cal
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => removeFoodFromMeal(composition.id)}
+                          className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          {Icons.Trash2()}
+                        </button>
+                      </div>
+                    ))}
+                </div>
+
+                {/* Cena */}
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    {Icons.UtensilsCrossed()} Cena
+                    <button
+                      onClick={() => openMealCalculator("cena")}
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      {Icons.Plus()} Agregar
+                    </button>
+                  </h4>
+                  {mealCompositions
+                    .filter((c) => c.meal_type === "cena")
+                    .map((composition) => (
+                      <div
+                        key={composition.id}
+                        className="flex items-center justify-between border-b py-2 last:border-b-0"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{composition.food_name}</p>
+                          <p className="text-xs text-gray-500">
+                            {composition.quantity_grams}g - {composition.calories_consumed} cal
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => removeFoodFromMeal(composition.id)}
+                          className="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          {Icons.Trash2()}
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "recursos" && (
+          <div className="space-y-6">
+            {/* Recursos de mindfulness */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>{Icons.Brain()}</span>
+                Mindfulness
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {mindfulnessResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-4">
+                      <h4 className="font-semibold mb-1">{resource.title}</h4>
+                      <p className="text-sm text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Recursos de nutrición */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>{Icons.UtensilsCrossed()}</span>
+                Nutrición
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {nutritionResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-4">
+                      <h4 className="font-semibold mb-1">{resource.title}</h4>
+                      <p className="text-sm text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Recursos de ejercicio */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>{Icons.Dumbbell()}</span>
+                Ejercicio
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {exerciseResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-4">
+                      <h4 className="font-semibold mb-1">{resource.title}</h4>
+                      <p className="text-sm text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "suplementos" && (
+          <div className="space-y-6">
+            {/* Lista de suplementos */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>{Icons.Package()}</span>
+                Suplementos
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {supplements.map((supplement) => (
+                  <div
+                    key={supplement.id}
+                    className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={supplement.image_url || "/placeholder.svg"}
+                      alt={supplement.name}
+                      className="w-full h-40 object-cover"
+                    />
+                    <div className="p-4">
+                      <h4 className="font-semibold mb-1">{supplement.name}</h4>
+                      <p className="text-sm text-gray-600 mb-2">{supplement.description}</p>
+                      <p className="text-sm font-medium text-green-600 mb-2">${supplement.price.toLocaleString()}</p>
+                      <ul className="text-xs text-gray-500 mb-3">
+                        {supplement.benefits.map((benefit, index) => (
+                          <li key={index}>- {benefit}</li>
+                        ))}
+                      </ul>
+                      <button
+                        onClick={() => handleSupplementContact(supplement)}
+                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+                      >
+                        {Icons.MessageSquare()} Contactar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Navegación inferior */}
+      <nav className="bg-white border-t shadow-md fixed bottom-0 left-0 w-full z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="h-16 flex justify-between">
+            <button
+              onClick={() => setActiveTab("inicio")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "inicio" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <span className="text-2xl">{Icons.Home()}</span>
+              <span className="text-xs">Inicio</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("comida")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "comida" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <span className="text-2xl">{Icons.UtensilsCrossed()}</span>
+              <span className="text-xs">Comida</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("recursos")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "recursos" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <span className="text-2xl">{Icons.Link()}</span>
+              <span className="text-xs">Recursos</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("suplementos")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "suplementos" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <span className="text-2xl">{Icons.Package()}</span>
+              <span className="text-xs">Suplementos</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Modal de calculadora de comida */}
+      {showMealCalculator && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar comida a {selectedMealType}</h3>
+
+              {/* Selector de comida */}
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">Buscar comida</h4>
+                <div className="space-y-2">
+                  {getFoodsByCategory().map((category) => (
+                    <div key={category.id}>
+                      <h5 className="font-medium flex items-center gap-2">
+                        {category.icon} {category.name}
+                      </h5>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {category.foods.map((food) => (
+                          <button
+                            key={food.id}
+                            onClick={() => selectFood(food)}
+                            className={`px-3 py-2 text-sm border rounded-lg hover:bg-gray-50 transition-colors ${
+                              selectedFood?.id === food.id ? "border-green-500" : "border-gray-300"
+                            }`}
+                          >
+                            {food.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Selector de cantidad */}
+              {selectedFood && (
+                <div className="mb-4">
+                  <h4 className="font-semibold mb-2">
+                    {selectedFood.name} - {selectedFood.calories} cal / 100g
+                  </h4>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      className="w-24 p-3 border border-gray-300 rounded-lg"
+                      placeholder="Cantidad (g)"
+                      value={foodQuantity}
+                      onChange={(e) => setFoodQuantity(e.target.value)}
+                    />
+                    <span>gramos</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Botones de acción */}
+              <div className="grid grid-cols-2 gap-3 mt-6">
+                <button
+                  onClick={addFoodToMeal}
+                  className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400"
+                  disabled={!selectedFood || !foodQuantity}
+                >
+                  Agregar comida
+                </button>
+                <button
+                  onClick={() => setShowMealCalculator(false)}
+                  className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
