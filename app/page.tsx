@@ -59,12 +59,6 @@ const Icons = {
   Shield: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🛡️</span>,
   Menu: ({ size = "text-xl" }: { size?: string }) => <span className={size}>☰</span>,
   Close: ({ size = "text-xl" }: { size?: string }) => <span className={size}>✕</span>,
-  Coffee: ({ size = "text-xl" }: { size?: string }) => <span className={size}>☕</span>,
-  Blend: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🥤</span>,
-  Save: ({ size = "text-xl" }: { size?: string }) => <span className={size}>💾</span>,
-  Info: ({ size = "text-xl" }: { size?: string }) => <span className={size}>ℹ️</span>,
-  BookOpen: ({ size = "text-xl" }: { size?: string }) => <span className={size}>📖</span>,
-  Utensils: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🍴</span>,
 }
 
 // ============================================================================
@@ -77,7 +71,7 @@ const SUPABASE_ANON_KEY =
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // ============================================================================
-// TIPOS DE DATOS EXPANDIDOS
+// TIPOS DE DATOS (MANTENIENDO LOS ORIGINALES)
 // ============================================================================
 interface UserProfile {
   id: string
@@ -144,54 +138,6 @@ interface MealComposition {
   carbs_consumed: number
   fats_consumed: number
   created_at: string
-}
-
-// 🆕 NUEVO: Interfaz para batidos personalizados
-interface CustomSmoothie {
-  id: string
-  user_id: string
-  name: string
-  ingredients: SmoothieIngredient[]
-  total_calories: number
-  total_protein: number
-  total_carbs: number
-  total_fats: number
-  created_at: string
-}
-
-interface SmoothieIngredient {
-  food_id: string
-  food_name: string
-  quantity_grams: number
-  calories: number
-  protein: number
-  carbs: number
-  fats: number
-}
-
-// 🆕 NUEVO: Interfaz para composición de comidas mejorada
-interface EnhancedMealComposition {
-  id: string
-  user_id: string
-  date: string
-  meal_type: "desayuno" | "almuerzo" | "cena"
-  meal_name: string
-  ingredients: MealIngredient[]
-  total_calories: number
-  total_protein: number
-  total_carbs: number
-  total_fats: number
-  created_at: string
-}
-
-interface MealIngredient {
-  food_id: string
-  food_name: string
-  quantity_grams: number
-  calories: number
-  protein: number
-  carbs: number
-  fats: number
 }
 
 interface GlobalTip {
@@ -280,144 +226,7 @@ interface AIRecommendation {
 }
 
 // ============================================================================
-// BANCO DE ALIMENTOS EXPANDIDO (100+ ALIMENTOS + 20+ BEBIDAS)
-// ============================================================================
-const EXPANDED_FOOD_DATABASE = [
-  // PROTEÍNAS (25 alimentos)
-  { name: "Pechuga de pollo", calories: 165, protein: 31, carbs: 0, fats: 3.6, category: "proteinas" },
-  { name: "Carne de res magra", calories: 250, protein: 26, carbs: 0, fats: 15, category: "proteinas" },
-  { name: "Salmón", calories: 208, protein: 20, carbs: 0, fats: 13, category: "proteinas" },
-  { name: "Atún en agua", calories: 132, protein: 28, carbs: 0, fats: 1.3, category: "proteinas" },
-  { name: "Huevos enteros", calories: 155, protein: 13, carbs: 1.1, fats: 11, category: "proteinas" },
-  { name: "Clara de huevo", calories: 52, protein: 11, carbs: 0.7, fats: 0.2, category: "proteinas" },
-  { name: "Pavo", calories: 189, protein: 29, carbs: 0, fats: 7.4, category: "proteinas" },
-  { name: "Cerdo magro", calories: 242, protein: 27, carbs: 0, fats: 14, category: "proteinas" },
-  { name: "Pechuga de pavo", calories: 135, protein: 30, carbs: 0, fats: 1, category: "proteinas" },
-  { name: "Camarones", calories: 85, protein: 20, carbs: 0, fats: 0.5, category: "proteinas" },
-  { name: "Merluza", calories: 90, protein: 17, carbs: 0, fats: 2, category: "proteinas" },
-  { name: "Tilapia", calories: 96, protein: 20, carbs: 0, fats: 1.7, category: "proteinas" },
-  { name: "Sardinas", calories: 208, protein: 25, carbs: 0, fats: 11, category: "proteinas" },
-  { name: "Bacalao", calories: 82, protein: 18, carbs: 0, fats: 0.7, category: "proteinas" },
-  { name: "Tofu", calories: 76, protein: 8, carbs: 1.9, fats: 4.8, category: "proteinas" },
-  { name: "Tempeh", calories: 193, protein: 19, carbs: 9, fats: 11, category: "proteinas" },
-  { name: "Seitan", calories: 370, protein: 75, carbs: 14, fats: 1.9, category: "proteinas" },
-  { name: "Queso cottage", calories: 98, protein: 11, carbs: 3.4, fats: 4.3, category: "proteinas" },
-  { name: "Queso ricotta", calories: 174, protein: 11, carbs: 3, fats: 13, category: "proteinas" },
-  { name: "Yogurt griego", calories: 59, protein: 10, carbs: 3.6, fats: 0.4, category: "proteinas" },
-  { name: "Proteína de suero", calories: 367, protein: 75, carbs: 7, fats: 4, category: "proteinas" },
-  { name: "Caseína", calories: 373, protein: 81, carbs: 3.8, fats: 1.8, category: "proteinas" },
-  { name: "Proteína vegetal", calories: 345, protein: 70, carbs: 8, fats: 3, category: "proteinas" },
-  { name: "Lentejas rojas", calories: 116, protein: 9, carbs: 20, fats: 0.4, category: "proteinas" },
-  { name: "Garbanzos cocidos", calories: 164, protein: 8.9, carbs: 27, fats: 2.6, category: "proteinas" },
-
-  // CARBOHIDRATOS (30 alimentos)
-  { name: "Arroz blanco", calories: 130, protein: 2.7, carbs: 28, fats: 0.3, category: "carbohidratos" },
-  { name: "Arroz integral", calories: 123, protein: 2.6, carbs: 25, fats: 1, category: "carbohidratos" },
-  { name: "Quinoa", calories: 120, protein: 4.4, carbs: 22, fats: 1.9, category: "carbohidratos" },
-  { name: "Avena", calories: 389, protein: 17, carbs: 66, fats: 6.9, category: "carbohidratos" },
-  { name: "Pan integral", calories: 247, protein: 13, carbs: 41, fats: 4.2, category: "carbohidratos" },
-  { name: "Pasta integral", calories: 124, protein: 5, carbs: 25, fats: 1.1, category: "carbohidratos" },
-  { name: "Papa blanca", calories: 77, protein: 2, carbs: 17, fats: 0.1, category: "carbohidratos" },
-  { name: "Papa dulce", calories: 86, protein: 1.6, carbs: 20, fats: 0.1, category: "carbohidratos" },
-  { name: "Yuca", calories: 160, protein: 1.4, carbs: 38, fats: 0.3, category: "carbohidratos" },
-  { name: "Plátano verde", calories: 122, protein: 1.3, carbs: 32, fats: 0.4, category: "carbohidratos" },
-  { name: "Arepa de maíz", calories: 150, protein: 4, carbs: 30, fats: 1, category: "carbohidratos" },
-  { name: "Cebada", calories: 354, protein: 12, carbs: 73, fats: 2.3, category: "carbohidratos" },
-  { name: "Trigo bulgur", calories: 342, protein: 12, carbs: 76, fats: 1.3, category: "carbohidratos" },
-  { name: "Amaranto", calories: 371, protein: 14, carbs: 65, fats: 7, category: "carbohidratos" },
-  { name: "Mijo", calories: 378, protein: 11, carbs: 73, fats: 4.2, category: "carbohidratos" },
-  { name: "Tortilla de maíz", calories: 218, protein: 5.7, carbs: 45, fats: 2.9, category: "carbohidratos" },
-  { name: "Tortilla de trigo", calories: 304, protein: 8.2, carbs: 51, fats: 7.9, category: "carbohidratos" },
-  { name: "Galletas integrales", calories: 451, protein: 7.5, carbs: 71, fats: 15, category: "carbohidratos" },
-  { name: "Cereal integral", calories: 357, protein: 12, carbs: 67, fats: 4.7, category: "carbohidratos" },
-  { name: "Granola", calories: 471, protein: 10, carbs: 64, fats: 20, category: "carbohidratos" },
-  { name: "Muesli", calories: 367, protein: 10, carbs: 66, fats: 9, category: "carbohidratos" },
-  { name: "Pan de centeno", calories: 259, protein: 8.5, carbs: 48, fats: 3.3, category: "carbohidratos" },
-  { name: "Bagel integral", calories: 250, protein: 10, carbs: 49, fats: 1.5, category: "carbohidratos" },
-  { name: "Crackers integrales", calories: 408, protein: 10, carbs: 68, fats: 12, category: "carbohidratos" },
-  { name: "Polenta", calories: 70, protein: 1.7, carbs: 16, fats: 0.2, category: "carbohidratos" },
-  { name: "Tapioca", calories: 358, protein: 0.6, carbs: 88, fats: 0.1, category: "carbohidratos" },
-  { name: "Harina de avena", calories: 379, protein: 13, carbs: 68, fats: 6.5, category: "carbohidratos" },
-  { name: "Salvado de trigo", calories: 216, protein: 16, carbs: 65, fats: 4.3, category: "carbohidratos" },
-  { name: "Germen de trigo", calories: 360, protein: 23, carbs: 52, fats: 9.7, category: "carbohidratos" },
-  { name: "Chía", calories: 486, protein: 17, carbs: 42, fats: 31, category: "carbohidratos" },
-
-  // VEGETALES (25 alimentos)
-  { name: "Brócoli", calories: 34, protein: 2.8, carbs: 7, fats: 0.4, category: "vegetales" },
-  { name: "Espinaca", calories: 23, protein: 2.9, carbs: 3.6, fats: 0.4, category: "vegetales" },
-  { name: "Lechuga", calories: 15, protein: 1.4, carbs: 2.9, fats: 0.2, category: "vegetales" },
-  { name: "Tomate", calories: 18, protein: 0.9, carbs: 3.9, fats: 0.2, category: "vegetales" },
-  { name: "Zanahoria", calories: 41, protein: 0.9, carbs: 10, fats: 0.2, category: "vegetales" },
-  { name: "Apio", calories: 16, protein: 0.7, carbs: 3, fats: 0.2, category: "vegetales" },
-  { name: "Pepino", calories: 16, protein: 0.7, carbs: 4, fats: 0.1, category: "vegetales" },
-  { name: "Pimentón rojo", calories: 31, protein: 1, carbs: 7, fats: 0.3, category: "vegetales" },
-  { name: "Cebolla", calories: 40, protein: 1.1, carbs: 9.3, fats: 0.1, category: "vegetales" },
-  { name: "Ajo", calories: 149, protein: 6.4, carbs: 33, fats: 0.5, category: "vegetales" },
-  { name: "Coliflor", calories: 25, protein: 1.9, carbs: 5, fats: 0.3, category: "vegetales" },
-  { name: "Repollo", calories: 25, protein: 1.3, carbs: 6, fats: 0.1, category: "vegetales" },
-  { name: "Col rizada", calories: 49, protein: 4.3, carbs: 9, fats: 0.9, category: "vegetales" },
-  { name: "Acelgas", calories: 19, protein: 1.8, carbs: 3.7, fats: 0.2, category: "vegetales" },
-  { name: "Berros", calories: 11, protein: 2.3, carbs: 1.3, fats: 0.1, category: "vegetales" },
-  { name: "Rúcula", calories: 25, protein: 2.6, carbs: 3.7, fats: 0.7, category: "vegetales" },
-  { name: "Espárragos", calories: 20, protein: 2.2, carbs: 3.9, fats: 0.1, category: "vegetales" },
-  { name: "Alcachofa", calories: 47, protein: 3.3, carbs: 11, fats: 0.2, category: "vegetales" },
-  { name: "Berenjena", calories: 25, protein: 1, carbs: 6, fats: 0.2, category: "vegetales" },
-  { name: "Calabacín", calories: 17, protein: 1.2, carbs: 3.1, fats: 0.3, category: "vegetales" },
-  { name: "Calabaza", calories: 26, protein: 1, carbs: 6.5, fats: 0.1, category: "vegetales" },
-  { name: "Remolacha", calories: 43, protein: 1.6, carbs: 10, fats: 0.2, category: "vegetales" },
-  { name: "Nabo", calories: 28, protein: 0.9, carbs: 6.4, fats: 0.1, category: "vegetales" },
-  { name: "Rabanito", calories: 16, protein: 0.7, carbs: 3.4, fats: 0.1, category: "vegetales" },
-  { name: "Champiñones", calories: 22, protein: 3.1, carbs: 3.3, fats: 0.3, category: "vegetales" },
-
-  // FRUTAS (20 alimentos)
-  { name: "Banano", calories: 89, protein: 1.1, carbs: 23, fats: 0.3, category: "frutas" },
-  { name: "Manzana", calories: 52, protein: 0.3, carbs: 14, fats: 0.2, category: "frutas" },
-  { name: "Naranja", calories: 47, protein: 0.9, carbs: 12, fats: 0.1, category: "frutas" },
-  { name: "Fresa", calories: 32, protein: 0.7, carbs: 7.7, fats: 0.3, category: "frutas" },
-  { name: "Piña", calories: 50, protein: 0.5, carbs: 13, fats: 0.1, category: "frutas" },
-  { name: "Mango", calories: 60, protein: 0.8, carbs: 15, fats: 0.4, category: "frutas" },
-  { name: "Papaya", calories: 43, protein: 0.5, carbs: 11, fats: 0.3, category: "frutas" },
-  { name: "Kiwi", calories: 61, protein: 1.1, carbs: 15, fats: 0.5, category: "frutas" },
-  { name: "Pera", calories: 57, protein: 0.4, carbs: 15, fats: 0.1, category: "frutas" },
-  { name: "Durazno", calories: 39, protein: 0.9, carbs: 10, fats: 0.3, category: "frutas" },
-  { name: "Ciruela", calories: 46, protein: 0.7, carbs: 11, fats: 0.3, category: "frutas" },
-  { name: "Uvas", calories: 62, protein: 0.6, carbs: 16, fats: 0.2, category: "frutas" },
-  { name: "Sandía", calories: 30, protein: 0.6, carbs: 8, fats: 0.2, category: "frutas" },
-  { name: "Melón", calories: 34, protein: 0.8, carbs: 8.6, fats: 0.2, category: "frutas" },
-  { name: "Arándanos", calories: 57, protein: 0.7, carbs: 14, fats: 0.3, category: "frutas" },
-  { name: "Frambuesas", calories: 52, protein: 1.2, carbs: 12, fats: 0.7, category: "frutas" },
-  { name: "Moras", calories: 43, protein: 1.4, carbs: 10, fats: 0.5, category: "frutas" },
-  { name: "Cereza", calories: 63, protein: 1.1, carbs: 16, fats: 0.2, category: "frutas" },
-  { name: "Aguacate", calories: 160, protein: 2, carbs: 9, fats: 15, category: "frutas" },
-  { name: "Coco", calories: 354, protein: 3.3, carbs: 15, fats: 33, category: "frutas" },
-
-  // 🆕 NUEVA SECCIÓN: BEBIDAS (22 bebidas)
-  { name: "Café negro", calories: 2, protein: 0.3, carbs: 0, fats: 0, category: "bebidas" },
-  { name: "Cappuccino", calories: 80, protein: 4, carbs: 6, fats: 4, category: "bebidas" },
-  { name: "Latte", calories: 103, protein: 6, carbs: 8, fats: 4, category: "bebidas" },
-  { name: "Chocolate caliente", calories: 192, protein: 9, carbs: 27, fats: 6, category: "bebidas" },
-  { name: "Frappé de café", calories: 180, protein: 3, carbs: 35, fats: 4, category: "bebidas" },
-  { name: "Malteada de vainilla", calories: 250, protein: 8, carbs: 40, fats: 8, category: "bebidas" },
-  { name: "Leche entera", calories: 61, protein: 3.2, carbs: 4.8, fats: 3.3, category: "bebidas" },
-  { name: "Leche deslactosada", calories: 50, protein: 3.3, carbs: 4.9, fats: 2.4, category: "bebidas" },
-  { name: "Leche de almendras", calories: 17, protein: 0.6, carbs: 1.5, fats: 1.2, category: "bebidas" },
-  { name: "Leche de soya", calories: 33, protein: 2.9, carbs: 1.8, fats: 1.9, category: "bebidas" },
-  { name: "Leche de coco", calories: 19, protein: 0.2, carbs: 1.8, fats: 1.6, category: "bebidas" },
-  { name: "Leche de avena", calories: 47, protein: 1.5, carbs: 7.7, fats: 1.5, category: "bebidas" },
-  { name: "Jugo de naranja", calories: 45, protein: 0.5, carbs: 11, fats: 0.1, category: "bebidas" },
-  { name: "Jugo de manzana", calories: 46, protein: 0.1, carbs: 11, fats: 0.1, category: "bebidas" },
-  { name: "Agua de coco", calories: 19, protein: 0.7, carbs: 3.7, fats: 0.2, category: "bebidas" },
-  { name: "Té verde", calories: 1, protein: 0, carbs: 0, fats: 0, category: "bebidas" },
-  { name: "Té negro", calories: 2, protein: 0, carbs: 0.7, fats: 0, category: "bebidas" },
-  { name: "Kombucha", calories: 30, protein: 0, carbs: 7, fats: 0, category: "bebidas" },
-  { name: "Batido de proteína", calories: 120, protein: 25, carbs: 3, fats: 1, category: "bebidas" },
-  { name: "Smoothie verde", calories: 95, protein: 2, carbs: 22, fats: 0.5, category: "bebidas" },
-  { name: "Gaseosa cola", calories: 42, protein: 0, carbs: 11, fats: 0, category: "bebidas" },
-  { name: "Cerveza ligera", calories: 43, protein: 0.4, carbs: 3.6, fats: 0, category: "bebidas" }
-]
-
-// ============================================================================
-// CONFIGURACIÓN DE DATOS (EXPANDIDA)
+// CONFIGURACIÓN DE DATOS (ORIGINAL)
 // ============================================================================
 const ACTIVITY_LEVELS = [
   { value: 1.2, label: "Sedentario", desc: "Poco ejercicio" },
@@ -522,37 +331,27 @@ const GOALS = [
 
 const LEVEL_SYSTEM = {
   levels: [
-    { level: 1, name: "Principiante", icon: "🌱", pointsRequired: 0, color: "bg-green-100 text-green-800", description: "¡Bienvenido! Empiezas tu viaje hacia el bienestar. Cada pequeño paso cuenta." },
-    { level: 2, name: "Explorador", icon: "🔍", pointsRequired: 100, color: "bg-blue-100 text-blue-800", description: "Estás explorando nuevos hábitos. ¡Sigue descubriendo qué funciona para ti!" },
-    { level: 3, name: "Comprometido", icon: "💪", pointsRequired: 300, color: "bg-purple-100 text-purple-800", description: "Muestras compromiso real. Tus hábitos empiezan a consolidarse." },
-    { level: 4, name: "Disciplinado", icon: "🎯", pointsRequired: 600, color: "bg-orange-100 text-orange-800", description: "Tu disciplina es admirable. Los resultados empiezan a ser visibles." },
-    { level: 5, name: "Experto", icon: "⭐", pointsRequired: 1000, color: "bg-yellow-100 text-yellow-800", description: "Dominas los fundamentos del bienestar. Eres una inspiración para otros." },
-    { level: 6, name: "Maestro", icon: "👑", pointsRequired: 1500, color: "bg-red-100 text-red-800", description: "Has alcanzado la maestría. Tu estilo de vida es un ejemplo a seguir." },
-    { level: 7, name: "Leyenda", icon: "💎", pointsRequired: 2500, color: "bg-indigo-100 text-indigo-800", description: "Eres una leyenda viviente del bienestar. Tu transformación es extraordinaria." },
-    { level: 8, name: "VitalMente", icon: "✨", pointsRequired: 4000, color: "bg-pink-100 text-pink-800", description: "Has alcanzado el nivel máximo: equilibrio perfecto entre cuerpo y mente." },
+    { level: 1, name: "Principiante", icon: "🌱", pointsRequired: 0, color: "bg-green-100 text-green-800" },
+    { level: 2, name: "Explorador", icon: "🔍", pointsRequired: 100, color: "bg-blue-100 text-blue-800" },
+    { level: 3, name: "Comprometido", icon: "💪", pointsRequired: 300, color: "bg-purple-100 text-purple-800" },
+    { level: 4, name: "Disciplinado", icon: "🎯", pointsRequired: 600, color: "bg-orange-100 text-orange-800" },
+    { level: 5, name: "Experto", icon: "⭐", pointsRequired: 1000, color: "bg-yellow-100 text-yellow-800" },
+    { level: 6, name: "Maestro", icon: "👑", pointsRequired: 1500, color: "bg-red-100 text-red-800" },
+    { level: 7, name: "Leyenda", icon: "💎", pointsRequired: 2500, color: "bg-indigo-100 text-indigo-800" },
+    { level: 8, name: "VitalMente", icon: "✨", pointsRequired: 4000, color: "bg-pink-100 text-pink-800" },
   ],
   pointsPerAction: {
     water: 5,
     exercise: 20,
     mindfulness: 15,
     meal: 10,
-    smoothie: 15,
-    custom_meal: 25,
     streak_bonus: 50,
     challenge_complete: 100,
   },
-  badges: [
-    { id: "hydrated", name: "Hidratado", icon: "💧", description: "Bebe 8 vasos de agua en un día" },
-    { id: "warrior", name: "Guerrero", icon: "⚔️", description: "Completa 5 sesiones de ejercicio" },
-    { id: "zen", name: "Zen Master", icon: "🧘", description: "Practica mindfulness por 7 días seguidos" },
-    { id: "chef", name: "Chef Saludable", icon: "👨‍🍳", description: "Crea 10 comidas personalizadas" },
-    { id: "smoothie_king", name: "Rey de Batidos", icon: "🥤", description: "Crea 5 batidos personalizados" },
-    { id: "streak", name: "Constante", icon: "🔥", description: "Mantén una racha de 30 días" },
-  ]
 }
 
 // ============================================================================
-// FUNCIONES DE BASE DE DATOS EXPANDIDAS
+// FUNCIONES DE BASE DE DATOS (MANTENIENDO LAS ORIGINALES)
 // ============================================================================
 const dbFunctions = {
   async findUserByPhone(phone: string): Promise<UserProfile | null> {
@@ -670,38 +469,17 @@ const dbFunctions = {
 
   async getGlobalFoods(): Promise<GlobalFood[]> {
     try {
-      // Intentar obtener de la base de datos primero
       const { data, error } = await supabase
         .from("global_foods")
         .select("*")
         .eq("is_active", true)
         .order("category", { ascending: true })
         .order("name", { ascending: true })
-      
-      if (error || !data || data.length === 0) {
-        // Si no hay datos en la DB, usar el banco expandido
-        return EXPANDED_FOOD_DATABASE.map((food, index) => ({
-          id: `expanded_${index}`,
-          ...food,
-          common_portion_size: 100,
-          common_portion_name: "gramos",
-          is_active: true,
-          created_at: new Date().toISOString()
-        }))
-      }
-      
+      if (error) throw error
       return data as GlobalFood[]
     } catch (error) {
       console.error("Error loading global foods:", error)
-      // Fallback al banco expandido
-      return EXPANDED_FOOD_DATABASE.map((food, index) => ({
-        id: `expanded_${index}`,
-        ...food,
-        common_portion_size: 100,
-        common_portion_name: "gramos",
-        is_active: true,
-        created_at: new Date().toISOString()
-      }))
+      return []
     }
   },
 
@@ -759,101 +537,6 @@ const dbFunctions = {
       if (error) throw error
     } catch (error) {
       console.error("Error deleting meal composition:", error)
-      throw error
-    }
-  },
-
-  // 🆕 NUEVAS FUNCIONES PARA BATIDOS PERSONALIZADOS
-  async getUserSmoothies(userId: string): Promise<CustomSmoothie[]> {
-    try {
-      const { data, error } = await supabase
-        .from("user_smoothies")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-      if (error) {
-        // Si la tabla no existe, retornar array vacío
-        console.log("Tabla user_smoothies no existe aún:", error.message)
-        return []
-      }
-      return (data || []).map(smoothie => ({
-        ...smoothie,
-        ingredients: typeof smoothie.ingredients === 'string' 
-          ? JSON.parse(smoothie.ingredients) 
-          : smoothie.ingredients
-      })) as CustomSmoothie[]
-    } catch (error) {
-      console.error("Error loading user smoothies:", error)
-      return []
-    }
-  },
-
-  async createCustomSmoothie(smoothie: Omit<CustomSmoothie, "id" | "created_at">): Promise<CustomSmoothie> {
-    try {
-      const { data, error } = await supabase
-        .from("user_smoothies")
-        .insert({
-          ...smoothie,
-          ingredients: JSON.stringify(smoothie.ingredients),
-          created_at: new Date().toISOString(),
-        })
-        .select()
-        .single()
-      if (error) throw error
-      return {
-        ...data,
-        ingredients: typeof data.ingredients === 'string' ? JSON.parse(data.ingredients) : data.ingredients
-      } as CustomSmoothie
-    } catch (error) {
-      console.error("Error creating custom smoothie:", error)
-      throw error
-    }
-  },
-
-  // 🆕 NUEVAS FUNCIONES PARA COMPOSICIONES DE COMIDAS MEJORADAS
-  async getEnhancedMealCompositions(userId: string): Promise<EnhancedMealComposition[]> {
-    try {
-      const today = new Date().toISOString().split("T")[0]
-      const { data, error } = await supabase
-        .from("enhanced_meal_compositions")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("date", today)
-        .order("created_at", { ascending: true })
-      if (error) {
-        console.log("Tabla enhanced_meal_compositions no existe aún:", error.message)
-        return []
-      }
-      return (data || []).map(meal => ({
-        ...meal,
-        ingredients: typeof meal.ingredients === 'string' 
-          ? JSON.parse(meal.ingredients) 
-          : meal.ingredients
-      })) as EnhancedMealComposition[]
-    } catch (error) {
-      console.error("Error loading enhanced meal compositions:", error)
-      return []
-    }
-  },
-
-  async createEnhancedMealComposition(meal: Omit<EnhancedMealComposition, "id" | "created_at">): Promise<EnhancedMealComposition> {
-    try {
-      const { data, error } = await supabase
-        .from("enhanced_meal_compositions")
-        .insert({
-          ...meal,
-          ingredients: JSON.stringify(meal.ingredients),
-          created_at: new Date().toISOString(),
-        })
-        .select()
-        .single()
-      if (error) throw error
-      return {
-        ...data,
-        ingredients: typeof data.ingredients === 'string' ? JSON.parse(data.ingredients) : data.ingredients
-      } as EnhancedMealComposition
-    } catch (error) {
-      console.error("Error creating enhanced meal composition:", error)
       throw error
     }
   },
@@ -958,125 +641,41 @@ const dbFunctions = {
     }
   },
 
-  // 🆕 FUNCIÓN MEJORADA PARA ANÁLISIS DE PATRONES IA
-  async generateAdvancedAIRecommendations(userId: string): Promise<AIRecommendation[]> {
+  async generateAIRecommendations(userId: string): Promise<AIRecommendation[]> {
     try {
-      const progressHistory = await dbFunctions.getProgressHistory(userId, 30) // Analizamos 30 días
+      const progressHistory = await dbFunctions.getProgressHistory(userId, 7)
       const supplements = await dbFunctions.getActiveSupplements()
-      const userSmoothies = await dbFunctions.getUserSmoothies(userId)
-      const mealCompositions = await dbFunctions.getTodayMealCompositions(userId)
       const recommendations: AIRecommendation[] = []
 
       if (!progressHistory || progressHistory.length === 0 || !supplements || supplements.length === 0) {
         return []
       }
 
-      // Análisis avanzado de patrones
-      const analysisResults = {
-        avgWater: progressHistory.reduce((sum, day) => sum + (day.water || 0), 0) / progressHistory.length,
-        avgExercise: progressHistory.reduce((sum, day) => sum + (day.exercise || 0), 0) / progressHistory.length,
-        avgMindfulness: progressHistory.reduce((sum, day) => sum + (day.mindfulness || 0), 0) / progressHistory.length,
-        consistencyScore: progressHistory.filter(day => 
-          (day.water >= 6) && (day.exercise >= 1) && (day.mindfulness >= 1)
-        ).length / progressHistory.length,
-        weekendPattern: progressHistory.filter(day => {
-          const dayOfWeek = new Date(day.date).getDay()
-          return dayOfWeek === 0 || dayOfWeek === 6 // Sábado y domingo
-        }).reduce((acc, day) => ({
-          water: acc.water + day.water,
-          exercise: acc.exercise + day.exercise,
-          mindfulness: acc.mindfulness + day.mindfulness
-        }), { water: 0, exercise: 0, mindfulness: 0 }),
-        smoothieUsage: userSmoothies.length,
-        nutritionalPatterns: mealCompositions.length > 0
-      }
+      const avgWater = progressHistory.reduce((sum, day) => sum + (day.water || 0), 0) / progressHistory.length
+      const avgExercise = progressHistory.reduce((sum, day) => sum + (day.exercise || 0), 0) / progressHistory.length
+      const avgMindfulness =
+        progressHistory.reduce((sum, day) => sum + (day.mindfulness || 0), 0) / progressHistory.length
 
-      // Recomendación basada en ejercicio inconsistente
-      if (analysisResults.avgExercise < 0.7) {
-        const energySupplements = supplements.filter(s =>
-          s.benefits && Array.isArray(s.benefits) &&
-          s.benefits.some(b => b && typeof b === "string" && 
-            (b.toLowerCase().includes("energía") || b.toLowerCase().includes("fuerza"))
-          )
+      if (avgExercise < 0.5 && supplements.length > 0) {
+        const energySupplements = supplements.filter(
+          (s) =>
+            s.benefits &&
+            Array.isArray(s.benefits) &&
+            s.benefits.some((b) => b && typeof b === "string" && b.toLowerCase().includes("energía")),
         )
-        
         if (energySupplements.length > 0) {
           recommendations.push({
-            id: `${userId}_energy_advanced`,
+            id: `${userId}_energy_rec`,
             user_id: userId,
-            supplement_names: energySupplements.slice(0, 2).map(s => s.name || "Suplemento"),
-            recommendation_type: "exercise_consistency",
-            priority: analysisResults.avgExercise < 0.3 ? "high" : "medium",
-            reason: `Análisis de 30 días: Tu actividad física promedio es ${(analysisResults.avgExercise * 100).toFixed(1)}%. Estos suplementos pueden incrementar tu energía y motivación.`,
-            sales_angle: `¡Recupera tu energía! ${analysisResults.consistencyScore < 0.3 ? "Oferta especial por baja actividad" : "Impulsa tu rendimiento"} 💪`,
-            discount_percentage: analysisResults.avgExercise < 0.3 ? 20 : 15,
+            supplement_names: energySupplements.slice(0, 2).map((s) => s.name || "Suplemento"),
+            recommendation_type: "exercise_support",
+            priority: "high",
+            reason: `Hemos notado que tu actividad física ha sido baja. Estos suplementos pueden ayudarte a tener más energía.`,
+            sales_angle: "¡Recupera tu energía y vuelve a entrenar! 💪",
+            discount_percentage: 15,
             optimal_timing: "morning",
-            confidence_score: 0.85,
-            user_patterns: ["low_exercise_consistency", `avg_exercise_${(analysisResults.avgExercise * 100).toFixed(0)}`],
-            is_active: true,
-            shown_count: 0,
-            clicked: false,
-            purchased: false,
-            expires_at: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
-            created_at: new Date().toISOString(),
-          })
-        }
-      }
-
-      // Recomendación basada en estrés/mindfulness
-      if (analysisResults.avgMindfulness < 0.6) {
-        const relaxSupplements = supplements.filter(s =>
-          s.benefits && Array.isArray(s.benefits) &&
-          s.benefits.some(b => b && typeof b === "string" && 
-            (b.toLowerCase().includes("estrés") || b.toLowerCase().includes("calma") || b.toLowerCase().includes("ansiedad"))
-          )
-        )
-        
-        if (relaxSupplements.length > 0) {
-          recommendations.push({
-            id: `${userId}_stress_advanced`,
-            user_id: userId,
-            supplement_names: relaxSupplements.slice(0, 2).map(s => s.name || "Suplemento"),
-            recommendation_type: "stress_management_advanced",
-            priority: analysisResults.avgMindfulness < 0.3 ? "high" : "medium",
-            reason: `Patrón detectado: Tu práctica de mindfulness es del ${(analysisResults.avgMindfulness * 100).toFixed(1)}%. El estrés puede estar afectando tu bienestar general.`,
-            sales_angle: "Encuentra tu equilibrio mental 🧘‍♀️ Calma garantizada",
-            discount_percentage: 12,
-            optimal_timing: "evening",
-            confidence_score: 0.78,
-            user_patterns: ["irregular_mindfulness", `stress_level_${analysisResults.avgMindfulness < 0.3 ? "high" : "medium"}`],
-            is_active: true,
-            shown_count: 0,
-            clicked: false,
-            purchased: false,
-            expires_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-            created_at: new Date().toISOString(),
-          })
-        }
-      }
-
-      // Recomendación basada en hidratación
-      if (analysisResults.avgWater < 6) {
-        const hydroSupplements = supplements.filter(s =>
-          s.benefits && Array.isArray(s.benefits) &&
-          s.benefits.some(b => b && typeof b === "string" && 
-            (b.toLowerCase().includes("hidrat") || b.toLowerCase().includes("electrolito"))
-          )
-        )
-        
-        if (hydroSupplements.length > 0) {
-          recommendations.push({
-            id: `${userId}_hydration_advanced`,
-            user_id: userId,
-            supplement_names: hydroSupplements.slice(0, 1).map(s => s.name || "Suplemento"),
-            recommendation_type: "hydration_support",
-            priority: "medium",
-            reason: `Hidratación insuficiente: Promedias ${analysisResults.avgWater.toFixed(1)} vasos/día. Los electrolitos pueden optimizar tu hidratación.`,
-            sales_angle: "💧 Hidratación inteligente - Más que agua",
-            discount_percentage: 10,
-            optimal_timing: "morning",
-            confidence_score: 0.72,
-            user_patterns: ["dehydration_pattern", `water_avg_${Math.round(analysisResults.avgWater)}`],
+            confidence_score: 0.8,
+            user_patterns: ["low_exercise"],
             is_active: true,
             shown_count: 0,
             clicked: false,
@@ -1087,34 +686,34 @@ const dbFunctions = {
         }
       }
 
-      // Recomendación por alta consistencia (usuario avanzado)
-      if (analysisResults.consistencyScore > 0.8) {
-        const advancedSupplements = supplements.filter(s =>
-          s.benefits && Array.isArray(s.benefits) &&
-          s.benefits.some(b => b && typeof b === "string" && 
-            (b.toLowerCase().includes("rendimiento") || b.toLowerCase().includes("avanzado") || 
-             b.toLowerCase().includes("premium") || b.toLowerCase().includes("élite"))
-          )
+      if (avgMindfulness < 0.5 && supplements.length > 0) {
+        const relaxSupplements = supplements.filter(
+          (s) =>
+            s.benefits &&
+            Array.isArray(s.benefits) &&
+            s.benefits.some(
+              (b) =>
+                b && typeof b === "string" && (b.toLowerCase().includes("estrés") || b.toLowerCase().includes("calma")),
+            ),
         )
-        
-        if (advancedSupplements.length > 0) {
+        if (relaxSupplements.length > 0) {
           recommendations.push({
-            id: `${userId}_advanced_user`,
+            id: `${userId}_relax_rec`,
             user_id: userId,
-            supplement_names: advancedSupplements.slice(0, 1).map(s => s.name || "Suplemento"),
-            recommendation_type: "advanced_user_optimization",
-            priority: "low",
-            reason: `¡Excelente! Tu consistencia es del ${(analysisResults.consistencyScore * 100).toFixed(1)}%. Estos suplementos premium pueden llevar tu rendimiento al siguiente nivel.`,
-            sales_angle: "🚀 Nivel Elite - Solo para usuarios avanzados como tú",
-            discount_percentage: 5,
-            optimal_timing: "pre_workout",
-            confidence_score: 0.95,
-            user_patterns: ["high_consistency", "advanced_user", `consistency_${Math.round(analysisResults.consistencyScore * 100)}`],
+            supplement_names: relaxSupplements.slice(0, 2).map((s) => s.name || "Suplemento"),
+            recommendation_type: "stress_management",
+            priority: "medium",
+            reason: `Tu práctica de mindfulness ha sido irregular. Estos suplementos pueden ayudarte a encontrar más calma.`,
+            sales_angle: "Encuentra tu paz interior 🧘‍♀️",
+            discount_percentage: 10,
+            optimal_timing: "evening",
+            confidence_score: 0.7,
+            user_patterns: ["low_mindfulness"],
             is_active: true,
             shown_count: 0,
             clicked: false,
             purchased: false,
-            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
             created_at: new Date().toISOString(),
           })
         }
@@ -1122,7 +721,7 @@ const dbFunctions = {
 
       return recommendations
     } catch (error) {
-      console.error("Error generating advanced AI recommendations:", error)
+      console.error("Error generating AI recommendations:", error)
       return []
     }
   },
@@ -1135,60 +734,6 @@ const dbFunctions = {
     } catch (error) {
       console.error("Error loading all users:", error)
       return []
-    }
-  },
-
-  // 🆕 FUNCIÓN MEJORADA PARA ANÁLISIS DE PATRONES DEL ADMINISTRADOR
-  async getDetailedUserAnalytics(): Promise<any> {
-    try {
-      const users = await dbFunctions.getAllUsers()
-      const analytics = {
-        totalUsers: users.length,
-        newUsersThisWeek: users.filter(u => 
-          new Date(u.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-        ).length,
-        activeUsersToday: users.filter(u => 
-          new Date(u.last_login) > new Date(Date.now() - 24 * 60 * 60 * 1000)
-        ).length,
-        goalDistribution: {} as Record<string, number>,
-        activityLevelDistribution: {} as Record<string, number>,
-        ageGroups: {
-          '18-25': 0,
-          '26-35': 0,
-          '36-45': 0,
-          '46-55': 0,
-          '55+': 0
-        },
-        retentionRate: 0,
-        averageSessionTime: 0,
-        mostActiveHours: {} as Record<string, number>
-      }
-
-      // Análisis de distribución de objetivos
-      users.forEach(user => {
-        analytics.goalDistribution[user.goal] = (analytics.goalDistribution[user.goal] || 0) + 1
-        
-        // Análisis de grupos de edad
-        if (user.age >= 18 && user.age <= 25) analytics.ageGroups['18-25']++
-        else if (user.age >= 26 && user.age <= 35) analytics.ageGroups['26-35']++
-        else if (user.age >= 36 && user.age <= 45) analytics.ageGroups['36-45']++
-        else if (user.age >= 46 && user.age <= 55) analytics.ageGroups['46-55']++
-        else analytics.ageGroups['55+']++
-
-        // Análisis de nivel de actividad
-        const activityLabel = ACTIVITY_LEVELS.find(a => a.value === user.activity_level)?.label || 'Desconocido'
-        analytics.activityLevelDistribution[activityLabel] = (analytics.activityLevelDistribution[activityLabel] || 0) + 1
-      })
-
-      // Calcular tasa de retención (usuarios que han ingresado en los últimos 7 días)
-      analytics.retentionRate = users.length > 0 
-        ? (users.filter(u => new Date(u.last_login) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length / users.length) * 100
-        : 0
-
-      return analytics
-    } catch (error) {
-      console.error("Error getting detailed user analytics:", error)
-      return null
     }
   },
 
@@ -1219,20 +764,6 @@ const dbFunctions = {
             icon: "🧘‍♀️",
             is_active: true,
           },
-          {
-            category: "Nutrición",
-            title: "Batidos nutritivos",
-            content: "Crea batidos personalizados combinando proteínas, frutas y vegetales para una nutrición completa.",
-            icon: "🥤",
-            is_active: true,
-          },
-          {
-            category: "Gamificación",
-            title: "Sube de nivel",
-            content: "Completa tareas diarias para ganar puntos y subir de nivel. ¡Cada acción cuenta para tu progreso!",
-            icon: "🎯",
-            is_active: true,
-          },
         ]
         for (const tip of defaultTips) {
           await supabase.from("global_tips").insert(tip)
@@ -1261,13 +792,6 @@ const dbFunctions = {
             title: "Rutina de ejercicios en casa - 20 minutos",
             description: "Entrenamiento completo sin equipamiento",
             url: "https://www.youtube.com/watch?v=8dQKcziOQ8I",
-            is_active: true,
-          },
-          {
-            type: "nutrition" as const,
-            title: "Guía de batidos proteicos",
-            description: "Recetas de batidos nutritivos para cada objetivo",
-            url: "https://www.youtube.com/watch?v=smoothie_guide",
             is_active: true,
           },
         ]
@@ -1309,36 +833,11 @@ const dbFunctions = {
             whatsapp_message:
               "Hola! Me interesa MusclePro Elite para mi entrenamiento. ¿Qué sabores tienen disponibles?",
           },
-          {
-            name: "HydroBalance",
-            description: "Electrolitos avanzados para optimizar hidratación y rendimiento deportivo",
-            benefits: "Hidratación óptima,Electrolitos balanceados,Mejora rendimiento,Recuperación rápida",
-            price: 65000,
-            image_url: "/placeholder.svg?height=200&width=200",
-            is_active: true,
-            whatsapp_message:
-              "Hola! Me interesa HydroBalance para mejorar mi hidratación. ¿Cuál es la forma de uso recomendada?",
-          },
         ]
         for (const supplement of defaultSupplements) {
           await supabase.from("supplements").insert(supplement)
         }
       }
-
-      // Inicializar banco de alimentos expandido en la base de datos
-      const { data: existingFoods } = await supabase.from("global_foods").select("*")
-      if (!existingFoods || existingFoods.length < 50) {
-        // Solo insertar si hay menos de 50 alimentos para evitar duplicados
-        for (const food of EXPANDED_FOOD_DATABASE.slice(0, 20)) { // Insertar los primeros 20 como muestra
-          await supabase.from("global_foods").insert({
-            ...food,
-            common_portion_size: 100,
-            common_portion_name: "gramos",
-            is_active: true
-          })
-        }
-      }
-
     } catch (error) {
       console.log("Datos por defecto ya inicializados o error menor:", error)
     }
@@ -1346,7 +845,7 @@ const dbFunctions = {
 }
 
 // ============================================================================
-// FUNCIONES AUXILIARES EXPANDIDAS
+// FUNCIONES AUXILIARES
 // ============================================================================
 const getYouTubeThumbnail = (url: string): string => {
   const patterns = [/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/, /^([a-zA-Z0-9_-]{11})$/]
@@ -1391,44 +890,11 @@ const getResourceTypeIcon = (type: string) => {
   }
 }
 
-// 🆕 FUNCIONES AUXILIARES PARA ALIMENTOS EXPANDIDOS
-const getFoodsByExpandedCategory = (globalFoods: GlobalFood[]) => {
-  const categories = [
-    { id: "proteinas", name: "Proteínas", icon: "🍗" },
-    { id: "carbohidratos", name: "Carbohidratos", icon: "🌾" },
-    { id: "vegetales", name: "Vegetales", icon: "🥬" },
-    { id: "frutas", name: "Frutas", icon: "🍎" },
-    { id: "bebidas", name: "Bebidas", icon: "🥤" }, // Nueva categoría
-  ]
-  
-  return categories.map((category) => ({
-    ...category,
-    foods: globalFoods.filter((food) => food.category === category.id),
-  }))
-}
-
-const calculateTotalMacros = (ingredients: (SmoothieIngredient | MealIngredient)[]): {
-  calories: number
-  protein: number
-  carbs: number
-  fats: number
-} => {
-  return ingredients.reduce(
-    (totals, ingredient) => ({
-      calories: totals.calories + ingredient.calories,
-      protein: totals.protein + ingredient.protein,
-      carbs: totals.carbs + ingredient.carbs,
-      fats: totals.fats + ingredient.fats,
-    }),
-    { calories: 0, protein: 0, carbs: 0, fats: 0 }
-  )
-}
-
 // ============================================================================
-// COMPONENTE PRINCIPAL EXPANDIDO
+// COMPONENTE PRINCIPAL RESPONSIVE
 // ============================================================================
-export default function VitalMenteEnhancedApp() {
-  // Estados principales (mantenidos del original)
+export default function VitalMenteApp() {
+  // Estados principales
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     if (typeof window !== "undefined") {
       const savedUser = localStorage.getItem("vitalmente_user")
@@ -1457,7 +923,7 @@ export default function VitalMenteEnhancedApp() {
     cena: 0,
   })
 
-  // Estados de datos expandidos
+  // Estados de datos
   const [userFoods, setUserFoods] = useState<UserFood[]>([])
   const [globalFoods, setGlobalFoods] = useState<GlobalFood[]>([])
   const [progressHistory, setProgressHistory] = useState<DailyProgress[]>([])
@@ -1473,15 +939,7 @@ export default function VitalMenteEnhancedApp() {
     fats: 0,
   })
 
-  // 🆕 NUEVOS ESTADOS PARA FUNCIONALIDADES EXPANDIDAS
-  const [userSmoothies, setUserSmoothies] = useState<CustomSmoothie[]>([])
-  const [enhancedMealCompositions, setEnhancedMealCompositions] = useState<EnhancedMealComposition[]>([])
-  const [showSmoothieCreator, setShowSmoothieCreator] = useState(false)
-  const [showEnhancedMealCreator, setShowEnhancedMealCreator] = useState(false)
-  const [showGamificationInfo, setShowGamificationInfo] = useState(false)
-  const [selectedMealTypeEnhanced, setSelectedMealTypeEnhanced] = useState<"desayuno" | "almuerzo" | "cena">("desayuno")
-
-  // Estados de UI móvil (mantenidos)
+  // Estados de UI móvil
   const [showMealCalculator, setShowMealCalculator] = useState(false)
   const [selectedMealType, setSelectedMealType] = useState<"desayuno" | "almuerzo" | "cena">("desayuno")
   const [selectedFood, setSelectedFood] = useState<UserFood | GlobalFood | null>(null)
@@ -1489,15 +947,14 @@ export default function VitalMenteEnhancedApp() {
   const [showFloatingMenu, setShowFloatingMenu] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
 
-  // Estados de administración expandidos
+  // Estados de administración
   const [logoClicks, setLogoClicks] = useState(0)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [adminCode, setAdminCode] = useState("")
   const [activeAdminTab, setActiveAdminTab] = useState("dashboard")
-  const [detailedAnalytics, setDetailedAnalytics] = useState<any>(null)
 
-  // Estados de formularios (mantenidos)
+  // Estados de formularios
   const [loginForm, setLoginForm] = useState({ phone: "", accessCode: "" })
   const [registerForm, setRegisterForm] = useState({
     phone: "",
@@ -1518,7 +975,7 @@ export default function VitalMenteEnhancedApp() {
   const [allUsers, setAllUsers] = useState<UserProfile[]>([])
 
   // ============================================================================
-  // EFECTOS Y INICIALIZACIÓN EXPANDIDOS
+  // EFECTOS Y INICIALIZACIÓN
   // ============================================================================
   useEffect(() => {
     initializeApp()
@@ -1569,14 +1026,12 @@ export default function VitalMenteEnhancedApp() {
         setDailyProgress((prev) => ({ ...prev, user_id: userId }))
       }
 
-      const [foods, history, compositions, gamification, recommendations, smoothies, enhancedMeals] = await Promise.all([
+      const [foods, history, compositions, gamification, recommendations] = await Promise.all([
         dbFunctions.getUserFoods(userId),
         dbFunctions.getProgressHistory(userId),
         dbFunctions.getTodayMealCompositions(userId),
         dbFunctions.getUserGamification(userId),
-        dbFunctions.generateAdvancedAIRecommendations(userId), // 🆕 Función mejorada
-        dbFunctions.getUserSmoothies(userId), // 🆕 Nuevos batidos
-        dbFunctions.getEnhancedMealCompositions(userId), // 🆕 Nuevas composiciones
+        dbFunctions.generateAIRecommendations(userId),
       ])
 
       setUserFoods(foods)
@@ -1585,41 +1040,9 @@ export default function VitalMenteEnhancedApp() {
       calculateConsumedMacros(compositions)
       setUserGamification(gamification)
       setAiRecommendations(recommendations)
-      setUserSmoothies(smoothies) // 🆕
-      setEnhancedMealCompositions(enhancedMeals) // 🆕
-      
-      // 🆕 Calcular macros incluyendo comidas mejoradas
-      calculateEnhancedConsumedMacros([...compositions, ...enhancedMeals])
     } catch (error) {
       console.error("Error loading user data:", error)
     }
-  }
-
-  // 🆕 NUEVA FUNCIÓN PARA CALCULAR MACROS MEJORADOS
-  const calculateEnhancedConsumedMacros = (compositions: (MealComposition | EnhancedMealComposition)[]) => {
-    const totals = compositions.reduce(
-      (acc, comp) => {
-        if ('calories_consumed' in comp) {
-          // MealComposition original
-          return {
-            calories: acc.calories + comp.calories_consumed,
-            protein: acc.protein + comp.protein_consumed,
-            carbs: acc.carbs + comp.carbs_consumed,
-            fats: acc.fats + comp.fats_consumed,
-          }
-        } else {
-          // EnhancedMealComposition
-          return {
-            calories: acc.calories + comp.total_calories,
-            protein: acc.protein + comp.total_protein,
-            carbs: acc.carbs + comp.total_carbs,
-            fats: acc.fats + comp.total_fats,
-          }
-        }
-      },
-      { calories: 0, protein: 0, carbs: 0, fats: 0 }
-    )
-    setConsumedMacros(totals)
   }
 
   const calculateConsumedMacros = (compositions: MealComposition[]) => {
@@ -1630,7 +1053,7 @@ export default function VitalMenteEnhancedApp() {
         carbs: acc.carbs + comp.carbs_consumed,
         fats: acc.fats + comp.fats_consumed,
       }),
-      { calories: 0, protein: 0, carbs: 0, fats: 0 }
+      { calories: 0, protein: 0, carbs: 0, fats: 0 },
     )
     setConsumedMacros(totals)
   }
@@ -1651,7 +1074,7 @@ export default function VitalMenteEnhancedApp() {
   }
 
   // ============================================================================
-  // FUNCIONES DE AUTENTICACIÓN (MANTENIDAS DEL ORIGINAL)
+  // FUNCIONES DE AUTENTICACIÓN
   // ============================================================================
   const handleLogin = async () => {
     if (!loginForm.phone || !loginForm.accessCode) {
@@ -1765,12 +1188,10 @@ export default function VitalMenteEnhancedApp() {
     setLastSaveTime(null)
     setUserGamification(null)
     setAiRecommendations([])
-    setUserSmoothies([]) // 🆕
-    setEnhancedMealCompositions([]) // 🆕
   }
 
   // ============================================================================
-  // FUNCIONES DE PROGRESO EXPANDIDAS
+  // FUNCIONES DE PROGRESO
   // ============================================================================
   const updateProgress = async (field: keyof DailyProgress, increment: number) => {
     if (!currentUser) return
@@ -1792,13 +1213,6 @@ export default function VitalMenteEnhancedApp() {
       if (success) {
         setSaveStatus("saved")
         setLastSaveTime(new Date())
-        
-        // 🆕 ACTUALIZAR GAMIFICACIÓN CON NUEVAS ACCIONES
-        if (userGamification) {
-          const pointsEarned = LEVEL_SYSTEM.pointsPerAction[field] || 0
-          await updateUserGamification(pointsEarned, field)
-        }
-        
         setTimeout(() => setSaveStatus("idle"), 2000)
       } else {
         throw new Error("Error al guardar progreso")
@@ -1809,46 +1223,6 @@ export default function VitalMenteEnhancedApp() {
       setDailyProgress(dailyProgress)
       alert("Error al guardar progreso. Por favor intenta de nuevo.")
       setTimeout(() => setSaveStatus("idle"), 3000)
-    }
-  }
-
-  // 🆕 NUEVA FUNCIÓN PARA ACTUALIZAR GAMIFICACIÓN
-  const updateUserGamification = async (points: number, action: string) => {
-    if (!currentUser || !userGamification) return
-    
-    try {
-      const newTotalPoints = userGamification.total_points + points
-      const currentLevel = LEVEL_SYSTEM.levels.find(level => 
-        newTotalPoints >= level.pointsRequired && 
-        (LEVEL_SYSTEM.levels[level.level] ? newTotalPoints < LEVEL_SYSTEM.levels[level.level].pointsRequired : true)
-      )?.level || 1
-      
-      const updatedGamification = {
-        ...userGamification,
-        total_points: newTotalPoints,
-        current_level: currentLevel,
-        weekly_points: userGamification.weekly_points + points,
-        monthly_points: userGamification.monthly_points + points,
-        experience_points: newTotalPoints,
-      }
-      
-      setUserGamification(updatedGamification)
-      
-      // Actualizar en base de datos
-      await supabase
-        .from("user_gamification")
-        .update({
-          total_points: newTotalPoints,
-          current_level: currentLevel,
-          weekly_points: updatedGamification.weekly_points,
-          monthly_points: updatedGamification.monthly_points,
-          experience_points: newTotalPoints,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", currentUser.id)
-        
-    } catch (error) {
-      console.error("Error updating gamification:", error)
     }
   }
 
@@ -1880,157 +1254,7 @@ export default function VitalMenteEnhancedApp() {
   }
 
   // ============================================================================
-  // 🆕 FUNCIONES PARA BATIDOS PERSONALIZADOS
-  // ============================================================================
-  const [smoothieIngredients, setSmoothieIngredients] = useState<SmoothieIngredient[]>([])
-  const [smoothieName, setSmoothieName] = useState("")
-
-  const addIngredientToSmoothie = (food: GlobalFood, quantity: number) => {
-    const ratio = quantity / 100
-    const ingredient: SmoothieIngredient = {
-      food_id: food.id,
-      food_name: food.name,
-      quantity_grams: quantity,
-      calories: Math.round(food.calories * ratio),
-      protein: Math.round(food.protein * ratio),
-      carbs: Math.round(food.carbs * ratio),
-      fats: Math.round(food.fats * ratio),
-    }
-    
-    setSmoothieIngredients(prev => [...prev, ingredient])
-  }
-
-  const removeIngredientFromSmoothie = (index: number) => {
-    setSmoothieIngredients(prev => prev.filter((_, i) => i !== index))
-  }
-
-  const saveSmoothie = async () => {
-    if (!currentUser || !smoothieName || smoothieIngredients.length === 0) {
-      alert("Por favor completa el nombre y agrega al menos un ingrediente")
-      return
-    }
-
-    try {
-      const totals = calculateTotalMacros(smoothieIngredients)
-      const smoothie: Omit<CustomSmoothie, "id" | "created_at"> = {
-        user_id: currentUser.id,
-        name: smoothieName,
-        ingredients: smoothieIngredients,
-        total_calories: totals.calories,
-        total_protein: totals.protein,
-        total_carbs: totals.carbs,
-        total_fats: totals.fats,
-      }
-
-      const newSmoothie = await dbFunctions.createCustomSmoothie(smoothie)
-      setUserSmoothies(prev => [newSmoothie, ...prev])
-      
-      // Actualizar gamificación
-      await updateUserGamification(LEVEL_SYSTEM.pointsPerAction.smoothie, 'smoothie')
-      
-      // Limpiar formulario
-      setSmoothieIngredients([])
-      setSmoothieName("")
-      setShowSmoothieCreator(false)
-      
-      alert("¡Batido guardado exitosamente! +15 puntos")
-    } catch (error: any) {
-      console.error("Error saving smoothie:", error)
-      alert("Error al guardar batido: " + error.message)
-    }
-  }
-
-  // ============================================================================
-  // 🆕 FUNCIONES PARA COMIDAS MEJORADAS
-  // ============================================================================
-  const [mealIngredients, setMealIngredients] = useState<MealIngredient[]>([])
-  const [mealName, setMealName] = useState("")
-
-  const addIngredientToMeal = (food: GlobalFood, quantity: number) => {
-    const ratio = quantity / 100
-    const ingredient: MealIngredient = {
-      food_id: food.id,
-      food_name: food.name,
-      quantity_grams: quantity,
-      calories: Math.round(food.calories * ratio),
-      protein: Math.round(food.protein * ratio),
-      carbs: Math.round(food.carbs * ratio),
-      fats: Math.round(food.fats * ratio),
-    }
-    
-    setMealIngredients(prev => [...prev, ingredient])
-  }
-
-  const removeIngredientFromMeal = (index: number) => {
-    setMealIngredients(prev => prev.filter((_, i) => i !== index))
-  }
-
-  const updateIngredientQuantity = (index: number, newQuantity: number) => {
-    setMealIngredients(prev => prev.map((ingredient, i) => {
-      if (i === index) {
-        const food = globalFoods.find(f => f.id === ingredient.food_id)
-        if (food) {
-          const ratio = newQuantity / 100
-          return {
-            ...ingredient,
-            quantity_grams: newQuantity,
-            calories: Math.round(food.calories * ratio),
-            protein: Math.round(food.protein * ratio),
-            carbs: Math.round(food.carbs * ratio),
-            fats: Math.round(food.fats * ratio),
-          }
-        }
-      }
-      return ingredient
-    }))
-  }
-
-  const saveEnhancedMeal = async () => {
-    if (!currentUser || !mealName || mealIngredients.length === 0) {
-      alert("Por favor completa el nombre y agrega al menos un ingrediente")
-      return
-    }
-
-    try {
-      const totals = calculateTotalMacros(mealIngredients)
-      const meal: Omit<EnhancedMealComposition, "id" | "created_at"> = {
-        user_id: currentUser.id,
-        date: new Date().toISOString().split("T")[0],
-        meal_type: selectedMealTypeEnhanced,
-        meal_name: mealName,
-        ingredients: mealIngredients,
-        total_calories: totals.calories,
-        total_protein: totals.protein,
-        total_carbs: totals.carbs,
-        total_fats: totals.fats,
-      }
-
-      const newMeal = await dbFunctions.createEnhancedMealComposition(meal)
-      setEnhancedMealCompositions(prev => [...prev, newMeal])
-      
-      // Actualizar progreso de comida
-      await updateProgress(selectedMealTypeEnhanced, 1)
-      
-      // Actualizar gamificación
-      await updateUserGamification(LEVEL_SYSTEM.pointsPerAction.custom_meal, 'custom_meal')
-      
-      // Recalcular macros consumidos
-      calculateEnhancedConsumedMacros([...mealCompositions, ...enhancedMealCompositions, newMeal])
-      
-      // Limpiar formulario
-      setMealIngredients([])
-      setMealName("")
-      setShowEnhancedMealCreator(false)
-      
-      alert("¡Comida guardada exitosamente! +25 puntos")
-    } catch (error: any) {
-      console.error("Error saving enhanced meal:", error)
-      alert("Error al guardar comida: " + error.message)
-    }
-  }
-
-  // ============================================================================
-  // FUNCIONES DE ADMINISTRACIÓN EXPANDIDAS
+  // FUNCIONES DE ADMINISTRACIÓN
   // ============================================================================
   const handleLogoClick = () => {
     setLogoClicks((prev) => {
@@ -2058,32 +1282,21 @@ export default function VitalMenteEnhancedApp() {
 
   const loadAdminData = async () => {
     try {
-      const [users, analytics] = await Promise.all([
-        dbFunctions.getAllUsers(),
-        dbFunctions.getDetailedUserAnalytics()
-      ])
+      const users = await dbFunctions.getAllUsers()
       setAllUsers(users)
-      setDetailedAnalytics(analytics)
     } catch (error) {
       console.error("Error loading admin data:", error)
     }
   }
 
   // ============================================================================
-  // FUNCIONES DE COMIDA EXPANDIDAS
+  // FUNCIONES DE COMIDA
   // ============================================================================
   const openMealCalculator = (mealType: "desayuno" | "almuerzo" | "cena") => {
     setSelectedMealType(mealType)
     setShowMealCalculator(true)
     setSelectedFood(null)
     setFoodQuantity("100")
-  }
-
-  const openEnhancedMealCreator = (mealType: "desayuno" | "almuerzo" | "cena") => {
-    setSelectedMealTypeEnhanced(mealType)
-    setShowEnhancedMealCreator(true)
-    setMealIngredients([])
-    setMealName("")
   }
 
   const selectFood = (food: GlobalFood | UserFood) => {
@@ -2121,7 +1334,16 @@ export default function VitalMenteEnhancedApp() {
   }
 
   const getFoodsByCategory = () => {
-    return getFoodsByExpandedCategory(globalFoods)
+    const categories = [
+      { id: "proteinas", name: "Proteínas", icon: "🍗" },
+      { id: "vegetales", name: "Vegetales", icon: "🥬" },
+      { id: "frutas", name: "Frutas", icon: "🍎" },
+      { id: "carbohidratos", name: "Carbohidratos", icon: "🌾" },
+    ]
+    return categories.map((category) => ({
+      ...category,
+      foods: globalFoods.filter((food) => food.category === category.id),
+    }))
   }
 
   const removeFoodFromMeal = async (compositionId: string) => {
@@ -2150,7 +1372,7 @@ export default function VitalMenteEnhancedApp() {
   const handleSupplementContact = (supplement: Supplement) => {
     const defaultMessage = `Hola! Me interesa el suplemento ${supplement.name} que vi en VitalMente. ¿Podrían darme más información sobre disponibilidad y forma de pago?
 
-Precio mostrado: ${supplement.price.toLocaleString()}
+Precio mostrado: $${supplement.price.toLocaleString()}
 Beneficios: ${supplement.benefits.join(", ")}
 
 Gracias!`
@@ -2160,7 +1382,7 @@ Gracias!`
   }
 
   // ============================================================================
-  // 🆕 COMPONENTES DE UI MEJORADOS Y RESPONSIVOS
+  // COMPONENTES DE UI RESPONSIVOS
   // ============================================================================
   const SaveStatusIndicator = () => {
     if (saveStatus === "idle") return null
@@ -2209,14 +1431,6 @@ Gracias!`
               <Icons.Brain size="text-lg" />
               <span className="hidden sm:inline">Mindfulness +1</span>
             </button>
-            {/* 🆕 Botón para crear batido rápido */}
-            <button
-              onClick={() => setShowSmoothieCreator(true)}
-              className="bg-orange-500 text-white p-3 rounded-full shadow-lg hover:bg-orange-600 transition-colors flex items-center gap-2 min-w-max text-sm"
-            >
-              <Icons.Blend size="text-lg" />
-              <span className="hidden sm:inline">Batido</span>
-            </button>
           </div>
         )}
         <button
@@ -2231,7 +1445,6 @@ Gracias!`
     )
   }
 
-  // 🆕 PANEL DE GAMIFICACIÓN EXPANDIDO CON EXPLICACIONES
   const GamificationPanel = () => {
     if (!userGamification) return null
     const currentLevelInfo =
@@ -2256,24 +1469,12 @@ Gracias!`
           <div className="text-right">
             <div className="text-xl sm:text-2xl font-bold">{userGamification.total_points}</div>
             <div className="text-xs opacity-75">puntos</div>
-            <button
-              onClick={() => setShowGamificationInfo(true)}
-              className="text-xs opacity-75 underline hover:opacity-100 mt-1"
-            >
-              <Icons.Info size="text-xs" /> Info
-            </button>
           </div>
         </div>
-        
-        {/* Descripción del nivel actual */}
-        <div className="bg-white/10 rounded-lg p-2 mb-3">
-          <p className="text-xs text-center">{currentLevelInfo.description}</p>
-        </div>
-        
         {nextLevelInfo && (
           <div className="mb-3">
             <div className="flex justify-between text-xs mb-1">
-              <span>Siguiente: {nextLevelInfo.name}</span>
+              <span>Siguiente nivel</span>
               <span>{Math.round(progressToNext)}%</span>
             </div>
             <div className="w-full bg-white/20 rounded-full h-2">
@@ -2284,7 +1485,6 @@ Gracias!`
             </div>
           </div>
         )}
-        
         <div className="grid grid-cols-3 gap-2 text-center text-xs sm:text-sm">
           <div>
             <div className="font-bold">{userGamification.streak_days}</div>
@@ -2303,484 +1503,1732 @@ Gracias!`
     )
   }
 
-  // 🆕 MODAL DE INFORMACIÓN DE GAMIFICACIÓN
-  const GamificationInfoModal = () => {
-    if (!showGamificationInfo) return null
+  // Panel de administración responsive
+  // Después de la línea del AdminPanel, reemplazar toda la función AdminPanel con la versión completa:
+
+  const AdminPanel = () => {
+    const [showAddResource, setShowAddResource] = useState(false)
+    const [newResource, setNewResource] = useState({
+      type: "mindfulness" as "mindfulness" | "nutrition" | "exercise",
+      title: "",
+      description: "",
+      url: "",
+      image_url: "",
+    })
+
+    // 🆕 Estados para agregar tips
+    const [showAddTip, setShowAddTip] = useState(false)
+    const [newTip, setNewTip] = useState({
+      category: "",
+      title: "",
+      content: "",
+      icon: "💡",
+    })
+
+    // 🆕 Estados para agregar suplementos
+    const [showAddSupplement, setShowAddSupplement] = useState(false)
+    const [newSupplement, setNewSupplement] = useState({
+      name: "",
+      description: "",
+      benefits: "",
+      price: "",
+      image_url: "",
+      whatsapp_message: "",
+    })
+
+    // 🆕 Función para agregar recursos
+    const addResource = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("global_resources")
+          .insert({
+            ...newResource,
+            is_active: true,
+            created_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+        if (error) throw error
+        setGlobalResources((prev) => [...prev, data])
+        setNewResource({
+          type: "mindfulness",
+          title: "",
+          description: "",
+          url: "",
+          image_url: "",
+        })
+        setShowAddResource(false)
+        alert("✅ Recurso agregado exitosamente!")
+        await loadGlobalContent()
+      } catch (error) {
+        console.error("Error adding resource:", error)
+        alert("❌ Error al agregar recurso")
+      }
+    }
+
+    // 🆕 Función para agregar tips
+    const addTip = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("global_tips")
+          .insert({
+            ...newTip,
+            is_active: true,
+            created_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+        if (error) throw error
+        setGlobalTips((prev) => [...prev, data])
+        setNewTip({
+          category: "",
+          title: "",
+          content: "",
+          icon: "💡",
+        })
+        setShowAddTip(false)
+        alert("✅ Tip agregado exitosamente!")
+        await loadGlobalContent()
+      } catch (error) {
+        console.error("Error adding tip:", error)
+        alert("❌ Error al agregar tip")
+      }
+    }
+
+    // 🆕 Función para agregar suplementos
+    const addSupplement = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("supplements")
+          .insert({
+            ...newSupplement,
+            price: Number.parseInt(newSupplement.price) || 0,
+            is_active: true,
+            created_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+        if (error) throw error
+        setSupplements((prev) => [...prev, { ...data, benefits: data.benefits ? data.benefits.split(",") : [] }])
+        setNewSupplement({
+          name: "",
+          description: "",
+          benefits: "",
+          price: "",
+          image_url: "",
+          whatsapp_message: "",
+        })
+        setShowAddSupplement(false)
+        alert("✅ Suplemento agregado exitosamente!")
+        await loadGlobalContent()
+      } catch (error) {
+        console.error("Error adding supplement:", error)
+        alert("❌ Error al agregar suplemento")
+      }
+    }
 
     return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-        <div className="relative top-4 mx-auto border w-full max-w-lg shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                <Icons.Trophy size="text-xl" />
-                Sistema de Gamificación
-              </h3>
-              <button 
-                onClick={() => setShowGamificationInfo(false)} 
-                className="p-2 hover:bg-gray-100 rounded-full"
+      <div className="min-h-screen bg-gray-50">
+        {/* Header móvil de administración */}
+        <div className="bg-white border-b shadow-sm">
+          <div className="px-4 py-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <Icons.Shield size="text-xl sm:text-2xl" />
+                  <span className="hidden sm:inline">Panel de Administración Maestro</span>
+                  <span className="sm:hidden">Admin Maestro</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  Análisis de patrones y gestión de suplementación inteligente
+                </p>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                    🌐 Conectado a Supabase
+                  </span>
+                  <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA Activa</span>
+                  <span className="inline-block px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
+                    🚀 Desplegado en Vercel
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsAdmin(false)}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
               >
-                <Icons.X size="text-lg" />
+                <Icons.LogOut size="text-sm" />
+                <span className="hidden sm:inline">Salir</span>
               </button>
             </div>
-            
-            {/* Cómo funciona */}
-            <div className="mb-6">
-              <h4 className="font-semibold mb-3 text-sm flex items-center gap-2">
-                <Icons.BookOpen size="text-sm" />
-                ¿Cómo Funciona?
-              </h4>
-              <div className="space-y-2 text-sm text-gray-600">
-                <p>• Gana puntos completando actividades diarias</p>
-                <p>• Sube de nivel automáticamente con los puntos</p>
-                <p>• Mantén rachas para bonificaciones extra</p>
-                <p>• Desbloquea insignias por logros especiales</p>
+          </div>
+        </div>
+
+        {/* Navegación de tabs responsive */}
+        <div className="bg-white border-b overflow-x-auto">
+          <div className="px-4">
+            <div className="flex space-x-4 sm:space-x-8 min-w-max">
+              {[
+                { id: "dashboard", name: "Dashboard", icon: <Icons.Chart size="text-sm" /> },
+                { id: "users", name: "Usuarios", icon: <Icons.Users size="text-sm" /> },
+                { id: "ia-patterns", name: "IA Patterns", icon: <Icons.Robot size="text-sm" /> },
+                { id: "resources", name: "Recursos", icon: <Icons.Link size="text-sm" /> },
+                { id: "supplements", name: "Suplementos", icon: <Icons.Package size="text-sm" /> },
+                { id: "analytics", name: "Analytics", icon: <Icons.TrendingUp size="text-sm" /> },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveAdminTab(tab.id)}
+                  className={`py-3 px-2 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap ${
+                    activeAdminTab === tab.id
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Contenido de administración */}
+        <div className="px-4 py-6">
+          {/* TAB DASHBOARD */}
+          {activeAdminTab === "dashboard" && (
+            <div className="space-y-4">
+              {/* Métricas principales */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">Usuarios Totales</p>
+                      <p className="text-xl sm:text-2xl font-bold text-blue-600">{allUsers.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        +
+                        {
+                          allUsers.filter(
+                            (u) => new Date(u.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                          ).length
+                        }{" "}
+                        esta semana
+                      </p>
+                    </div>
+                    <Icons.Users size="text-2xl" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">Suplementos Activos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-purple-600">{supplements.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Catálogo completo</p>
+                    </div>
+                    <Icons.Package size="text-2xl" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">Tips Activos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-green-600">{globalTips.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Contenido educativo</p>
+                    </div>
+                    <Icons.Lightbulb size="text-2xl" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">Recursos Activos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-orange-600">{globalResources.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Videos, PDFs, Enlaces</p>
+                    </div>
+                    <Icons.Link size="text-2xl" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Estado del sistema */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Database size="text-lg" />
+                  Estado del Sistema
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl mb-2">✅</div>
+                    <div className="font-semibold text-green-800 text-sm">Supabase</div>
+                    <div className="text-xs text-green-600">Conectado y funcionando</div>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl mb-2">🚀</div>
+                    <div className="font-semibold text-blue-800 text-sm">Vercel</div>
+                    <div className="text-xs text-blue-600">Desplegado y activo</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl mb-2">🤖</div>
+                    <div className="font-semibold text-purple-800 text-sm">IA Engine</div>
+                    <div className="text-xs text-purple-600">Generando recomendaciones</div>
+                  </div>
+                </div>
               </div>
             </div>
+          )}
 
-            {/* Puntos por actividad */}
-            <div className="mb-6">
-              <h4 className="font-semibold mb-3 text-sm">💎 Puntos por Actividad</h4>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex justify-between p-2 bg-blue-50 rounded">
-                  <span>💧 Agua</span>
-                  <span className="font-bold">5 pts</span>
-                </div>
-                <div className="flex justify-between p-2 bg-green-50 rounded">
-                  <span>💪 Ejercicio</span>
-                  <span className="font-bold">20 pts</span>
-                </div>
-                <div className="flex justify-between p-2 bg-purple-50 rounded">
-                  <span>🧘 Mindfulness</span>
-                  <span className="font-bold">15 pts</span>
-                </div>
-                <div className="flex justify-between p-2 bg-orange-50 rounded">
-                  <span>🍽️ Comida</span>
-                  <span className="font-bold">10 pts</span>
-                </div>
-                <div className="flex justify-between p-2 bg-pink-50 rounded">
-                  <span>🥤 Batido</span>
-                  <span className="font-bold">15 pts</span>
-                </div>
-                <div className="flex justify-between p-2 bg-yellow-50 rounded">
-                  <span>🍴 Comida Custom</span>
-                  <span className="font-bold">25 pts</span>
-                </div>
+          {/* TAB USUARIOS */}
+          {activeAdminTab === "users" && (
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
+                  <Icons.Users size="text-lg" />
+                  Lista de Usuarios Registrados ({allUsers.length})
+                </h3>
               </div>
-            </div>
-
-            {/* Niveles disponibles */}
-            <div className="mb-6">
-              <h4 className="font-semibold mb-3 text-sm">🎯 Niveles Disponibles</h4>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {LEVEL_SYSTEM.levels.map((level) => (
-                  <div 
-                    key={level.level} 
-                    className={`p-2 rounded-lg border ${
-                      userGamification?.current_level === level.level 
-                        ? 'bg-purple-50 border-purple-300' 
-                        : 'bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{level.icon}</span>
-                        <div>
-                          <p className="text-sm font-medium">{level.name}</p>
-                          <p className="text-xs text-gray-500">{level.pointsRequired} puntos</p>
+              <div className="max-h-96 overflow-y-auto">
+                {allUsers.map((user) => (
+                  <div key={user.id} className="p-4 border-b hover:bg-gray-50 transition-colors">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm">{user.name}</p>
+                        <p className="text-xs text-gray-600">{user.phone}</p>
+                        <p className="text-xs text-gray-500">
+                          Registrado: {new Date(user.created_at).toLocaleDateString()}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Último acceso: {new Date(user.last_login).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded mb-1 block">
+                          {GOALS.find((g) => g.id === user.goal)?.label || user.goal}
+                        </span>
+                        <div className="text-xs text-gray-500">
+                          {user.age} años | {user.weight}kg | {user.height}cm
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Actividad: {ACTIVITY_LEVELS.find((a) => a.value === user.activity_level)?.label}
                         </div>
                       </div>
-                      {userGamification?.current_level === level.level && (
-                        <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                          Actual
-                        </span>
-                      )}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+          )}
 
-            {/* Insignias disponibles */}
-            <div className="mb-6">
-              <h4 className="font-semibold mb-3 text-sm">🏅 Insignias</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {LEVEL_SYSTEM.badges.map((badge) => (
-                  <div key={badge.id} className="p-2 bg-gray-50 rounded-lg text-center">
-                    <div className="text-lg mb-1">{badge.icon}</div>
-                    <div className="text-xs font-medium">{badge.name}</div>
-                    <div className="text-xs text-gray-500">{badge.description}</div>
+          {/* 🆕 TAB IA PATTERNS - RESTAURADO COMPLETO */}
+          {activeAdminTab === "ia-patterns" && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Explicación del sistema IA */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Robot size="text-lg" />
+                  Sistema de Análisis Inteligente
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">🧠</div>
+                    <div className="font-semibold text-sm">Análisis de Comportamiento</div>
+                    <div className="text-xs text-gray-600">
+                      Detecta patrones en hidratación, ejercicio y mindfulness
+                    </div>
                   </div>
-                ))}
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">🎯</div>
+                    <div className="font-semibold text-sm">Recomendaciones Personalizadas</div>
+                    <div className="text-xs text-gray-600">Sugiere suplementos basados en déficits detectados</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">📊</div>
+                    <div className="font-semibold text-sm">Scoring de Confianza</div>
+                    <div className="text-xs text-gray-600">Evalúa la precisión de cada recomendación</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">⚡</div>
+                    <div className="font-semibold text-sm">Optimización Temporal</div>
+                    <div className="text-xs text-gray-600">Determina el mejor momento para cada suplemento</div>
+                  </div>
+                </div>
+
+                {/* Algoritmos activos */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">🔬 Algoritmos Activos</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-white rounded border">
+                      <div>
+                        <span className="font-medium text-sm">Detector de Déficit de Ejercicio</span>
+                        <p className="text-xs text-gray-600">
+                          Si ejercicio promedio {"<"} 0.5 sesiones/día → Recomienda energéticos
+                        </p>
+                      </div>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Activo</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white rounded border">
+                      <div>
+                        <span className="font-medium text-sm">Detector de Estrés/Ansiedad</span>
+                        <p className="text-xs text-gray-600">
+                          Si mindfulness {"<"} 0.5 sesiones/día → Recomienda relajantes
+                        </p>
+                      </div>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Activo</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white rounded border">
+                      <div>
+                        <span className="font-medium text-sm">Detector de Deshidratación</span>
+                        <p className="text-xs text-gray-600">Si agua {"<"} 6 vasos/día → Recomienda electrolitos</p>
+                      </div>
+                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">En desarrollo</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Métricas de IA */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4">📈 Métricas de IA</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-blue-600">
+                      {allUsers.length > 0 ? Math.round((aiRecommendations.length / allUsers.length) * 100) : 0}%
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Usuarios con recomendaciones activas</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-green-600">85%</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Precisión promedio del algoritmo</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-purple-600">12%</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Tasa de conversión estimada</div>
+                  </div>
+                </div>
               </div>
             </div>
+          )}
 
-            <button
-              onClick={() => setShowGamificationInfo(false)}
-              className="w-full bg-purple-500 text-white p-3 rounded-lg hover:bg-purple-600 text-sm"
-            >
-              ¡Entendido!
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
+          {/* TAB RECURSOS */}
+          {activeAdminTab === "resources" && (
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                  <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+                    <Icons.Link size="text-lg" />
+                    Gestión de Recursos ({globalResources.length})
+                  </h3>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => setShowAddResource(true)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm justify-center"
+                    >
+                      <Icons.Plus size="text-sm" />
+                      Agregar Recurso
+                    </button>
+                    <button
+                      onClick={() => setShowAddTip(true)}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm justify-center"
+                    >
+                      <Icons.Plus size="text-sm" />
+                      Agregar Tip
+                    </button>
+                  </div>
+                </div>
 
-  // 🆕 CREADOR DE BATIDOS PERSONALIZADO
-  const SmoothieCreator = () => {
-    if (!showSmoothieCreator) return null
-
-    const smoothieTotals = calculateTotalMacros(smoothieIngredients)
-    const smoothieCategories = getFoodsByCategory().filter(cat => 
-      ['frutas', 'bebidas', 'proteinas'].includes(cat.id)
-    )
-
-    return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-        <div className="relative top-4 mx-auto border w-full max-w-2xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                <Icons.Blend size="text-xl" />
-                Crear Batido Personalizado
-              </h3>
-              <button 
-                onClick={() => {
-                  setShowSmoothieCreator(false)
-                  setSmoothieIngredients([])
-                  setSmoothieName("")
-                }} 
-                className="p-2 hover:bg-gray-100 rounded-full"
-              >
-                <Icons.X size="text-lg" />
-              </button>
-            </div>
-
-            {/* Nombre del batido */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre del batido
-              </label>
-              <input
-                type="text"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
-                placeholder="Mi batido energético..."
-                value={smoothieName}
-                onChange={(e) => setSmoothieName(e.target.value)}
-              />
-            </div>
-
-            {/* Ingredientes agregados */}
-            {smoothieIngredients.length > 0 && (
-              <div className="mb-4 p-3 bg-purple-50 rounded-lg">
-                <h4 className="font-semibold text-sm mb-2">Ingredientes ({smoothieIngredients.length})</h4>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {smoothieIngredients.map((ingredient, index) => (
-                    <div key={index} className="flex items-center justify-between text-xs bg-white p-2 rounded">
-                      <div className="flex-1">
-                        <span className="font-medium">{ingredient.food_name}</span>
-                        <span className="text-gray-500 ml-2">{ingredient.quantity_grams}g</span>
+                {/* Lista de recursos existentes */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {globalResources.map((resource) => (
+                    <div key={resource.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">{getResourceTypeIcon(resource.type)}</span>
+                        <span className="text-xs sm:text-sm font-medium capitalize">{resource.type}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-600">{ingredient.calories} cal</span>
-                        <button
-                          onClick={() => removeIngredientFromSmoothie(index)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded"
-                        >
-                          <Icons.Trash2 size="text-xs" />
-                        </button>
-                      </div>
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600 mb-2">{resource.description}</p>
+                      <a
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-600 hover:text-blue-800 break-all"
+                      >
+                        {resource.url}
+                      </a>
                     </div>
                   ))}
                 </div>
-                
-                {/* Totales del batido */}
-                <div className="mt-3 p-2 bg-white rounded border">
-                  <div className="grid grid-cols-4 gap-2 text-xs text-center">
-                    <div>
-                      <div className="font-bold">{smoothieTotals.calories}</div>
-                      <div className="text-gray-500">Cal</div>
+              </div>
+
+              {/* Lista de tips */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Lightbulb size="text-lg" />
+                  Tips Activos ({globalTips.length})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {globalTips.map((tip) => (
+                    <div key={tip.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">{tip.icon}</span>
+                        <span className="text-xs sm:text-sm font-medium">{tip.category}</span>
+                      </div>
+                      <h4 className="font-semibold text-sm mb-1">{tip.title}</h4>
+                      <p className="text-xs text-gray-600">{tip.content}</p>
                     </div>
-                    <div>
-                      <div className="font-bold">{smoothieTotals.protein}g</div>
-                      <div className="text-gray-500">Prot</div>
-                    </div>
-                    <div>
-                      <div className="font-bold">{smoothieTotals.carbs}g</div>
-                      <div className="text-gray-500">Carbs</div>
-                    </div>
-                    <div>
-                      <div className="font-bold">{smoothieTotals.fats}g</div>
-                      <div className="text-gray-500">Grasas</div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Selector de ingredientes */}
-            <div className="mb-4">
-              <h4 className="font-semibold text-sm mb-3">Agregar Ingredientes</h4>
-              <div className="space-y-4">
-                {smoothieCategories.map((category) => (
-                  <div key={category.id}>
-                    <h5 className="font-medium flex items-center gap-2 text-sm mb-2">
-                      {category.icon} {category.name}
-                    </h5>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {category.foods.slice(0, 6).map((food) => {
-                        const [selectedQuantity, setSelectedQuantity] = useState("50")
+          {/* TAB SUPLEMENTOS */}
+          {activeAdminTab === "supplements" && (
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+                  <Icons.Package size="text-lg" />
+                  Gestión de Suplementos ({supplements.length})
+                </h3>
+                <button
+                  onClick={() => setShowAddSupplement(true)}
+                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2 text-sm w-full sm:w-auto justify-center"
+                >
+                  <Icons.Plus size="text-sm" />
+                  Agregar Suplemento
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {supplements.map((supplement) => (
+                  <div key={supplement.id} className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-sm mb-1">{supplement.name}</h4>
+                    <p className="text-xs text-gray-600 mb-2">{supplement.description}</p>
+                    <p className="text-sm sm:text-base font-bold text-green-600 mb-2">
+                      ${supplement.price.toLocaleString()}
+                    </p>
+                    <div className="text-xs text-gray-500">
+                      <p>Beneficios: {supplement.benefits.join(", ")}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 🆕 TAB ANALYTICS - RESTAURADO COMPLETO */}
+          {activeAdminTab === "analytics" && (
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.TrendingUp size="text-lg" />
+                  Analytics Avanzados
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3 text-sm sm:text-base">📊 Distribución de Objetivos</h4>
+                    <div className="space-y-2">
+                      {GOALS.map((goal) => {
+                        const count = allUsers.filter((u) => u.goal === goal.id).length
+                        const percentage = allUsers.length > 0 ? Math.round((count / allUsers.length) * 100) : 0
                         return (
-                          <div key={food.id} className="border border-gray-200 rounded-lg p-2">
-                            <div className="text-xs font-medium mb-1">{food.name}</div>
-                            <div className="text-xs text-gray-500 mb-2">{food.calories} cal/100g</div>
-                            <div className="flex items-center gap-1 mb-2">
-                              <input
-                                type="number"
-                                className="w-12 text-xs p-1 border rounded"
-                                value={selectedQuantity}
-                                onChange={(e) => setSelectedQuantity(e.target.value)}
-                                min="10"
-                                max="200"
-                              />
-                              <span className="text-xs">g</span>
+                          <div key={goal.id} className="flex items-center justify-between">
+                            <span className="text-xs sm:text-sm truncate flex-1 mr-2">{goal.label}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-16 sm:w-20 bg-gray-200 rounded-full h-2">
+                                <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${percentage}%` }}></div>
+                              </div>
+                              <span className="text-xs text-gray-500 w-6 text-right">{count}</span>
                             </div>
-                            <button
-                              onClick={() => {
-                                addIngredientToSmoothie(food, parseInt(selectedQuantity))
-                                setSelectedQuantity("50")
-                              }}
-                              className="w-full text-xs bg-purple-500 text-white p-1 rounded hover:bg-purple-600"
-                            >
-                              <Icons.Plus size="text-xs" />
-                            </button>
                           </div>
                         )
                       })}
                     </div>
                   </div>
-                ))}
+                  <div>
+                    <h4 className="font-semibold mb-3 text-sm sm:text-base">⚡ Actividad Reciente</h4>
+                    <div className="space-y-2">
+                      {allUsers.slice(0, 5).map((user) => (
+                        <div key={user.id} className="flex items-center justify-between text-xs sm:text-sm">
+                          <span className="truncate flex-1 mr-2">{user.name}</span>
+                          <span className="text-gray-500 text-xs">
+                            {new Date(user.last_login).toLocaleDateString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Métricas adicionales de analytics */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4">📈 Métricas de Engagement</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-blue-600">
+                      {
+                        allUsers.filter((u) => new Date(u.last_login) > new Date(Date.now() - 24 * 60 * 60 * 1000))
+                          .length
+                      }
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Usuarios activos hoy</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-green-600">
+                      {
+                        allUsers.filter((u) => new Date(u.last_login) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+                          .length
+                      }
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Usuarios activos esta semana</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-purple-600">
+                      {Math.round((globalResources.length + globalTips.length + supplements.length) / 3)}
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Contenido promedio por categoría</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-orange-600">
+                      {allUsers.length > 0 ? Math.round((aiRecommendations.length / allUsers.length) * 100) : 0}%
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Cobertura de recomendaciones IA</div>
+                  </div>
+                </div>
               </div>
             </div>
+          )}
+        </div>
 
-            {/* Botones de acción */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={saveSmoothie}
-                className="bg-purple-500 text-white p-3 rounded-lg hover:bg-purple-600 disabled:bg-gray-400 text-sm flex items-center justify-center gap-2"
-                disabled={!smoothieName || smoothieIngredients.length === 0}
-              >
-                <Icons.Save size="text-sm" />
-                Guardar Batido
-              </button>
-              <button
-                onClick={() => {
-                  setShowSmoothieCreator(false)
-                  setSmoothieIngredients([])
-                  setSmoothieName("")
-                }}
-                className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
-              >
-                Cancelar
-              </button>
+        {/* 🆕 MODALES COMPLETOS - RESPONSIVE */}
+        {/* Modal para agregar recurso */}
+        {showAddResource && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Agregar Nuevo Recurso</h3>
+                  <button onClick={() => setShowAddResource(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                    <Icons.X size="text-lg" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    value={newResource.type}
+                    onChange={(e) => setNewResource((prev) => ({ ...prev, type: e.target.value as any }))}
+                  >
+                    <option value="mindfulness">🧘‍♀️ Mindfulness</option>
+                    <option value="nutrition">🥗 Nutrición</option>
+                    <option value="exercise">💪 Ejercicio</option>
+                  </select>
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Título del recurso"
+                    value={newResource.title}
+                    onChange={(e) => setNewResource((prev) => ({ ...prev, title: e.target.value }))}
+                  />
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Descripción"
+                    rows={3}
+                    value={newResource.description}
+                    onChange={(e) => setNewResource((prev) => ({ ...prev, description: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="URL (YouTube, PDF, Spotify, etc.)"
+                    value={newResource.url}
+                    onChange={(e) => setNewResource((prev) => ({ ...prev, url: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="URL de imagen (opcional)"
+                    value={newResource.image_url}
+                    onChange={(e) => setNewResource((prev) => ({ ...prev, image_url: e.target.value }))}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                  <button
+                    onClick={addResource}
+                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 text-sm"
+                  >
+                    Agregar Recurso
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddResource(false)
+                      setNewResource({
+                        type: "mindfulness",
+                        title: "",
+                        description: "",
+                        url: "",
+                        image_url: "",
+                      })
+                    }}
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+        )}
+
+        {/* Modal para agregar tip */}
+        {showAddTip && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Agregar Nuevo Tip</h3>
+                  <button onClick={() => setShowAddTip(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                    <Icons.X size="text-lg" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Categoría (ej: Hidratación, Ejercicio)"
+                    value={newTip.category}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, category: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Título del tip"
+                    value={newTip.title}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, title: e.target.value }))}
+                  />
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Contenido del tip"
+                    rows={4}
+                    value={newTip.content}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, content: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Emoji/Icono (ej: 💧, 🏃‍♂️, 🧘‍♀️)"
+                    value={newTip.icon}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, icon: e.target.value }))}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                  <button
+                    onClick={addTip}
+                    className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 text-sm"
+                  >
+                    Agregar Tip
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddTip(false)
+                      setNewTip({
+                        category: "",
+                        title: "",
+                        content: "",
+                        icon: "💡",
+                      })
+                    }}
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🆕 Modal para agregar suplemento - COMPLETO */}
+        {showAddSupplement && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Agregar Nuevo Suplemento</h3>
+                  <button onClick={() => setShowAddSupplement(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                    <Icons.X size="text-lg" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Nombre del suplemento"
+                    value={newSupplement.name}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, name: e.target.value }))}
+                  />
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Descripción"
+                    rows={3}
+                    value={newSupplement.description}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, description: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Beneficios (separados por comas)"
+                    value={newSupplement.benefits}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, benefits: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Precio (solo números)"
+                    type="number"
+                    value={newSupplement.price}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, price: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="URL de imagen"
+                    value={newSupplement.image_url}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, image_url: e.target.value }))}
+                  />
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Mensaje personalizado de WhatsApp (opcional)"
+                    rows={3}
+                    value={newSupplement.whatsapp_message}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, whatsapp_message: e.target.value }))}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                  <button
+                    onClick={addSupplement}
+                    className="bg-purple-500 text-white p-3 rounded-lg hover:bg-purple-600 text-sm"
+                  >
+                    Agregar Suplemento
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddSupplement(false)
+                      setNewSupplement({
+                        name: "",
+                        description: "",
+                        benefits: "",
+                        price: "",
+                        image_url: "",
+                        whatsapp_message: "",
+                      })
+                    }}
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // RENDERIZADO CONDICIONAL PARA ADMIN
+  // ============================================================================
+  if (isAdmin) {
+    return <AdminPanel />
+  }
+
+  // ============================================================================
+  // ESTADOS DE CARGA Y ERROR
+  // ============================================================================
+  if (connectionStatus === "connecting") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+          <div className="text-3xl mb-4">
+            <Icons.Loader2 size="text-3xl" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">Conectando</h3>
+          <p className="text-gray-600 text-sm">Inicializando base de datos...</p>
         </div>
       </div>
     )
   }
 
-  // 🆕 CREADOR DE COMIDAS MEJORADO
-  const EnhancedMealCreator = () => {
-    if (!showEnhancedMealCreator) return null
-
-    const mealTotals = calculateTotalMacros(mealIngredients)
-    const allCategories = getFoodsByCategory()
-
+  if (connectionStatus === "error") {
     return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-        <div className="relative top-4 mx-auto border w-full max-w-3xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                <Icons.Utensils size="text-xl" />
-                Crear {selectedMealTypeEnhanced.charAt(0).toUpperCase() + selectedMealTypeEnhanced.slice(1)} Personalizado
-              </h3>
-              <button 
-                onClick={() => {
-                  setShowEnhancedMealCreator(false)
-                  setMealIngredients([])
-                  setMealName("")
-                }} 
-                className="p-2 hover:bg-gray-100 rounded-full"
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+          <div className="text-3xl mb-4 text-red-500">
+            <Icons.X size="text-3xl" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">Error de conexión</h3>
+          <p className="text-gray-600 mb-4 text-sm">No se pudo conectar con la base de datos</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // PANTALLA DE LOGIN/REGISTRO RESPONSIVE
+  // ============================================================================
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+          <div className="text-center mb-6">
+            <div onClick={handleLogoClick} className="cursor-pointer">
+              <h1 className="text-xl sm:text-2xl font-bold text-green-600">VitalMente</h1>
+              <p className="text-gray-600 text-sm">Tu compañero de bienestar personalizado</p>
+              <div className="flex justify-center gap-2 mt-2 flex-wrap">
+                <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded">🌐 Conectado</span>
+                <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA Activa</span>
+              </div>
+              {logoClicks > 0 && <div className="mt-2 text-xs text-gray-400">Clics: {logoClicks}/5</div>}
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {/* Botones de navegación */}
+            <div className="flex rounded-lg bg-gray-100 p-1">
+              <button
+                onClick={() => setShowRegister(false)}
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
+                  !showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600"
+                }`}
               >
-                <Icons.X size="text-lg" />
+                Ingresar
+              </button>
+              <button
+                onClick={() => setShowRegister(true)}
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
+                  showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600"
+                }`}
+              >
+                Crear Cuenta
               </button>
             </div>
 
-            {/* Nombre de la comida */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre de la comida
-              </label>
-              <input
-                type="text"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                placeholder="Mi desayuno proteico..."
-                value={mealName}
-                onChange={(e) => setMealName(e.target.value)}
-              />
+            {!showRegister ? (
+              <div className="space-y-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  placeholder="+57 300 123 4567"
+                  value={loginForm.phone}
+                  onChange={(e) => setLoginForm((prev) => ({ ...prev, phone: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  type="password"
+                  placeholder="Código de 10 dígitos"
+                  maxLength={10}
+                  value={loginForm.accessCode}
+                  onChange={(e) => setLoginForm((prev) => ({ ...prev, accessCode: e.target.value }))}
+                />
+                <button
+                  onClick={handleLogin}
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors text-sm"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Icons.Loader2 size="text-sm" />
+                      Ingresando...
+                    </>
+                  ) : (
+                    "Ingresar"
+                  )}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  placeholder="Número de teléfono"
+                  value={registerForm.phone}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  placeholder="Nombre completo"
+                  value={registerForm.name}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, name: e.target.value }))}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                    placeholder="Edad"
+                    type="number"
+                    value={registerForm.age}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, age: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                    placeholder="Peso (kg)"
+                    type="number"
+                    value={registerForm.weight}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, weight: e.target.value }))}
+                  />
+                </div>
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  placeholder="Altura (cm)"
+                  type="number"
+                  value={registerForm.height}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, height: e.target.value }))}
+                />
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  value={registerForm.activityLevel}
+                  onChange={(e) =>
+                    setRegisterForm((prev) => ({ ...prev, activityLevel: Number.parseFloat(e.target.value) }))
+                  }
+                >
+                  {ACTIVITY_LEVELS.map((level) => (
+                    <option key={level.value} value={level.value}>
+                      {level.label} - {level.desc}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  value={registerForm.goal}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, goal: e.target.value }))}
+                >
+                  <optgroup label="🎯 TRANSFORMACIÓN FÍSICA">
+                    {GOALS.filter((goal) => goal.category === "physical").map((goal) => (
+                      <option key={goal.id} value={goal.id}>
+                        {goal.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="💫 BIENESTAR EMOCIONAL">
+                    {GOALS.filter((goal) => goal.category === "emotional").map((goal) => (
+                      <option key={goal.id} value={goal.id}>
+                        {goal.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="⚖️ EQUILIBRIO TOTAL">
+                    {GOALS.filter((goal) => goal.category === "holistic").map((goal) => (
+                      <option key={goal.id} value={goal.id}>
+                        {goal.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
+                <div className="space-y-4">
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                    type="password"
+                    placeholder="Código de acceso (10 dígitos)"
+                    maxLength={10}
+                    value={registerForm.accessCode}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, accessCode: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                    type="password"
+                    placeholder="Confirmar código"
+                    maxLength={10}
+                    value={registerForm.confirmCode}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, confirmCode: e.target.value }))}
+                  />
+                </div>
+                <button
+                  onClick={handleRegister}
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors text-sm"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Icons.Loader2 size="text-sm" />
+                      Creando cuenta...
+                    </>
+                  ) : (
+                    "Crear cuenta"
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Modal de acceso administrador */}
+        {showAdminLogin && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-20 mx-auto border w-full max-w-sm shadow-lg rounded-md bg-white">
+              <div className="p-5">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Acceso Administrador</h3>
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm"
+                  type="password"
+                  placeholder="Código de acceso"
+                  value={adminCode}
+                  onChange={(e) => setAdminCode(e.target.value)}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handleAdminLogin}
+                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 text-sm"
+                  >
+                    Ingresar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAdminLogin(false)
+                      setAdminCode("")
+                      setLogoClicks(0)
+                    }}
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // APLICACIÓN PRINCIPAL RESPONSIVE
+  // ============================================================================
+  const activeTips = globalTips.filter((tip) => tip.is_active)
+  const mindfulnessResources = globalResources.filter((r) => r.type === "mindfulness" && r.is_active)
+  const nutritionResources = globalResources.filter((r) => r.type === "nutrition" && r.is_active)
+  const exerciseResources = globalResources.filter((r) => r.type === "exercise" && r.is_active)
+  const caloriesProgress = getCaloriesProgress()
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 pb-20">
+      <SaveStatusIndicator />
+      <FloatingActionButtons />
+
+      {/* Header responsive */}
+      <header className="bg-white border-b shadow-sm sticky top-0 z-30">
+        <div className="px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-2xl font-bold text-green-600">VitalMente</h1>
+              <span className="hidden sm:inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="sm:hidden p-2 rounded-lg hover:bg-gray-100"
+              >
+                <Icons.Menu size="text-xl" />
+              </button>
+              <button
+                onClick={handleLogout}
+                className="hidden sm:flex px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 items-center gap-2 text-sm"
+              >
+                <Icons.LogOut size="text-sm" />
+                Salir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Menú móvil desplegable */}
+        {showMobileMenu && (
+          <div className="sm:hidden bg-white border-t p-4">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 rounded-lg text-sm"
+            >
+              <Icons.LogOut size="text-sm" />
+              Cerrar Sesión
+            </button>
+          </div>
+        )}
+      </header>
+
+      {/* Contenido principal */}
+      <main className="px-4 py-6">
+        {activeTab === "inicio" && (
+          <div className="space-y-4">
+            {/* Bienvenida */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="text-base sm:text-lg font-semibold mb-2 flex items-center gap-2">
+                ¡Hola, {currentUser?.name}! <Icons.Magic size="text-lg" />
+              </h2>
+              <p className="text-gray-600 text-sm">{getMotivationalMessage(currentUser?.goal || "reduce_stress")}</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Panel izquierdo: Ingredientes agregados */}
-              <div>
-                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Icons.CheckCircle size="text-sm" />
-                  Ingredientes Agregados ({mealIngredients.length})
-                </h4>
-                
-                {mealIngredients.length > 0 ? (
-                  <div className="space-y-2 mb-4 max-h-64 overflow-y-auto">
-                    {mealIngredients.map((ingredient, index) => (
-                      <div key={index} className="bg-green-50 p-3 rounded-lg border">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-sm">{ingredient.food_name}</span>
+            {/* Panel de gamificación */}
+            <GamificationPanel />
+
+            {/* Progreso diario */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold flex items-center gap-2">
+                  <Icons.Target size="text-lg" />
+                  Progreso Diario
+                </h3>
+                <span className="text-xs text-gray-600">
+                  {getProgressPercentage()}% <Icons.CheckCircle size="text-sm" />
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Agua */}
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                  <Icons.Droplets size="text-2xl" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Agua</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button
+                        onClick={() => updateProgress("water", -1)}
+                        className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                      >
+                        <Icons.Minus size="text-sm" />
+                      </button>
+                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.water}</span>
+                      <button
+                        onClick={() => updateProgress("water", 1)}
+                        className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                      >
+                        <Icons.Plus size="text-sm" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ejercicio */}
+                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                  <Icons.Activity size="text-2xl" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Ejercicio</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button
+                        onClick={() => updateProgress("exercise", -1)}
+                        className="p-1 rounded-full hover:bg-green-100 transition-colors"
+                      >
+                        <Icons.Minus size="text-sm" />
+                      </button>
+                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.exercise}</span>
+                      <button
+                        onClick={() => updateProgress("exercise", 1)}
+                        className="p-1 rounded-full hover:bg-green-100 transition-colors"
+                      >
+                        <Icons.Plus size="text-sm" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mindfulness */}
+                <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                  <Icons.Brain size="text-2xl" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Mindfulness</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button
+                        onClick={() => updateProgress("mindfulness", -1)}
+                        className="p-1 rounded-full hover:bg-purple-100 transition-colors"
+                      >
+                        <Icons.Minus size="text-sm" />
+                      </button>
+                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.mindfulness}</span>
+                      <button
+                        onClick={() => updateProgress("mindfulness", 1)}
+                        className="p-1 rounded-full hover:bg-purple-100 transition-colors"
+                      >
+                        <Icons.Plus size="text-sm" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tips del día */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Lightbulb size="text-lg" />
+                Tip del día
+              </h3>
+              {activeTips.length > 0 ? (
+                <>
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xl">{activeTips[currentTipIndex].icon}</span>
+                      <span className="font-medium text-sm">{activeTips[currentTipIndex].category}</span>
+                    </div>
+                    <h4 className="font-semibold text-sm mb-1">{activeTips[currentTipIndex].title}</h4>
+                    <p className="text-gray-600 text-sm">{activeTips[currentTipIndex].content}</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <button
+                      onClick={() => setCurrentTipIndex((prev) => (prev === 0 ? activeTips.length - 1 : prev - 1))}
+                      className="px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg flex items-center gap-1"
+                    >
+                      <Icons.ChevronLeft size="text-sm" /> Anterior
+                    </button>
+                    <button
+                      onClick={() => setCurrentTipIndex((prev) => (prev === activeTips.length - 1 ? 0 : prev + 1))}
+                      className="px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg flex items-center gap-1"
+                    >
+                      Siguiente <Icons.ChevronRight size="text-sm" />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-500 text-sm">No hay tips disponibles.</p>
+              )}
+            </div>
+
+            {/* Recomendaciones IA */}
+            {aiRecommendations.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-4">
+                <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Robot size="text-lg" />
+                  Recomendaciones IA
+                </h3>
+                {aiRecommendations.map((rec) => (
+                  <div key={rec.id} className="border border-gray-200 rounded-lg p-3 mb-3">
+                    <h4 className="font-semibold text-sm mb-1">{rec.reason}</h4>
+                    <p className="text-xs text-gray-600 mb-2">Suplementos: {rec.supplement_names.join(", ")}</p>
+                    <button
+                      onClick={() => setActiveTab("suplementos")}
+                      className="px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
+                    >
+                      Ver más <Icons.ExternalLink size="text-xs" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "comida" && (
+          <div className="space-y-4">
+            {/* Resumen de calorías */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.UtensilsCrossed size="text-lg" />
+                Resumen Nutricional
+              </h3>
+              {macroResults ? (
+                <>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-medium">Calorías</p>
+                    <p className="text-lg font-bold">
+                      {caloriesProgress.consumed} / {caloriesProgress.target}
+                    </p>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                    <div
+                      className="bg-green-500 h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${caloriesProgress.percentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="p-2 bg-red-50 rounded-lg">
+                      <p className="text-xs font-medium">Proteína</p>
+                      <p className="text-sm font-bold">{consumedMacros.protein}g</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((consumedMacros.protein / macroResults.protein) * 100)}%
+                      </p>
+                    </div>
+                    <div className="p-2 bg-yellow-50 rounded-lg">
+                      <p className="text-xs font-medium">Carbos</p>
+                      <p className="text-sm font-bold">{consumedMacros.carbs}g</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((consumedMacros.carbs / macroResults.carbs) * 100)}%
+                      </p>
+                    </div>
+                    <div className="p-2 bg-blue-50 rounded-lg">
+                      <p className="text-xs font-medium">Grasas</p>
+                      <p className="text-sm font-bold">{consumedMacros.fats}g</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((consumedMacros.fats / macroResults.fats) * 100)}%
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-500 text-sm">Calculando macros...</p>
+              )}
+            </div>
+
+            {/* Comidas del día */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.ChefHat size="text-lg" />
+                Comidas de Hoy
+              </h3>
+              <div className="space-y-4">
+                {/* Desayuno */}
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                      <Icons.UtensilsCrossed size="text-sm" /> Desayuno
+                    </h4>
+                    <button
+                      onClick={() => openMealCalculator("desayuno")}
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
+                    >
+                      <Icons.Plus size="text-xs" /> Agregar
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {mealCompositions
+                      .filter((c) => c.meal_type === "desayuno")
+                      .map((composition) => (
+                        <div key={composition.id} className="flex items-center justify-between text-xs">
+                          <div>
+                            <p className="font-medium">{composition.food_name}</p>
+                            <p className="text-gray-500">
+                              {composition.quantity_grams}g - {composition.calories_consumed} cal
+                            </p>
+                          </div>
                           <button
-                            onClick={() => removeIngredientFromMeal(index)}
-                            className="p-1 text-red-600 hover:bg-red-100 rounded"
+                            onClick={() => removeFoodFromMeal(composition.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
                           >
                             <Icons.Trash2 size="text-xs" />
                           </button>
                         </div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <input
-                            type="number"
-                            className="w-20 text-sm p-1 border rounded"
-                            value={ingredient.quantity_grams}
-                            onChange={(e) => updateIngredientQuantity(index, parseInt(e.target.value) || 0)}
-                            min="1"
-                            max="1000"
-                          />
-                          <span className="text-sm text-gray-600">gramos</span>
-                        </div>
-                        <div className="grid grid-cols-4 gap-2 text-xs text-gray-600">
-                          <div>{ingredient.calories} cal</div>
-                          <div>{ingredient.protein}g prot</div>
-                          <div>{ingredient.carbs}g carbs</div>
-                          <div>{ingredient.fats}g grasas</div>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
-                ) : (
-                  <div className="bg-gray-50 p-4 rounded-lg text-center text-gray-500 text-sm mb-4">
-                    No hay ingredientes agregados
-                  </div>
-                )}
+                </div>
 
-                {/* Totales de la comida */}
-                {mealIngredients.length > 0 && (
-                  <div className="bg-green-100 p-4 rounded-lg">
-                    <h5 className="font-semibold text-sm mb-2">Totales Nutricionales</h5>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-green-600">{mealTotals.calories}</div>
-                        <div className="text-xs text-gray-600">Calorías</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-red-600">{mealTotals.protein}g</div>
-                        <div className="text-xs text-gray-600">Proteína</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-yellow-600">{mealTotals.carbs}g</div>
-                        <div className="text-xs text-gray-600">Carbohidratos</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-blue-600">{mealTotals.fats}g</div>
-                        <div className="text-xs text-gray-600">Grasas</div>
-                      </div>
+                {/* Almuerzo */}
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                      <Icons.UtensilsCrossed size="text-sm" /> Almuerzo
+                    </h4>
+                    <button
+                      onClick={() => openMealCalculator("almuerzo")}
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
+                    >
+                      <Icons.Plus size="text-xs" /> Agregar
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {mealCompositions
+                      .filter((c) => c.meal_type === "almuerzo")
+                      .map((composition) => (
+                        <div key={composition.id} className="flex items-center justify-between text-xs">
+                          <div>
+                            <p className="font-medium">{composition.food_name}</p>
+                            <p className="text-gray-500">
+                              {composition.quantity_grams}g - {composition.calories_consumed} cal
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => removeFoodFromMeal(composition.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Icons.Trash2 size="text-xs" />
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Cena */}
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                      <Icons.UtensilsCrossed size="text-sm" /> Cena
+                    </h4>
+                    <button
+                      onClick={() => openMealCalculator("cena")}
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
+                    >
+                      <Icons.Plus size="text-xs" /> Agregar
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {mealCompositions
+                      .filter((c) => c.meal_type === "cena")
+                      .map((composition) => (
+                        <div key={composition.id} className="flex items-center justify-between text-xs">
+                          <div>
+                            <p className="font-medium">{composition.food_name}</p>
+                            <p className="text-gray-500">
+                              {composition.quantity_grams}g - {composition.calories_consumed} cal
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => removeFoodFromMeal(composition.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Icons.Trash2 size="text-xs" />
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "recursos" && (
+          <div className="space-y-4">
+            {/* Recursos de mindfulness */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Brain size="text-lg" />
+                Mindfulness
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {mindfulnessResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Recursos de nutrición */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.UtensilsCrossed size="text-lg" />
+                Nutrición
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {nutritionResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Recursos de ejercicio */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Dumbbell size="text-lg" />
+                Ejercicio
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {exerciseResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "suplementos" && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Package size="text-lg" />
+                Suplementos
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {supplements.map((supplement) => (
+                  <div key={supplement.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                    <img
+                      src={supplement.image_url || "/placeholder.svg?height=200&width=200"}
+                      alt={supplement.name}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{supplement.name}</h4>
+                      <p className="text-xs text-gray-600 mb-2">{supplement.description}</p>
+                      <p className="text-sm font-medium text-green-600 mb-2">${supplement.price.toLocaleString()}</p>
+                      <ul className="text-xs text-gray-500 mb-3 space-y-1">
+                        {supplement.benefits.slice(0, 3).map((benefit, index) => (
+                          <li key={index}>• {benefit}</li>
+                        ))}
+                      </ul>
+                      <button
+                        onClick={() => handleSupplementContact(supplement)}
+                        className="w-full px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm"
+                      >
+                        <Icons.MessageSquare size="text-sm" />
+                        Contactar
+                      </button>
                     </div>
                   </div>
-                )}
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Navegación inferior fija */}
+      <nav className="bg-white border-t shadow-lg fixed bottom-0 left-0 w-full z-30">
+        <div className="px-4">
+          <div className="h-16 flex justify-between">
+            <button
+              onClick={() => setActiveTab("inicio")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "inicio" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <Icons.Home size="text-xl" />
+              <span className="text-xs mt-1">Inicio</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("comida")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "comida" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <Icons.UtensilsCrossed size="text-xl" />
+              <span className="text-xs mt-1">Comida</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("recursos")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "recursos" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <Icons.Link size="text-xl" />
+              <span className="text-xs mt-1">Recursos</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("suplementos")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "suplementos" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <Icons.Package size="text-xl" />
+              <span className="text-xs mt-1">Tienda</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Modal de calculadora de comida - Responsive */}
+      {showMealCalculator && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+          <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Agregar a {selectedMealType}</h3>
+                <button onClick={() => setShowMealCalculator(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                  <Icons.X size="text-lg" />
+                </button>
               </div>
 
-              {/* Panel derecho: Selector de alimentos */}
-              <div>
-                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Icons.Plus size="text-sm" />
-                  Agregar Alimentos
-                </h4>
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {allCategories.map((category) => (
+              {/* Selector de comida */}
+              <div className="mb-4">
+                <h4 className="font-semibold mb-3 text-sm">Seleccionar alimento</h4>
+                <div className="space-y-3">
+                  {getFoodsByCategory().map((category) => (
                     <div key={category.id}>
-                      <h5 className="font-medium flex items-center gap-2 text-sm mb-2 sticky top-0 bg-white">
+                      <h5 className="font-medium flex items-center gap-2 text-sm mb-2">
                         {category.icon} {category.name}
                       </h5>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {category.foods.slice(0, 8).map((food) => {
-                          const [selectedQuantity, setSelectedQuantity] = useState("100")
-                          return (
-                            <div key={food.id} className="border border-gray-200 rounded-lg p-2 hover:bg-gray-50">
-                              <div className="text-sm font-medium mb-1">{food.name}</div>
-                              <div className="text-xs text-gray-500 mb-2">
-                                {food.calories} cal | {food.protein}g prot | {food.carbs}g carbs | {food.fats}g grasas
-                              </div>
-                              <div className="flex items-center gap-2 mb-2">
-                                <input
-                                  type="number"
-                                  className="w-16 text-xs p-1 border rounded"
-                                  value={selectedQuantity}
-                                  onChange={(e) => setSelectedQuantity(e.target.value)}
-                                  min="1"
-                                  max="1000"
-                                />
-                                <span className="text-xs">g</span>
-                                <button
-                                  onClick={() => {
-                                    addIngredientToMeal(food, parseInt(selectedQuantity))
-                                    setSelectedQuantity("100")
-                                  }}
-                                  className="flex-1 text-xs bg-green-500 text-white p-1 rounded hover:bg-green-600 flex items-center justify-center gap-1"
-                                >
-                                  <Icons.Plus size="text-xs" />
-                                  Agregar
-                                </button>
-                              </div>
-                            </div>
-                          )
-                        })}
+                      <div className="grid grid-cols-2 gap-2">
+                        {category.foods.map((food) => (
+                          <button
+                            key={food.id}
+                            onClick={() => selectFood(food)}
+                            className={`px-3 py-2 text-xs border rounded-lg hover:bg-gray-50 transition-colors text-left ${
+                              selectedFood?.id === food.id ? "border-green-500 bg-green-50" : "border-gray-300"
+                            }`}
+                          >
+                            <div className="font-medium">{food.name}</div>
+                            <div className="text-gray-500">{food.calories} cal/100g</div>
+                          </button>
+                        ))}
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Botones de acción */}
-            <div className="grid grid-cols-2 gap-3 mt-6">
-              <button
-                onClick={saveEnhancedMeal}
-                className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 text-sm flex items-center justify-center gap-2"
-                disabled={!mealName || mealIngredients.length === 0}
-              >
-                <Icons.Save size="text-sm" />
-                Guardar Comida (+25 pts)
-              </button>
-              <button
-                onClick={() => {
-                  setShowEnhancedMealCreator(false)
-                  setMealIngredients([])
-                  setMealName("")
-                }}
-                className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
-              >
-                Cancelar
-              </button>
+              {/* Selector de cantidad */}
+              {selectedFood && (
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <h4 className="font-semibold mb-2 text-sm">
+                    {selectedFood.name} - {selectedFood.calories} cal/100g
+                  </h4>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      className="flex-1 p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Cantidad"
+                      value={foodQuantity}
+                      onChange={(e) => setFoodQuantity(e.target.value)}
+                    />
+                    <span className="text-sm text-gray-600">gramos</span>
+                  </div>
+                  {foodQuantity && (
+                    <div className="mt-2 text-xs text-gray-600">
+                      Calorías: {Math.round((Number(selectedFood.calories) * Number(foodQuantity)) / 100)} cal
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Botones de acción */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={addFoodToMeal}
+                  className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 text-sm"
+                  disabled={!selectedFood || !foodQuantity}
+                >
+                  Agregar
+                </button>
+                <button
+                  onClick={() => setShowMealCalculator(false)}
+                  className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )
-  }
+      )}
+    </div>
+  )
+}
