@@ -59,6 +59,10 @@ const Icons = {
   Shield: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🛡️</span>,
   Menu: ({ size = "text-xl" }: { size?: string }) => <span className={size}>☰</span>,
   Close: ({ size = "text-xl" }: { size?: string }) => <span className={size}>✕</span>,
+  Blender: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🥤</span>,
+  Info: ({ size = "text-xl" }: { size?: string }) => <span className={size}>ℹ️</span>,
+  Save: ({ size = "text-xl" }: { size?: string }) => <span className={size}>💾</span>,
+  List: ({ size = "text-xl" }: { size?: string }) => <span className={size}>📝</span>,
 }
 
 // ============================================================================
@@ -225,8 +229,19 @@ interface AIRecommendation {
   created_at: string
 }
 
+// 🆕 NUEVOS TIPOS PARA BATIDOS Y CREADOR DE COMIDAS
+interface SmoothieIngredient {
+  food: GlobalFood
+  quantity: number
+}
+
+interface MealBuilder {
+  ingredients: { food: GlobalFood; quantity: number }[]
+  totalMacros: ConsumedMacros
+}
+
 // ============================================================================
-// CONFIGURACIÓN DE DATOS (ORIGINAL)
+// CONFIGURACIÓN DE DATOS (ORIGINAL + EXPANSIÓN)
 // ============================================================================
 const ACTIVITY_LEVELS = [
   { value: 1.2, label: "Sedentario", desc: "Poco ejercicio" },
@@ -349,6 +364,79 @@ const LEVEL_SYSTEM = {
     challenge_complete: 100,
   },
 }
+
+// 🆕 BANCO DE ALIMENTOS EXPANDIDO (100 nuevos alimentos + 20 bebidas)
+const EXPANDED_FOOD_DATABASE: GlobalFood[] = [
+  // PROTEÍNAS ADICIONALES
+  { id: "proteina_31", name: "Salmón a la plancha", calories: 208, protein: 25.4, carbs: 0, fats: 12.4, category: "proteinas", common_portion_size: 150, common_portion_name: "filete", is_active: true, created_at: new Date().toISOString() },
+  { id: "proteina_32", name: "Atún en agua", calories: 128, protein: 28, carbs: 0, fats: 1.3, category: "proteinas", common_portion_size: 100, common_portion_name: "lata", is_active: true, created_at: new Date().toISOString() },
+  { id: "proteina_33", name: "Sardinas", calories: 208, protein: 24.6, carbs: 0, fats: 11.5, category: "proteinas", common_portion_size: 80, common_portion_name: "porción", is_active: true, created_at: new Date().toISOString() },
+  { id: "proteina_34", name: "Pechuga de pavo", calories: 189, protein: 29, carbs: 0, fats: 7.4, category: "proteinas", common_portion_size: 100, common_portion_name: "rebanada", is_active: true, created_at: new Date().toISOString() },
+  { id: "proteina_35", name: "Jamón serrano", calories: 241, protein: 30.5, carbs: 0.4, fats: 12.9, category: "proteinas", common_portion_size: 50, common_portion_name: "lonjas", is_active: true, created_at: new Date().toISOString() },
+  { id: "proteina_36", name: "Queso cottage", calories: 98, protein: 11, carbs: 3.4, fats: 4.3, category: "proteinas", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "proteina_37", name: "Ricotta", calories: 174, protein: 11, carbs: 3, fats: 13, category: "proteinas", common_portion_size: 100, common_portion_name: "porción", is_active: true, created_at: new Date().toISOString() },
+  { id: "proteina_38", name: "Yogur griego", calories: 59, protein: 10, carbs: 3.6, fats: 0.4, category: "proteinas", common_portion_size: 170, common_portion_name: "envase", is_active: true, created_at: new Date().toISOString() },
+  { id: "proteina_39", name: "Tempeh", calories: 193, protein: 19, carbs: 9, fats: 11, category: "proteinas", common_portion_size: 100, common_portion_name: "porción", is_active: true, created_at: new Date().toISOString() },
+  { id: "proteina_40", name: "Seitan", calories: 370, protein: 75, carbs: 14, fats: 1.9, category: "proteinas", common_portion_size: 100, common_portion_name: "porción", is_active: true, created_at: new Date().toISOString() },
+
+  // VEGETALES ADICIONALES
+  { id: "vegetal_31", name: "Kale", calories: 49, protein: 4.3, carbs: 8.8, fats: 0.9, category: "vegetales", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "vegetal_32", name: "Rúcula", calories: 25, protein: 2.6, carbs: 3.7, fats: 0.7, category: "vegetales", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "vegetal_33", name: "Acelgas", calories: 19, protein: 1.8, carbs: 3.7, fats: 0.2, category: "vegetales", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "vegetal_34", name: "Bok choy", calories: 13, protein: 1.5, carbs: 2.2, fats: 0.2, category: "vegetales", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "vegetal_35", name: "Berenjenas", calories: 25, protein: 1, carbs: 6, fats: 0.2, category: "vegetales", common_portion_size: 200, common_portion_name: "unidad", is_active: true, created_at: new Date().toISOString() },
+  { id: "vegetal_36", name: "Calabacín", calories: 17, protein: 1.2, carbs: 3.1, fats: 0.3, category: "vegetales", common_portion_size: 150, common_portion_name: "unidad", is_active: true, created_at: new Date().toISOString() },
+  { id: "vegetal_37", name: "Apio", calories: 14, protein: 0.7, carbs: 3, fats: 0.2, category: "vegetales", common_portion_size: 100, common_portion_name: "tallos", is_active: true, created_at: new Date().toISOString() },
+  { id: "vegetal_38", name: "Rábanos", calories: 16, protein: 0.7, carbs: 3.4, fats: 0.1, category: "vegetales", common_portion_size: 50, common_portion_name: "unidades", is_active: true, created_at: new Date().toISOString() },
+  { id: "vegetal_39", name: "Endivias", calories: 17, protein: 1.3, carbs: 3.4, fats: 0.2, category: "vegetales", common_portion_size: 100, common_portion_name: "hojas", is_active: true, created_at: new Date().toISOString() },
+  { id: "vegetal_40", name: "Alcachofas", calories: 47, protein: 3.3, carbs: 10.5, fats: 0.2, category: "vegetales", common_portion_size: 120, common_portion_name: "unidad", is_active: true, created_at: new Date().toISOString() },
+
+  // FRUTAS ADICIONALES
+  { id: "fruta_31", name: "Arándanos", calories: 57, protein: 0.7, carbs: 14.5, fats: 0.3, category: "frutas", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "fruta_32", name: "Frambuesas", calories: 52, protein: 1.2, carbs: 12, fats: 0.7, category: "frutas", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "fruta_33", name: "Moras", calories: 43, protein: 1.4, carbs: 9.6, fats: 0.5, category: "frutas", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "fruta_34", name: "Kiwi", calories: 61, protein: 1.1, carbs: 15, fats: 0.5, category: "frutas", common_portion_size: 100, common_portion_name: "unidad", is_active: true, created_at: new Date().toISOString() },
+  { id: "fruta_35", name: "Maracuyá", calories: 97, protein: 2.2, carbs: 23, fats: 0.7, category: "frutas", common_portion_size: 50, common_portion_name: "unidad", is_active: true, created_at: new Date().toISOString() },
+  { id: "fruta_36", name: "Higo", calories: 74, protein: 0.8, carbs: 19, fats: 0.3, category: "frutas", common_portion_size: 60, common_portion_name: "unidad", is_active: true, created_at: new Date().toISOString() },
+  { id: "fruta_37", name: "Granada", calories: 83, protein: 1.7, carbs: 19, fats: 1.2, category: "frutas", common_portion_size: 150, common_portion_name: "unidad", is_active: true, created_at: new Date().toISOString() },
+  { id: "fruta_38", name: "Caqui", calories: 70, protein: 0.6, carbs: 19, fats: 0.2, category: "frutas", common_portion_size: 120, common_portion_name: "unidad", is_active: true, created_at: new Date().toISOString() },
+  { id: "fruta_39", name: "Lichi", calories: 66, protein: 0.8, carbs: 17, fats: 0.4, category: "frutas", common_portion_size: 100, common_portion_name: "unidades", is_active: true, created_at: new Date().toISOString() },
+  { id: "fruta_40", name: "Papaya", calories: 43, protein: 0.5, carbs: 11, fats: 0.3, category: "frutas", common_portion_size: 150, common_portion_name: "rebanada", is_active: true, created_at: new Date().toISOString() },
+
+  // CARBOHIDRATOS ADICIONALES
+  { id: "carb_31", name: "Quinoa cocida", calories: 120, protein: 4.4, carbs: 22, fats: 1.9, category: "carbohidratos", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "carb_32", name: "Bulgur", calories: 83, protein: 3, carbs: 19, fats: 0.2, category: "carbohidratos", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "carb_33", name: "Cebada perlada", calories: 123, protein: 2.3, carbs: 28, fats: 0.4, category: "carbohidratos", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "carb_34", name: "Mijo", calories: 119, protein: 3.5, carbs: 23, fats: 1, category: "carbohidratos", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "carb_35", name: "Amaranto", calories: 102, protein: 4, carbs: 19, fats: 1.6, category: "carbohidratos", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "carb_36", name: "Pasta integral", calories: 124, protein: 5, carbs: 25, fats: 1.1, category: "carbohidratos", common_portion_size: 100, common_portion_name: "porción", is_active: true, created_at: new Date().toISOString() },
+  { id: "carb_37", name: "Pan integral", calories: 247, protein: 13, carbs: 41, fats: 4.2, category: "carbohidratos", common_portion_size: 30, common_portion_name: "rebanada", is_active: true, created_at: new Date().toISOString() },
+  { id: "carb_38", name: "Tortilla de maíz", calories: 218, protein: 5.7, carbs: 45, fats: 2.9, category: "carbohidratos", common_portion_size: 30, common_portion_name: "unidad", is_active: true, created_at: new Date().toISOString() },
+  { id: "carb_39", name: "Couscous", calories: 112, protein: 3.8, carbs: 23, fats: 0.2, category: "carbohidratos", common_portion_size: 100, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "carb_40", name: "Polenta", calories: 85, protein: 2, carbs: 18, fats: 0.3, category: "carbohidratos", common_portion_size: 100, common_portion_name: "porción", is_active: true, created_at: new Date().toISOString() },
+
+  // 🆕 NUEVA CATEGORÍA: BEBIDAS (20 bebidas)
+  { id: "bebida_1", name: "Café negro", calories: 2, protein: 0.3, carbs: 0, fats: 0, category: "bebidas", common_portion_size: 240, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_2", name: "Café con leche", calories: 42, protein: 2.2, carbs: 5.1, fats: 1.6, category: "bebidas", common_portion_size: 240, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_3", name: "Cappuccino", calories: 74, protein: 4, carbs: 6.8, fats: 4.1, category: "bebidas", common_portion_size: 180, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_4", name: "Latte", calories: 102, protein: 5.9, carbs: 9.5, fats: 3.9, category: "bebidas", common_portion_size: 240, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_5", name: "Chocolate caliente", calories: 192, protein: 8.8, carbs: 26.6, fats: 5.8, category: "bebidas", common_portion_size: 240, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_6", name: "Frappé de café", calories: 180, protein: 3, carbs: 28, fats: 7, category: "bebidas", common_portion_size: 350, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_7", name: "Malteada de vainilla", calories: 254, protein: 8.8, carbs: 40, fats: 6.9, category: "bebidas", common_portion_size: 350, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_8", name: "Leche entera", calories: 61, protein: 3.2, carbs: 4.8, fats: 3.3, category: "bebidas", common_portion_size: 240, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_9", name: "Leche deslactosada", calories: 50, protein: 3.4, carbs: 5, fats: 2.5, category: "bebidas", common_portion_size: 240, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_10", name: "Leche de almendras", calories: 17, protein: 0.6, carbs: 1.5, fats: 1.5, category: "bebidas", common_portion_size: 240, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_11", name: "Leche de soya", calories: 54, protein: 3.3, carbs: 4.2, fats: 2.2, category: "bebidas", common_portion_size: 240, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_12", name: "Leche de coco", calories: 76, protein: 0.5, carbs: 7.1, fats: 5.1, category: "bebidas", common_portion_size: 240, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_13", name: "Leche de avena", calories: 80, protein: 3, carbs: 16, fats: 1.5, category: "bebidas", common_portion_size: 240, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_14", name: "Té verde", calories: 2, protein: 0.2, carbs: 0, fats: 0, category: "bebidas", common_portion_size: 240, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_15", name: "Té negro", calories: 2, protein: 0, carbs: 0.7, fats: 0, category: "bebidas", common_portion_size: 240, common_portion_name: "taza", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_16", name: "Jugo de naranja natural", calories: 45, protein: 0.7, carbs: 10.4, fats: 0.2, category: "bebidas", common_portion_size: 240, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_17", name: "Agua de coco", calories: 19, protein: 0.7, carbs: 3.7, fats: 0.2, category: "bebidas", common_portion_size: 240, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_18", name: "Kombucha", calories: 30, protein: 0, carbs: 7, fats: 0, category: "bebidas", common_portion_size: 240, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_19", name: "Batido de proteína", calories: 103, protein: 20, carbs: 3, fats: 1.5, category: "bebidas", common_portion_size: 250, common_portion_name: "vaso", is_active: true, created_at: new Date().toISOString() },
+  { id: "bebida_20", name: "Agua mineral", calories: 0, protein: 0, carbs: 0, fats: 0, category: "bebidas", common_portion_size: 500, common_portion_name: "botella", is_active: true, created_at: new Date().toISOString() },
+]
 
 // ============================================================================
 // FUNCIONES DE BASE DE DATOS (MANTENIENDO LAS ORIGINALES)
@@ -891,7 +979,7 @@ const getResourceTypeIcon = (type: string) => {
 }
 
 // ============================================================================
-// COMPONENTE PRINCIPAL RESPONSIVE
+// COMPONENTE PRINCIPAL RESPONSIVE MEJORADO
 // ============================================================================
 export default function VitalMenteApp() {
   // Estados principales
@@ -946,6 +1034,13 @@ export default function VitalMenteApp() {
   const [foodQuantity, setFoodQuantity] = useState<string>("100")
   const [showFloatingMenu, setShowFloatingMenu] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+
+  // 🆕 Estados para nuevas funcionalidades
+  const [showSmoothieBuilder, setShowSmoothieBuilder] = useState(false)
+  const [smoothieIngredients, setSmoothieIngredients] = useState<SmoothieIngredient[]>([])
+  const [showMealBuilder, setShowMealBuilder] = useState(false)
+  const [mealBuilder, setMealBuilder] = useState<MealBuilder>({ ingredients: [], totalMacros: { calories: 0, protein: 0, carbs: 0, fats: 0 } })
+  const [showGamificationGuide, setShowGamificationGuide] = useState(false)
 
   // Estados de administración
   const [logoClicks, setLogoClicks] = useState(0)
@@ -1011,7 +1106,10 @@ export default function VitalMenteApp() {
       setGlobalTips(tips)
       setGlobalResources(resources)
       setSupplements(activeSupplements)
-      setGlobalFoods(globalFoodsList)
+      
+      // 🆕 Combinamos el banco de datos existente con el expandido
+      const combinedFoods = [...globalFoodsList, ...EXPANDED_FOOD_DATABASE]
+      setGlobalFoods(combinedFoods)
     } catch (error) {
       console.error("Error loading global content:", error)
     }
@@ -1074,7 +1172,176 @@ export default function VitalMenteApp() {
   }
 
   // ============================================================================
-  // FUNCIONES DE AUTENTICACIÓN
+  // 🆕 FUNCIONES PARA NUEVAS FUNCIONALIDADES
+  // ============================================================================
+
+  // Funciones para el creador de batidos
+  const addIngredientToSmoothie = (food: GlobalFood, quantity: number) => {
+    const existingIndex = smoothieIngredients.findIndex(ing => ing.food.id === food.id)
+    if (existingIndex >= 0) {
+      const updated = [...smoothieIngredients]
+      updated[existingIndex].quantity = quantity
+      setSmoothieIngredients(updated)
+    } else {
+      setSmoothieIngredients([...smoothieIngredients, { food, quantity }])
+    }
+  }
+
+  const removeIngredientFromSmoothie = (foodId: string) => {
+    setSmoothieIngredients(smoothieIngredients.filter(ing => ing.food.id !== foodId))
+  }
+
+  const calculateSmoothieMacros = () => {
+    return smoothieIngredients.reduce(
+      (totals, ingredient) => {
+        const ratio = ingredient.quantity / 100
+        return {
+          calories: totals.calories + (ingredient.food.calories * ratio),
+          protein: totals.protein + (ingredient.food.protein * ratio),
+          carbs: totals.carbs + (ingredient.food.carbs * ratio),
+          fats: totals.fats + (ingredient.food.fats * ratio),
+        }
+      },
+      { calories: 0, protein: 0, carbs: 0, fats: 0 }
+    )
+  }
+
+  const saveSmoothieAsMeal = async (mealType: "desayuno" | "almuerzo" | "cena") => {
+    if (!currentUser || smoothieIngredients.length === 0) return
+    
+    try {
+      const smoothieName = `Batido personalizado (${smoothieIngredients.map(ing => ing.food.name).join(', ')})`
+      const smoothieMacros = calculateSmoothieMacros()
+      
+      const composition: Omit<MealComposition, "id" | "created_at"> = {
+        user_id: currentUser.id,
+        date: new Date().toISOString().split("T")[0],
+        meal_type: mealType,
+        food_id: `smoothie_${Date.now()}`,
+        food_name: smoothieName,
+        quantity_grams: smoothieIngredients.reduce((sum, ing) => sum + ing.quantity, 0),
+        calories_consumed: Math.round(smoothieMacros.calories),
+        protein_consumed: Math.round(smoothieMacros.protein),
+        carbs_consumed: Math.round(smoothieMacros.carbs),
+        fats_consumed: Math.round(smoothieMacros.fats),
+      }
+      
+      const newComposition = await dbFunctions.addMealComposition(composition)
+      setMealCompositions((prev) => [...prev, newComposition])
+      calculateConsumedMacros([...mealCompositions, newComposition])
+      await updateProgress(mealType, 1)
+      
+      setSmoothieIngredients([])
+      setShowSmoothieBuilder(false)
+      alert('¡Batido guardado exitosamente!')
+    } catch (error: any) {
+      console.error("Error saving smoothie:", error)
+      alert("Error al guardar batido: " + error.message)
+    }
+  }
+
+  // Funciones para el creador de comidas mejorado
+  const addIngredientToMealBuilder = (food: GlobalFood, quantity: number) => {
+    const newIngredient = { food, quantity }
+    const updatedIngredients = [...mealBuilder.ingredients, newIngredient]
+    const updatedMacros = calculateMealBuilderMacros(updatedIngredients)
+    
+    setMealBuilder({
+      ingredients: updatedIngredients,
+      totalMacros: updatedMacros
+    })
+  }
+
+  const updateIngredientQuantity = (index: number, quantity: number) => {
+    const updatedIngredients = [...mealBuilder.ingredients]
+    updatedIngredients[index].quantity = quantity
+    const updatedMacros = calculateMealBuilderMacros(updatedIngredients)
+    
+    setMealBuilder({
+      ingredients: updatedIngredients,
+      totalMacros: updatedMacros
+    })
+  }
+
+  const removeIngredientFromMealBuilder = (index: number) => {
+    const updatedIngredients = mealBuilder.ingredients.filter((_, i) => i !== index)
+    const updatedMacros = calculateMealBuilderMacros(updatedIngredients)
+    
+    setMealBuilder({
+      ingredients: updatedIngredients,
+      totalMacros: updatedMacros
+    })
+  }
+
+  const calculateMealBuilderMacros = (ingredients: { food: GlobalFood; quantity: number }[]) => {
+    return ingredients.reduce(
+      (totals, ingredient) => {
+        const ratio = ingredient.quantity / 100
+        return {
+          calories: totals.calories + (ingredient.food.calories * ratio),
+          protein: totals.protein + (ingredient.food.protein * ratio),
+          carbs: totals.carbs + (ingredient.food.carbs * ratio),
+          fats: totals.fats + (ingredient.food.fats * ratio),
+        }
+      },
+      { calories: 0, protein: 0, carbs: 0, fats: 0 }
+    )
+  }
+
+  const saveMealBuilderAsMeal = async (mealType: "desayuno" | "almuerzo" | "cena") => {
+    if (!currentUser || mealBuilder.ingredients.length === 0) return
+    
+    try {
+      for (const ingredient of mealBuilder.ingredients) {
+        const ratio = ingredient.quantity / 100
+        const composition: Omit<MealComposition, "id" | "created_at"> = {
+          user_id: currentUser.id,
+          date: new Date().toISOString().split("T")[0],
+          meal_type: mealType,
+          food_id: ingredient.food.id,
+          food_name: ingredient.food.name,
+          quantity_grams: ingredient.quantity,
+          calories_consumed: Math.round(ingredient.food.calories * ratio),
+          protein_consumed: Math.round(ingredient.food.protein * ratio),
+          carbs_consumed: Math.round(ingredient.food.carbs * ratio),
+          fats_consumed: Math.round(ingredient.food.fats * ratio),
+        }
+        
+        const newComposition = await dbFunctions.addMealComposition(composition)
+        setMealCompositions((prev) => [...prev, newComposition])
+      }
+      
+      calculateConsumedMacros([...mealCompositions, ...mealBuilder.ingredients.map(ing => {
+        const ratio = ing.quantity / 100
+        return {
+          id: `temp_${Date.now()}`,
+          user_id: currentUser.id,
+          date: new Date().toISOString().split("T")[0],
+          meal_type: mealType,
+          food_id: ing.food.id,
+          food_name: ing.food.name,
+          quantity_grams: ing.quantity,
+          calories_consumed: Math.round(ing.food.calories * ratio),
+          protein_consumed: Math.round(ing.food.protein * ratio),
+          carbs_consumed: Math.round(ing.food.carbs * ratio),
+          fats_consumed: Math.round(ing.food.fats * ratio),
+          created_at: new Date().toISOString(),
+        }
+      })])
+      
+      await updateProgress(mealType, 1)
+      
+      setMealBuilder({ ingredients: [], totalMacros: { calories: 0, protein: 0, carbs: 0, fats: 0 } })
+      setShowMealBuilder(false)
+      alert('¡Comida guardada exitosamente!')
+    } catch (error: any) {
+      console.error("Error saving meal:", error)
+      alert("Error al guardar comida: " + error.message)
+    }
+  }
+
+  // ============================================================================
+  // FUNCIONES DE AUTENTICACIÓN (MANTENIENDO LAS ORIGINALES)
   // ============================================================================
   const handleLogin = async () => {
     if (!loginForm.phone || !loginForm.accessCode) {
@@ -1188,10 +1455,13 @@ export default function VitalMenteApp() {
     setLastSaveTime(null)
     setUserGamification(null)
     setAiRecommendations([])
+    // 🆕 Limpiar estados de nuevas funcionalidades
+    setSmoothieIngredients([])
+    setMealBuilder({ ingredients: [], totalMacros: { calories: 0, protein: 0, carbs: 0, fats: 0 } })
   }
 
   // ============================================================================
-  // FUNCIONES DE PROGRESO
+  // FUNCIONES DE PROGRESO (MANTENIENDO LAS ORIGINALES)
   // ============================================================================
   const updateProgress = async (field: keyof DailyProgress, increment: number) => {
     if (!currentUser) return
@@ -1254,7 +1524,7 @@ export default function VitalMenteApp() {
   }
 
   // ============================================================================
-  // FUNCIONES DE ADMINISTRACIÓN
+  // FUNCIONES DE ADMINISTRACIÓN (MANTENIENDO LAS ORIGINALES)
   // ============================================================================
   const handleLogoClick = () => {
     setLogoClicks((prev) => {
@@ -1290,7 +1560,7 @@ export default function VitalMenteApp() {
   }
 
   // ============================================================================
-  // FUNCIONES DE COMIDA
+  // FUNCIONES DE COMIDA (MANTENIENDO LAS ORIGINALES + MEJORAS)
   // ============================================================================
   const openMealCalculator = (mealType: "desayuno" | "almuerzo" | "cena") => {
     setSelectedMealType(mealType)
@@ -1333,12 +1603,14 @@ export default function VitalMenteApp() {
     }
   }
 
+  // 🆕 Función mejorada para obtener alimentos por categoría (incluyendo bebidas)
   const getFoodsByCategory = () => {
     const categories = [
       { id: "proteinas", name: "Proteínas", icon: "🍗" },
       { id: "vegetales", name: "Vegetales", icon: "🥬" },
       { id: "frutas", name: "Frutas", icon: "🍎" },
       { id: "carbohidratos", name: "Carbohidratos", icon: "🌾" },
+      { id: "bebidas", name: "Bebidas", icon: "🥤" }, // 🆕 Nueva categoría
     ]
     return categories.map((category) => ({
       ...category,
@@ -1445,6 +1717,7 @@ Gracias!`
     )
   }
 
+  // 🆕 Panel de gamificación mejorado con explicación
   const GamificationPanel = () => {
     if (!userGamification) return null
     const currentLevelInfo =
@@ -1466,15 +1739,24 @@ Gracias!`
               <p className="text-xs sm:text-sm opacity-90">Nivel {userGamification.current_level}</p>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-xl sm:text-2xl font-bold">{userGamification.total_points}</div>
-            <div className="text-xs opacity-75">puntos</div>
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              <div className="text-xl sm:text-2xl font-bold">{userGamification.total_points}</div>
+              <div className="text-xs opacity-75">puntos</div>
+            </div>
+            {/* 🆕 Botón de información */}
+            <button
+              onClick={() => setShowGamificationGuide(true)}
+              className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
+            >
+              <Icons.Info size="text-sm" />
+            </button>
           </div>
         </div>
         {nextLevelInfo && (
           <div className="mb-3">
             <div className="flex justify-between text-xs mb-1">
-              <span>Siguiente nivel</span>
+              <span>Siguiente nivel: {nextLevelInfo.name}</span>
               <span>{Math.round(progressToNext)}%</span>
             </div>
             <div className="w-full bg-white/20 rounded-full h-2">
@@ -1503,9 +1785,365 @@ Gracias!`
     )
   }
 
-  // Panel de administración responsive
-  // Después de la línea del AdminPanel, reemplazar toda la función AdminPanel con la versión completa:
+  // 🆕 Modal de guía de gamificación
+  const GamificationGuideModal = () => {
+    if (!showGamificationGuide) return null
 
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+        <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+          <div className="p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                <Icons.Trophy size="text-lg" />
+                Sistema de Niveles
+              </h3>
+              <button 
+                onClick={() => setShowGamificationGuide(false)} 
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <Icons.X size="text-lg" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <h4 className="font-semibold text-sm mb-2">🎯 ¿Cómo ganar puntos?</h4>
+                <ul className="text-xs space-y-1">
+                  <li>• Agua: +5 puntos por vaso</li>
+                  <li>• Ejercicio: +20 puntos por sesión</li>
+                  <li>• Mindfulness: +15 puntos por sesión</li>
+                  <li>• Comidas: +10 puntos por comida registrada</li>
+                  <li>• Racha diaria: +50 puntos bonus</li>
+                </ul>
+              </div>
+
+              <div className="bg-purple-50 p-3 rounded-lg">
+                <h4 className="font-semibold text-sm mb-2">🏆 Niveles disponibles</h4>
+                <div className="space-y-2">
+                  {LEVEL_SYSTEM.levels.map((level) => (
+                    <div key={level.level} className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-2">
+                        <span className="text-lg">{level.icon}</span>
+                        {level.name}
+                      </span>
+                      <span className="text-gray-500">{level.pointsRequired} pts</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-green-50 p-3 rounded-lg">
+                <h4 className="font-semibold text-sm mb-2">✨ Beneficios</h4>
+                <ul className="text-xs space-y-1">
+                  <li>• Mantén tu motivación alta</li>
+                  <li>• Compite contigo mismo</li>
+                  <li>• Desbloquea nuevos logros</li>
+                  <li>• Accede a contenido exclusivo</li>
+                </ul>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowGamificationGuide(false)}
+              className="w-full mt-4 bg-purple-500 text-white p-3 rounded-lg hover:bg-purple-600 text-sm"
+            >
+              ¡Entendido!
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 🆕 Creador de batidos
+  const SmoothieBuilderModal = () => {
+    if (!showSmoothieBuilder) return null
+
+    const smoothieMacros = calculateSmoothieMacros()
+    const availableFoods = globalFoods.filter(food => 
+      ['frutas', 'bebidas', 'proteinas'].includes(food.category)
+    )
+
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+        <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                <Icons.Blender size="text-lg" />
+                Crear Batido
+              </h3>
+              <button onClick={() => setShowSmoothieBuilder(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                <Icons.X size="text-lg" />
+              </button>
+            </div>
+
+            {/* Ingredientes actuales */}
+            {smoothieIngredients.length > 0 && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                <h4 className="font-semibold mb-2 text-sm">Ingredients ({smoothieIngredients.length})</h4>
+                <div className="space-y-2">
+                  {smoothieIngredients.map((ingredient, index) => (
+                    <div key={index} className="flex items-center justify-between text-xs">
+                      <span>{ingredient.food.name} ({ingredient.quantity}g)</span>
+                      <button
+                        onClick={() => removeIngredientFromSmoothie(ingredient.food.id)}
+                        className="p-1 text-red-600 hover:bg-red-50 rounded"
+                      >
+                        <Icons.Trash2 size="text-xs" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 pt-2 border-t text-xs">
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    <div>
+                      <div className="font-bold">{Math.round(smoothieMacros.calories)}</div>
+                      <div className="text-gray-500">cal</div>
+                    </div>
+                    <div>
+                      <div className="font-bold">{Math.round(smoothieMacros.protein)}</div>
+                      <div className="text-gray-500">prot</div>
+                    </div>
+                    <div>
+                      <div className="font-bold">{Math.round(smoothieMacros.carbs)}</div>
+                      <div className="text-gray-500">carb</div>
+                    </div>
+                    <div>
+                      <div className="font-bold">{Math.round(smoothieMacros.fats)}</div>
+                      <div className="text-gray-500">gras</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Selector de ingredientes */}
+            <div className="mb-4">
+              <h4 className="font-semibold mb-3 text-sm">Agregar ingredientes</h4>
+              <div className="space-y-3">
+                {['frutas', 'bebidas', 'proteinas'].map((category) => {
+                  const categoryFoods = globalFoods.filter(food => food.category === category)
+                  const categoryIcons = { frutas: '🍎', bebidas: '🥤', proteinas: '🍗' }
+                  
+                  return (
+                    <div key={category}>
+                      <h5 className="font-medium flex items-center gap-2 text-sm mb-2">
+                        {categoryIcons[category as keyof typeof categoryIcons]} {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </h5>
+                      <div className="grid grid-cols-2 gap-2">
+                        {categoryFoods.slice(0, 6).map((food) => (
+                          <button
+                            key={food.id}
+                            onClick={() => {
+                              const quantity = prompt(`¿Cuántos gramos de ${food.name}?`, "50")
+                              if (quantity && !isNaN(Number(quantity))) {
+                                addIngredientToSmoothie(food, Number(quantity))
+                              }
+                            }}
+                            className="px-2 py-2 text-xs border rounded-lg hover:bg-gray-50 transition-colors text-left"
+                          >
+                            <div className="font-medium">{food.name}</div>
+                            <div className="text-gray-500">{food.calories} cal/100g</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Botones de acción */}
+            {smoothieIngredients.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-xs text-gray-600 mb-2">Guardar como:</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => saveSmoothieAsMeal("desayuno")}
+                    className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600 text-xs"
+                  >
+                    Desayuno
+                  </button>
+                  <button
+                    onClick={() => saveSmoothieAsMeal("almuerzo")}
+                    className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 text-xs"
+                  >
+                    Almuerzo
+                  </button>
+                  <button
+                    onClick={() => saveSmoothieAsMeal("cena")}
+                    className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 text-xs"
+                  >
+                    Cena
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                setSmoothieIngredients([])
+                setShowSmoothieBuilder(false)
+              }}
+              className="w-full mt-3 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 🆕 Constructor de comidas mejorado
+  const MealBuilderModal = () => {
+    if (!showMealBuilder) return null
+
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+        <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+                <Icons.ChefHat size="text-lg" />
+                Constructor de Comidas
+              </h3>
+              <button onClick={() => setShowMealBuilder(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                <Icons.X size="text-lg" />
+              </button>
+            </div>
+
+            {/* Lista de ingredientes actuales */}
+            {mealBuilder.ingredients.length > 0 && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                <h4 className="font-semibold mb-2 text-sm">Ingredientes ({mealBuilder.ingredients.length})</h4>
+                <div className="space-y-2">
+                  {mealBuilder.ingredients.map((ingredient, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className="flex-1 text-xs">
+                        <div className="font-medium">{ingredient.food.name}</div>
+                        <div className="text-gray-500">
+                          {Math.round((ingredient.food.calories * ingredient.quantity) / 100)} cal
+                        </div>
+                      </div>
+                      <input
+                        type="number"
+                        value={ingredient.quantity}
+                        onChange={(e) => updateIngredientQuantity(index, Number(e.target.value))}
+                        className="w-16 p-1 border rounded text-xs text-center"
+                        min="1"
+                      />
+                      <span className="text-xs text-gray-500">g</span>
+                      <button
+                        onClick={() => removeIngredientFromMealBuilder(index)}
+                        className="p-1 text-red-600 hover:bg-red-50 rounded"
+                      >
+                        <Icons.Trash2 size="text-xs" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Resumen nutricional */}
+                <div className="mt-3 pt-2 border-t">
+                  <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                    <div>
+                      <div className="font-bold">{Math.round(mealBuilder.totalMacros.calories)}</div>
+                      <div className="text-gray-500">cal</div>
+                    </div>
+                    <div>
+                      <div className="font-bold">{Math.round(mealBuilder.totalMacros.protein)}</div>
+                      <div className="text-gray-500">prot</div>
+                    </div>
+                    <div>
+                      <div className="font-bold">{Math.round(mealBuilder.totalMacros.carbs)}</div>
+                      <div className="text-gray-500">carb</div>
+                    </div>
+                    <div>
+                      <div className="font-bold">{Math.round(mealBuilder.totalMacros.fats)}</div>
+                      <div className="text-gray-500">gras</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Selector de alimentos por categoría */}
+            <div className="mb-4">
+              <h4 className="font-semibold mb-3 text-sm">Agregar alimentos</h4>
+              <div className="space-y-3">
+                {getFoodsByCategory().map((category) => (
+                  <div key={category.id}>
+                    <h5 className="font-medium flex items-center gap-2 text-sm mb-2">
+                      {category.icon} {category.name}
+                    </h5>
+                    <div className="grid grid-cols-2 gap-2">
+                      {category.foods.slice(0, 4).map((food) => (
+                        <button
+                          key={food.id}
+                          onClick={() => {
+                            const quantity = prompt(`¿Cuántos gramos de ${food.name}?`, "100")
+                            if (quantity && !isNaN(Number(quantity))) {
+                              addIngredientToMealBuilder(food, Number(quantity))
+                            }
+                          }}
+                          className="px-2 py-2 text-xs border rounded-lg hover:bg-gray-50 transition-colors text-left"
+                        >
+                          <div className="font-medium">{food.name}</div>
+                          <div className="text-gray-500">{food.calories} cal/100g</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Botones de guardar */}
+            {mealBuilder.ingredients.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-xs text-gray-600 mb-2">Guardar como:</div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => saveMealBuilderAsMeal("desayuno")}
+                    className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600 text-xs"
+                  >
+                    Desayuno
+                  </button>
+                  <button
+                    onClick={() => saveMealBuilderAsMeal("almuerzo")}
+                    className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 text-xs"
+                  >
+                    Almuerzo
+                  </button>
+                  <button
+                    onClick={() => saveMealBuilderAsMeal("cena")}
+                    className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 text-xs"
+                  >
+                    Cena
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                setMealBuilder({ ingredients: [], totalMacros: { calories: 0, protein: 0, carbs: 0, fats: 0 } })
+                setShowMealBuilder(false)
+              }}
+              className="w-full mt-3 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Panel de administración mejorado
   const AdminPanel = () => {
     const [showAddResource, setShowAddResource] = useState(false)
     const [newResource, setNewResource] = useState({
@@ -1516,7 +2154,6 @@ Gracias!`
       image_url: "",
     })
 
-    // 🆕 Estados para agregar tips
     const [showAddTip, setShowAddTip] = useState(false)
     const [newTip, setNewTip] = useState({
       category: "",
@@ -1525,7 +2162,6 @@ Gracias!`
       icon: "💡",
     })
 
-    // 🆕 Estados para agregar suplementos
     const [showAddSupplement, setShowAddSupplement] = useState(false)
     const [newSupplement, setNewSupplement] = useState({
       name: "",
@@ -1536,7 +2172,10 @@ Gracias!`
       whatsapp_message: "",
     })
 
-    // 🆕 Función para agregar recursos
+    // 🆕 Estados para edición
+    const [editingResource, setEditingResource] = useState<GlobalResource | null>(null)
+    const [editingSupplement, setEditingSupplement] = useState<Supplement | null>(null)
+
     const addResource = async () => {
       try {
         const { data, error } = await supabase
@@ -1566,7 +2205,6 @@ Gracias!`
       }
     }
 
-    // 🆕 Función para agregar tips
     const addTip = async () => {
       try {
         const { data, error } = await supabase
@@ -1595,7 +2233,6 @@ Gracias!`
       }
     }
 
-    // 🆕 Función para agregar suplementos
     const addSupplement = async () => {
       try {
         const { data, error } = await supabase
@@ -1626,6 +2263,111 @@ Gracias!`
         alert("❌ Error al agregar suplemento")
       }
     }
+
+    // 🆕 Funciones de edición
+    const updateResource = async (resource: GlobalResource) => {
+      try {
+        const { error } = await supabase
+          .from("global_resources")
+          .update({
+            title: resource.title,
+            description: resource.description,
+            url: resource.url,
+            image_url: resource.image_url,
+            is_active: resource.is_active,
+          })
+          .eq("id", resource.id)
+        
+        if (error) throw error
+        
+        setGlobalResources(prev => prev.map(r => r.id === resource.id ? resource : r))
+        setEditingResource(null)
+        alert("✅ Recurso actualizado!")
+      } catch (error) {
+        console.error("Error updating resource:", error)
+        alert("❌ Error al actualizar recurso")
+      }
+    }
+
+    const toggleResourceStatus = async (resourceId: string, isActive: boolean) => {
+      try {
+        const { error } = await supabase
+          .from("global_resources")
+          .update({ is_active: !isActive })
+          .eq("id", resourceId)
+        
+        if (error) throw error
+        
+        setGlobalResources(prev => prev.map(r => 
+          r.id === resourceId ? { ...r, is_active: !isActive } : r
+        ))
+        alert(`✅ Recurso ${!isActive ? 'activado' : 'desactivado'}!`)
+      } catch (error) {
+        console.error("Error toggling resource:", error)
+        alert("❌ Error al cambiar estado del recurso")
+      }
+    }
+
+    const deleteResource = async (resourceId: string) => {
+      if (!confirm("¿Estás seguro de eliminar este recurso?")) return
+      
+      try {
+        const { error } = await supabase
+          .from("global_resources")
+          .delete()
+          .eq("id", resourceId)
+        
+        if (error) throw error
+        
+        setGlobalResources(prev => prev.filter(r => r.id !== resourceId))
+        alert("✅ Recurso eliminado!")
+      } catch (error) {
+        console.error("Error deleting resource:", error)
+        alert("❌ Error al eliminar recurso")
+      }
+    }
+
+    // 🆕 Análisis de patrones para suplementación
+    const analyzeUserPatternsForSupplements = () => {
+      const patterns = allUsers.map(user => {
+        // Obtener datos de progreso del usuario (simulado para demo)
+        const avgWater = Math.random() * 8 // Simular promedio de agua
+        const avgExercise = Math.random() * 2 // Simular promedio de ejercicio
+        const avgMindfulness = Math.random() * 2 // Simular promedio de mindfulness
+        
+        const recommendations = []
+        
+        if (avgWater < 4) recommendations.push("Electrolitos/Hidratación")
+        if (avgExercise < 0.5) recommendations.push("Energéticos/Pre-workout")
+        if (avgMindfulness < 0.5) recommendations.push("Relajantes/Adaptógenos")
+        if (user.goal === "gain_muscle") recommendations.push("Proteína/Creatina")
+        if (user.goal === "lose_weight") recommendations.push("Quemadores/Termogénicos")
+        
+        return {
+          userId: user.id,
+          name: user.name,
+          goal: user.goal,
+          patterns: {
+            lowWater: avgWater < 4,
+            lowExercise: avgExercise < 0.5,
+            lowMindfulness: avgMindfulness < 0.5,
+          },
+          recommendations,
+          priority: recommendations.length > 2 ? "Alta" : recommendations.length > 0 ? "Media" : "Baja"
+        }
+      })
+      
+      return patterns
+    }
+
+    const userPatterns = analyzeUserPatternsForSupplements()
+    const highPriorityUsers = userPatterns.filter(p => p.priority === "Alta")
+    const supplementRecommendationStats = userPatterns.reduce((acc, pattern) => {
+      pattern.recommendations.forEach(rec => {
+        acc[rec] = (acc[rec] || 0) + 1
+      })
+      return acc
+    }, {} as Record<string, number>)
 
     return (
       <div className="min-h-screen bg-gray-50">
@@ -1670,7 +2412,7 @@ Gracias!`
               {[
                 { id: "dashboard", name: "Dashboard", icon: <Icons.Chart size="text-sm" /> },
                 { id: "users", name: "Usuarios", icon: <Icons.Users size="text-sm" /> },
-                { id: "ia-patterns", name: "IA Patterns", icon: <Icons.Robot size="text-sm" /> },
+                { id: "patterns", name: "Patrones IA", icon: <Icons.Robot size="text-sm" /> },
                 { id: "resources", name: "Recursos", icon: <Icons.Link size="text-sm" /> },
                 { id: "supplements", name: "Suplementos", icon: <Icons.Package size="text-sm" /> },
                 { id: "analytics", name: "Analytics", icon: <Icons.TrendingUp size="text-sm" /> },
@@ -1697,7 +2439,6 @@ Gracias!`
           {/* TAB DASHBOARD */}
           {activeAdminTab === "dashboard" && (
             <div className="space-y-4">
-              {/* Métricas principales */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white rounded-lg shadow p-4">
                   <div className="flex items-center justify-between">
@@ -1730,11 +2471,11 @@ Gracias!`
                 <div className="bg-white rounded-lg shadow p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-gray-600">Tips Activos</p>
-                      <p className="text-xl sm:text-2xl font-bold text-green-600">{globalTips.length}</p>
-                      <p className="text-xs text-gray-500 mt-1">Contenido educativo</p>
+                      <p className="text-xs font-medium text-gray-600">Usuarios Alta Prioridad</p>
+                      <p className="text-xl sm:text-2xl font-bold text-red-600">{highPriorityUsers.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Necesitan atención</p>
                     </div>
-                    <Icons.Lightbulb size="text-2xl" />
+                    <Icons.AlertCircle size="text-2xl" />
                   </div>
                 </div>
                 <div className="bg-white rounded-lg shadow p-4">
@@ -1749,28 +2490,23 @@ Gracias!`
                 </div>
               </div>
 
-              {/* Estado del sistema */}
+              {/* 🆕 Recomendaciones IA más populares */}
               <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Icons.Database size="text-lg" />
-                  Estado del Sistema
+                  <Icons.Robot size="text-lg" />
+                  Suplementos Más Recomendados por IA
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl mb-2">✅</div>
-                    <div className="font-semibold text-green-800 text-sm">Supabase</div>
-                    <div className="text-xs text-green-600">Conectado y funcionando</div>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl mb-2">🚀</div>
-                    <div className="font-semibold text-blue-800 text-sm">Vercel</div>
-                    <div className="text-xs text-blue-600">Desplegado y activo</div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl mb-2">🤖</div>
-                    <div className="font-semibold text-purple-800 text-sm">IA Engine</div>
-                    <div className="text-xs text-purple-600">Generando recomendaciones</div>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(supplementRecommendationStats)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 6)
+                    .map(([supplement, count]) => (
+                    <div key={supplement} className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-lg">
+                      <div className="font-semibold text-sm">{supplement}</div>
+                      <div className="text-2xl font-bold text-blue-600">{count}</div>
+                      <div className="text-xs text-gray-600">usuarios candidatos</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -1786,128 +2522,125 @@ Gracias!`
                 </h3>
               </div>
               <div className="max-h-96 overflow-y-auto">
-                {allUsers.map((user) => (
-                  <div key={user.id} className="p-4 border-b hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-sm">{user.name}</p>
-                        <p className="text-xs text-gray-600">{user.phone}</p>
-                        <p className="text-xs text-gray-500">
-                          Registrado: {new Date(user.created_at).toLocaleDateString()}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Último acceso: {new Date(user.last_login).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs bg-gray-100 px-2 py-1 rounded mb-1 block">
-                          {GOALS.find((g) => g.id === user.goal)?.label || user.goal}
-                        </span>
-                        <div className="text-xs text-gray-500">
-                          {user.age} años | {user.weight}kg | {user.height}cm
+                {allUsers.map((user) => {
+                  const userPattern = userPatterns.find(p => p.userId === user.id)
+                  return (
+                    <div key={user.id} className="p-4 border-b hover:bg-gray-50 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-sm">{user.name}</p>
+                          <p className="text-xs text-gray-600">{user.phone}</p>
+                          <p className="text-xs text-gray-500">
+                            Registrado: {new Date(user.created_at).toLocaleDateString()}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Último acceso: {new Date(user.last_login).toLocaleDateString()}
+                          </p>
                         </div>
-                        <div className="text-xs text-gray-500">
-                          Actividad: {ACTIVITY_LEVELS.find((a) => a.value === user.activity_level)?.label}
+                        <div className="text-right">
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded mb-1 block">
+                            {GOALS.find((g) => g.id === user.goal)?.label || user.goal}
+                          </span>
+                          {userPattern && (
+                            <span className={`text-xs px-2 py-1 rounded mb-1 block ${
+                              userPattern.priority === 'Alta' ? 'bg-red-100 text-red-800' :
+                              userPattern.priority === 'Media' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-green-100 text-green-800'
+                            }`}>
+                              Prioridad: {userPattern.priority}
+                            </span>
+                          )}
+                          <div className="text-xs text-gray-500">
+                            {user.age} años | {user.weight}kg | {user.height}cm
+                          </div>
                         </div>
                       </div>
+                      {userPattern && userPattern.recommendations.length > 0 && (
+                        <div className="mt-2 pt-2 border-t">
+                          <div className="text-xs text-gray-600 mb-1">Recomendaciones IA:</div>
+                          <div className="flex flex-wrap gap-1">
+                            {userPattern.recommendations.map((rec, idx) => (
+                              <span key={idx} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                {rec}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}
 
-          {/* 🆕 TAB IA PATTERNS - RESTAURADO COMPLETO */}
-          {activeAdminTab === "ia-patterns" && (
+          {/* 🆕 TAB PATRONES IA */}
+          {activeAdminTab === "patterns" && (
             <div className="space-y-4 sm:space-y-6">
-              {/* Explicación del sistema IA */}
               <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
                   <Icons.Robot size="text-lg" />
-                  Sistema de Análisis Inteligente
+                  Análisis de Patrones para Suplementación
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl sm:text-3xl mb-2">🧠</div>
-                    <div className="font-semibold text-sm">Análisis de Comportamiento</div>
-                    <div className="text-xs text-gray-600">
-                      Detecta patrones en hidratación, ejercicio y mindfulness
-                    </div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl sm:text-3xl mb-2">🎯</div>
-                    <div className="font-semibold text-sm">Recomendaciones Personalizadas</div>
-                    <div className="text-xs text-gray-600">Sugiere suplementos basados en déficits detectados</div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl sm:text-3xl mb-2">📊</div>
-                    <div className="font-semibold text-sm">Scoring de Confianza</div>
-                    <div className="text-xs text-gray-600">Evalúa la precisión de cada recomendación</div>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <div className="text-2xl sm:text-3xl mb-2">⚡</div>
-                    <div className="font-semibold text-sm">Optimización Temporal</div>
-                    <div className="text-xs text-gray-600">Determina el mejor momento para cada suplemento</div>
+                
+                {/* Usuarios de alta prioridad */}
+                <div className="mb-6">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base text-red-600">
+                    🚨 Usuarios de Alta Prioridad ({highPriorityUsers.length})
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {highPriorityUsers.map((pattern) => (
+                      <div key={pattern.userId} className="border border-red-200 rounded-lg p-3 bg-red-50">
+                        <div className="font-medium text-sm">{pattern.name}</div>
+                        <div className="text-xs text-gray-600 mb-2">
+                          Objetivo: {GOALS.find(g => g.id === pattern.goal)?.label}
+                        </div>
+                        <div className="space-y-1">
+                          {pattern.patterns.lowWater && (
+                            <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">💧 Baja hidratación</div>
+                          )}
+                          {pattern.patterns.lowExercise && (
+                            <div className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">💪 Poco ejercicio</div>
+                          )}
+                          {pattern.patterns.lowMindfulness && (
+                            <div className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">🧘 Poco mindfulness</div>
+                          )}
+                        </div>
+                        <div className="mt-2 text-xs">
+                          <strong>Sugerencias:</strong>
+                          <div className="mt-1 space-y-1">
+                            {pattern.recommendations.map((rec, idx) => (
+                              <div key={idx} className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                                {rec}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Algoritmos activos */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-semibold mb-3 text-sm sm:text-base">🔬 Algoritmos Activos</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-white rounded border">
-                      <div>
-                        <span className="font-medium text-sm">Detector de Déficit de Ejercicio</span>
-                        <p className="text-xs text-gray-600">
-                          Si ejercicio promedio {"<"} 0.5 sesiones/día → Recomienda energéticos
-                        </p>
+                {/* Estadísticas de recomendaciones */}
+                <div>
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">📊 Estadísticas de Recomendaciones</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Object.entries(supplementRecommendationStats).map(([supplement, count]) => (
+                      <div key={supplement} className="bg-gray-50 p-3 rounded-lg">
+                        <div className="font-medium text-sm">{supplement}</div>
+                        <div className="text-2xl font-bold text-blue-600">{count}</div>
+                        <div className="text-xs text-gray-600">
+                          {Math.round((count / allUsers.length) * 100)}% de usuarios
+                        </div>
                       </div>
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Activo</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-white rounded border">
-                      <div>
-                        <span className="font-medium text-sm">Detector de Estrés/Ansiedad</span>
-                        <p className="text-xs text-gray-600">
-                          Si mindfulness {"<"} 0.5 sesiones/día → Recomienda relajantes
-                        </p>
-                      </div>
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Activo</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-white rounded border">
-                      <div>
-                        <span className="font-medium text-sm">Detector de Deshidratación</span>
-                        <p className="text-xs text-gray-600">Si agua {"<"} 6 vasos/día → Recomienda electrolitos</p>
-                      </div>
-                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">En desarrollo</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Métricas de IA */}
-              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold mb-4">📈 Métricas de IA</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-xl sm:text-2xl font-bold text-blue-600">
-                      {allUsers.length > 0 ? Math.round((aiRecommendations.length / allUsers.length) * 100) : 0}%
-                    </div>
-                    <div className="text-xs sm:text-sm text-gray-600">Usuarios con recomendaciones activas</div>
-                  </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-xl sm:text-2xl font-bold text-green-600">85%</div>
-                    <div className="text-xs sm:text-sm text-gray-600">Precisión promedio del algoritmo</div>
-                  </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-xl sm:text-2xl font-bold text-purple-600">12%</div>
-                    <div className="text-xs sm:text-sm text-gray-600">Tasa de conversión estimada</div>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB RECURSOS */}
+          {/* TAB RECURSOS con CRUD completo */}
           {activeAdminTab === "resources" && (
             <div className="space-y-4 sm:space-y-6">
               <div className="bg-white rounded-lg shadow p-4 sm:p-6">
@@ -1934,24 +2667,58 @@ Gracias!`
                   </div>
                 </div>
 
-                {/* Lista de recursos existentes */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Lista de recursos con opciones CRUD */}
+                <div className="grid grid-cols-1 gap-4">
                   {globalResources.map((resource) => (
                     <div key={resource.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-lg">{getResourceTypeIcon(resource.type)}</span>
-                        <span className="text-xs sm:text-sm font-medium capitalize">{resource.type}</span>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg">{getResourceTypeIcon(resource.type)}</span>
+                            <span className="text-xs sm:text-sm font-medium capitalize">{resource.type}</span>
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              resource.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {resource.is_active ? 'Activo' : 'Inactivo'}
+                            </span>
+                          </div>
+                          <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                          <p className="text-xs text-gray-600 mb-2">{resource.description}</p>
+                          <a
+                            href={resource.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 hover:text-blue-800 break-all"
+                          >
+                            {resource.url}
+                          </a>
+                        </div>
+                        <div className="flex items-center gap-2 ml-4">
+                          <button
+                            onClick={() => setEditingResource(resource)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                            title="Editar"
+                          >
+                            <Icons.Edit size="text-sm" />
+                          </button>
+                          <button
+                            onClick={() => toggleResourceStatus(resource.id, resource.is_active)}
+                            className={`p-2 rounded-lg ${
+                              resource.is_active ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'
+                            }`}
+                            title={resource.is_active ? 'Desactivar' : 'Activar'}
+                          >
+                            {resource.is_active ? <Icons.X size="text-sm" /> : <Icons.CheckCircle size="text-sm" />}
+                          </button>
+                          <button
+                            onClick={() => deleteResource(resource.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                            title="Eliminar"
+                          >
+                            <Icons.Trash2 size="text-sm" />
+                          </button>
+                        </div>
                       </div>
-                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
-                      <p className="text-xs text-gray-600 mb-2">{resource.description}</p>
-                      <a
-                        href={resource.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-600 hover:text-blue-800 break-all"
-                      >
-                        {resource.url}
-                      </a>
                     </div>
                   ))}
                 </div>
@@ -1979,7 +2746,7 @@ Gracias!`
             </div>
           )}
 
-          {/* TAB SUPLEMENTOS */}
+          {/* TAB SUPLEMENTOS con CRUD completo */}
           {activeAdminTab === "supplements" && (
             <div className="bg-white rounded-lg shadow p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
@@ -1998,7 +2765,16 @@ Gracias!`
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {supplements.map((supplement) => (
                   <div key={supplement.id} className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-sm mb-1">{supplement.name}</h4>
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-semibold text-sm mb-1 flex-1">{supplement.name}</h4>
+                      <button
+                        onClick={() => setEditingSupplement(supplement)}
+                        className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                        title="Editar"
+                      >
+                        <Icons.Edit size="text-xs" />
+                      </button>
+                    </div>
                     <p className="text-xs text-gray-600 mb-2">{supplement.description}</p>
                     <p className="text-sm sm:text-base font-bold text-green-600 mb-2">
                       ${supplement.price.toLocaleString()}
@@ -2012,7 +2788,7 @@ Gracias!`
             </div>
           )}
 
-          {/* 🆕 TAB ANALYTICS - RESTAURADO COMPLETO */}
+          {/* TAB ANALYTICS */}
           {activeAdminTab === "analytics" && (
             <div className="space-y-4 sm:space-y-6">
               <div className="bg-white rounded-lg shadow p-4 sm:p-6">
@@ -2057,7 +2833,6 @@ Gracias!`
                 </div>
               </div>
 
-              {/* Métricas adicionales de analytics */}
               <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <h3 className="text-base sm:text-lg font-semibold mb-4">📈 Métricas de Engagement</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -2097,8 +2872,7 @@ Gracias!`
           )}
         </div>
 
-        {/* 🆕 MODALES COMPLETOS - RESPONSIVE */}
-        {/* Modal para agregar recurso */}
+        {/* MODALES PARA AGREGAR CONTENIDO */}
         {showAddResource && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
             <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
@@ -2173,7 +2947,6 @@ Gracias!`
           </div>
         )}
 
-        {/* Modal para agregar tip */}
         {showAddTip && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
             <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
@@ -2238,7 +3011,6 @@ Gracias!`
           </div>
         )}
 
-        {/* 🆕 Modal para agregar suplemento - COMPLETO */}
         {showAddSupplement && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
             <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
@@ -2318,6 +3090,65 @@ Gracias!`
             </div>
           </div>
         )}
+
+        {/* 🆕 Modal de edición de recursos */}
+        {editingResource && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Editar Recurso</h3>
+                  <button onClick={() => setEditingResource(null)} className="p-2 hover:bg-gray-100 rounded-full">
+                    <Icons.X size="text-lg" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Título del recurso"
+                    value={editingResource.title}
+                    onChange={(e) => setEditingResource({...editingResource, title: e.target.value})}
+                  />
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Descripción"
+                    rows={3}
+                    value={editingResource.description}
+                    onChange={(e) => setEditingResource({...editingResource, description: e.target.value})}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="URL"
+                    value={editingResource.url}
+                    onChange={(e) => setEditingResource({...editingResource, url: e.target.value})}
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={editingResource.is_active}
+                      onChange={(e) => setEditingResource({...editingResource, is_active: e.target.checked})}
+                    />
+                    <label className="text-sm">Activo</label>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                  <button
+                    onClick={() => updateResource(editingResource)}
+                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 text-sm"
+                  >
+                    Actualizar
+                  </button>
+                  <button
+                    onClick={() => setEditingResource(null)}
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -2365,870 +3196,3 @@ Gracias!`
       </div>
     )
   }
-
-  // ============================================================================
-  // PANTALLA DE LOGIN/REGISTRO RESPONSIVE
-  // ============================================================================
-  if (!currentUser) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-          <div className="text-center mb-6">
-            <div onClick={handleLogoClick} className="cursor-pointer">
-              <h1 className="text-xl sm:text-2xl font-bold text-green-600">VitalMente</h1>
-              <p className="text-gray-600 text-sm">Tu compañero de bienestar personalizado</p>
-              <div className="flex justify-center gap-2 mt-2 flex-wrap">
-                <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded">🌐 Conectado</span>
-                <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA Activa</span>
-              </div>
-              {logoClicks > 0 && <div className="mt-2 text-xs text-gray-400">Clics: {logoClicks}/5</div>}
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            {/* Botones de navegación */}
-            <div className="flex rounded-lg bg-gray-100 p-1">
-              <button
-                onClick={() => setShowRegister(false)}
-                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
-                  !showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600"
-                }`}
-              >
-                Ingresar
-              </button>
-              <button
-                onClick={() => setShowRegister(true)}
-                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
-                  showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600"
-                }`}
-              >
-                Crear Cuenta
-              </button>
-            </div>
-
-            {!showRegister ? (
-              <div className="space-y-4">
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                  placeholder="+57 300 123 4567"
-                  value={loginForm.phone}
-                  onChange={(e) => setLoginForm((prev) => ({ ...prev, phone: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                  type="password"
-                  placeholder="Código de 10 dígitos"
-                  maxLength={10}
-                  value={loginForm.accessCode}
-                  onChange={(e) => setLoginForm((prev) => ({ ...prev, accessCode: e.target.value }))}
-                />
-                <button
-                  onClick={handleLogin}
-                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors text-sm"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Icons.Loader2 size="text-sm" />
-                      Ingresando...
-                    </>
-                  ) : (
-                    "Ingresar"
-                  )}
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                  placeholder="Número de teléfono"
-                  value={registerForm.phone}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
-                />
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                  placeholder="Nombre completo"
-                  value={registerForm.name}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, name: e.target.value }))}
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                    placeholder="Edad"
-                    type="number"
-                    value={registerForm.age}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, age: e.target.value }))}
-                  />
-                  <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                    placeholder="Peso (kg)"
-                    type="number"
-                    value={registerForm.weight}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, weight: e.target.value }))}
-                  />
-                </div>
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                  placeholder="Altura (cm)"
-                  type="number"
-                  value={registerForm.height}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, height: e.target.value }))}
-                />
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                  value={registerForm.activityLevel}
-                  onChange={(e) =>
-                    setRegisterForm((prev) => ({ ...prev, activityLevel: Number.parseFloat(e.target.value) }))
-                  }
-                >
-                  {ACTIVITY_LEVELS.map((level) => (
-                    <option key={level.value} value={level.value}>
-                      {level.label} - {level.desc}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                  value={registerForm.goal}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, goal: e.target.value }))}
-                >
-                  <optgroup label="🎯 TRANSFORMACIÓN FÍSICA">
-                    {GOALS.filter((goal) => goal.category === "physical").map((goal) => (
-                      <option key={goal.id} value={goal.id}>
-                        {goal.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="💫 BIENESTAR EMOCIONAL">
-                    {GOALS.filter((goal) => goal.category === "emotional").map((goal) => (
-                      <option key={goal.id} value={goal.id}>
-                        {goal.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="⚖️ EQUILIBRIO TOTAL">
-                    {GOALS.filter((goal) => goal.category === "holistic").map((goal) => (
-                      <option key={goal.id} value={goal.id}>
-                        {goal.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                </select>
-                <div className="space-y-4">
-                  <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                    type="password"
-                    placeholder="Código de acceso (10 dígitos)"
-                    maxLength={10}
-                    value={registerForm.accessCode}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, accessCode: e.target.value }))}
-                  />
-                  <input
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                    type="password"
-                    placeholder="Confirmar código"
-                    maxLength={10}
-                    value={registerForm.confirmCode}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, confirmCode: e.target.value }))}
-                  />
-                </div>
-                <button
-                  onClick={handleRegister}
-                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors text-sm"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Icons.Loader2 size="text-sm" />
-                      Creando cuenta...
-                    </>
-                  ) : (
-                    "Crear cuenta"
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Modal de acceso administrador */}
-        {showAdminLogin && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-            <div className="relative top-20 mx-auto border w-full max-w-sm shadow-lg rounded-md bg-white">
-              <div className="p-5">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Acceso Administrador</h3>
-                <input
-                  className="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm"
-                  type="password"
-                  placeholder="Código de acceso"
-                  value={adminCode}
-                  onChange={(e) => setAdminCode(e.target.value)}
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={handleAdminLogin}
-                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 text-sm"
-                  >
-                    Ingresar
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowAdminLogin(false)
-                      setAdminCode("")
-                      setLogoClicks(0)
-                    }}
-                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  // ============================================================================
-  // APLICACIÓN PRINCIPAL RESPONSIVE
-  // ============================================================================
-  const activeTips = globalTips.filter((tip) => tip.is_active)
-  const mindfulnessResources = globalResources.filter((r) => r.type === "mindfulness" && r.is_active)
-  const nutritionResources = globalResources.filter((r) => r.type === "nutrition" && r.is_active)
-  const exerciseResources = globalResources.filter((r) => r.type === "exercise" && r.is_active)
-  const caloriesProgress = getCaloriesProgress()
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 pb-20">
-      <SaveStatusIndicator />
-      <FloatingActionButtons />
-
-      {/* Header responsive */}
-      <header className="bg-white border-b shadow-sm sticky top-0 z-30">
-        <div className="px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-2xl font-bold text-green-600">VitalMente</h1>
-              <span className="hidden sm:inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="sm:hidden p-2 rounded-lg hover:bg-gray-100"
-              >
-                <Icons.Menu size="text-xl" />
-              </button>
-              <button
-                onClick={handleLogout}
-                className="hidden sm:flex px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 items-center gap-2 text-sm"
-              >
-                <Icons.LogOut size="text-sm" />
-                Salir
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Menú móvil desplegable */}
-        {showMobileMenu && (
-          <div className="sm:hidden bg-white border-t p-4">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 rounded-lg text-sm"
-            >
-              <Icons.LogOut size="text-sm" />
-              Cerrar Sesión
-            </button>
-          </div>
-        )}
-      </header>
-
-      {/* Contenido principal */}
-      <main className="px-4 py-6">
-        {activeTab === "inicio" && (
-          <div className="space-y-4">
-            {/* Bienvenida */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-base sm:text-lg font-semibold mb-2 flex items-center gap-2">
-                ¡Hola, {currentUser?.name}! <Icons.Magic size="text-lg" />
-              </h2>
-              <p className="text-gray-600 text-sm">{getMotivationalMessage(currentUser?.goal || "reduce_stress")}</p>
-            </div>
-
-            {/* Panel de gamificación */}
-            <GamificationPanel />
-
-            {/* Progreso diario */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-semibold flex items-center gap-2">
-                  <Icons.Target size="text-lg" />
-                  Progreso Diario
-                </h3>
-                <span className="text-xs text-gray-600">
-                  {getProgressPercentage()}% <Icons.CheckCircle size="text-sm" />
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Agua */}
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                  <Icons.Droplets size="text-2xl" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Agua</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <button
-                        onClick={() => updateProgress("water", -1)}
-                        className="p-1 rounded-full hover:bg-blue-100 transition-colors"
-                      >
-                        <Icons.Minus size="text-sm" />
-                      </button>
-                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.water}</span>
-                      <button
-                        onClick={() => updateProgress("water", 1)}
-                        className="p-1 rounded-full hover:bg-blue-100 transition-colors"
-                      >
-                        <Icons.Plus size="text-sm" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Ejercicio */}
-                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                  <Icons.Activity size="text-2xl" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Ejercicio</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <button
-                        onClick={() => updateProgress("exercise", -1)}
-                        className="p-1 rounded-full hover:bg-green-100 transition-colors"
-                      >
-                        <Icons.Minus size="text-sm" />
-                      </button>
-                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.exercise}</span>
-                      <button
-                        onClick={() => updateProgress("exercise", 1)}
-                        className="p-1 rounded-full hover:bg-green-100 transition-colors"
-                      >
-                        <Icons.Plus size="text-sm" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mindfulness */}
-                <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                  <Icons.Brain size="text-2xl" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Mindfulness</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <button
-                        onClick={() => updateProgress("mindfulness", -1)}
-                        className="p-1 rounded-full hover:bg-purple-100 transition-colors"
-                      >
-                        <Icons.Minus size="text-sm" />
-                      </button>
-                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.mindfulness}</span>
-                      <button
-                        onClick={() => updateProgress("mindfulness", 1)}
-                        className="p-1 rounded-full hover:bg-purple-100 transition-colors"
-                      >
-                        <Icons.Plus size="text-sm" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Tips del día */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                <Icons.Lightbulb size="text-lg" />
-                Tip del día
-              </h3>
-              {activeTips.length > 0 ? (
-                <>
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xl">{activeTips[currentTipIndex].icon}</span>
-                      <span className="font-medium text-sm">{activeTips[currentTipIndex].category}</span>
-                    </div>
-                    <h4 className="font-semibold text-sm mb-1">{activeTips[currentTipIndex].title}</h4>
-                    <p className="text-gray-600 text-sm">{activeTips[currentTipIndex].content}</p>
-                  </div>
-                  <div className="flex justify-between">
-                    <button
-                      onClick={() => setCurrentTipIndex((prev) => (prev === 0 ? activeTips.length - 1 : prev - 1))}
-                      className="px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg flex items-center gap-1"
-                    >
-                      <Icons.ChevronLeft size="text-sm" /> Anterior
-                    </button>
-                    <button
-                      onClick={() => setCurrentTipIndex((prev) => (prev === activeTips.length - 1 ? 0 : prev + 1))}
-                      className="px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg flex items-center gap-1"
-                    >
-                      Siguiente <Icons.ChevronRight size="text-sm" />
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p className="text-gray-500 text-sm">No hay tips disponibles.</p>
-              )}
-            </div>
-
-            {/* Recomendaciones IA */}
-            {aiRecommendations.length > 0 && (
-              <div className="bg-white rounded-lg shadow p-4">
-                <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                  <Icons.Robot size="text-lg" />
-                  Recomendaciones IA
-                </h3>
-                {aiRecommendations.map((rec) => (
-                  <div key={rec.id} className="border border-gray-200 rounded-lg p-3 mb-3">
-                    <h4 className="font-semibold text-sm mb-1">{rec.reason}</h4>
-                    <p className="text-xs text-gray-600 mb-2">Suplementos: {rec.supplement_names.join(", ")}</p>
-                    <button
-                      onClick={() => setActiveTab("suplementos")}
-                      className="px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
-                    >
-                      Ver más <Icons.ExternalLink size="text-xs" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "comida" && (
-          <div className="space-y-4">
-            {/* Resumen de calorías */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                <Icons.UtensilsCrossed size="text-lg" />
-                Resumen Nutricional
-              </h3>
-              {macroResults ? (
-                <>
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-medium">Calorías</p>
-                    <p className="text-lg font-bold">
-                      {caloriesProgress.consumed} / {caloriesProgress.target}
-                    </p>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                    <div
-                      className="bg-green-500 h-2.5 rounded-full transition-all duration-300"
-                      style={{ width: `${caloriesProgress.percentage}%` }}
-                    ></div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div className="p-2 bg-red-50 rounded-lg">
-                      <p className="text-xs font-medium">Proteína</p>
-                      <p className="text-sm font-bold">{consumedMacros.protein}g</p>
-                      <p className="text-xs text-gray-500">
-                        {Math.round((consumedMacros.protein / macroResults.protein) * 100)}%
-                      </p>
-                    </div>
-                    <div className="p-2 bg-yellow-50 rounded-lg">
-                      <p className="text-xs font-medium">Carbos</p>
-                      <p className="text-sm font-bold">{consumedMacros.carbs}g</p>
-                      <p className="text-xs text-gray-500">
-                        {Math.round((consumedMacros.carbs / macroResults.carbs) * 100)}%
-                      </p>
-                    </div>
-                    <div className="p-2 bg-blue-50 rounded-lg">
-                      <p className="text-xs font-medium">Grasas</p>
-                      <p className="text-sm font-bold">{consumedMacros.fats}g</p>
-                      <p className="text-xs text-gray-500">
-                        {Math.round((consumedMacros.fats / macroResults.fats) * 100)}%
-                      </p>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <p className="text-gray-500 text-sm">Calculando macros...</p>
-              )}
-            </div>
-
-            {/* Comidas del día */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                <Icons.ChefHat size="text-lg" />
-                Comidas de Hoy
-              </h3>
-              <div className="space-y-4">
-                {/* Desayuno */}
-                <div className="border border-gray-200 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <Icons.UtensilsCrossed size="text-sm" /> Desayuno
-                    </h4>
-                    <button
-                      onClick={() => openMealCalculator("desayuno")}
-                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
-                    >
-                      <Icons.Plus size="text-xs" /> Agregar
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {mealCompositions
-                      .filter((c) => c.meal_type === "desayuno")
-                      .map((composition) => (
-                        <div key={composition.id} className="flex items-center justify-between text-xs">
-                          <div>
-                            <p className="font-medium">{composition.food_name}</p>
-                            <p className="text-gray-500">
-                              {composition.quantity_grams}g - {composition.calories_consumed} cal
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => removeFoodFromMeal(composition.id)}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
-                          >
-                            <Icons.Trash2 size="text-xs" />
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-
-                {/* Almuerzo */}
-                <div className="border border-gray-200 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <Icons.UtensilsCrossed size="text-sm" /> Almuerzo
-                    </h4>
-                    <button
-                      onClick={() => openMealCalculator("almuerzo")}
-                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
-                    >
-                      <Icons.Plus size="text-xs" /> Agregar
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {mealCompositions
-                      .filter((c) => c.meal_type === "almuerzo")
-                      .map((composition) => (
-                        <div key={composition.id} className="flex items-center justify-between text-xs">
-                          <div>
-                            <p className="font-medium">{composition.food_name}</p>
-                            <p className="text-gray-500">
-                              {composition.quantity_grams}g - {composition.calories_consumed} cal
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => removeFoodFromMeal(composition.id)}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
-                          >
-                            <Icons.Trash2 size="text-xs" />
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-
-                {/* Cena */}
-                <div className="border border-gray-200 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold text-sm flex items-center gap-2">
-                      <Icons.UtensilsCrossed size="text-sm" /> Cena
-                    </h4>
-                    <button
-                      onClick={() => openMealCalculator("cena")}
-                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
-                    >
-                      <Icons.Plus size="text-xs" /> Agregar
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {mealCompositions
-                      .filter((c) => c.meal_type === "cena")
-                      .map((composition) => (
-                        <div key={composition.id} className="flex items-center justify-between text-xs">
-                          <div>
-                            <p className="font-medium">{composition.food_name}</p>
-                            <p className="text-gray-500">
-                              {composition.quantity_grams}g - {composition.calories_consumed} cal
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => removeFoodFromMeal(composition.id)}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
-                          >
-                            <Icons.Trash2 size="text-xs" />
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "recursos" && (
-          <div className="space-y-4">
-            {/* Recursos de mindfulness */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                <Icons.Brain size="text-lg" />
-                Mindfulness
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {mindfulnessResources.map((resource) => (
-                  <a
-                    key={resource.id}
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
-                  >
-                    <img
-                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
-                      alt={resource.title}
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="p-3">
-                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
-                      <p className="text-xs text-gray-600">{resource.description}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Recursos de nutrición */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                <Icons.UtensilsCrossed size="text-lg" />
-                Nutrición
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {nutritionResources.map((resource) => (
-                  <a
-                    key={resource.id}
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
-                  >
-                    <img
-                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
-                      alt={resource.title}
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="p-3">
-                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
-                      <p className="text-xs text-gray-600">{resource.description}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Recursos de ejercicio */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                <Icons.Dumbbell size="text-lg" />
-                Ejercicio
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {exerciseResources.map((resource) => (
-                  <a
-                    key={resource.id}
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
-                  >
-                    <img
-                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
-                      alt={resource.title}
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="p-3">
-                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
-                      <p className="text-xs text-gray-600">{resource.description}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "suplementos" && (
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                <Icons.Package size="text-lg" />
-                Suplementos
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {supplements.map((supplement) => (
-                  <div key={supplement.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                    <img
-                      src={supplement.image_url || "/placeholder.svg?height=200&width=200"}
-                      alt={supplement.name}
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="p-3">
-                      <h4 className="font-semibold text-sm mb-1">{supplement.name}</h4>
-                      <p className="text-xs text-gray-600 mb-2">{supplement.description}</p>
-                      <p className="text-sm font-medium text-green-600 mb-2">${supplement.price.toLocaleString()}</p>
-                      <ul className="text-xs text-gray-500 mb-3 space-y-1">
-                        {supplement.benefits.slice(0, 3).map((benefit, index) => (
-                          <li key={index}>• {benefit}</li>
-                        ))}
-                      </ul>
-                      <button
-                        onClick={() => handleSupplementContact(supplement)}
-                        className="w-full px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm"
-                      >
-                        <Icons.MessageSquare size="text-sm" />
-                        Contactar
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Navegación inferior fija */}
-      <nav className="bg-white border-t shadow-lg fixed bottom-0 left-0 w-full z-30">
-        <div className="px-4">
-          <div className="h-16 flex justify-between">
-            <button
-              onClick={() => setActiveTab("inicio")}
-              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
-                activeTab === "inicio" ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              <Icons.Home size="text-xl" />
-              <span className="text-xs mt-1">Inicio</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("comida")}
-              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
-                activeTab === "comida" ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              <Icons.UtensilsCrossed size="text-xl" />
-              <span className="text-xs mt-1">Comida</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("recursos")}
-              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
-                activeTab === "recursos" ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              <Icons.Link size="text-xl" />
-              <span className="text-xs mt-1">Recursos</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("suplementos")}
-              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
-                activeTab === "suplementos" ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              <Icons.Package size="text-xl" />
-              <span className="text-xs mt-1">Tienda</span>
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Modal de calculadora de comida - Responsive */}
-      {showMealCalculator && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-          <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Agregar a {selectedMealType}</h3>
-                <button onClick={() => setShowMealCalculator(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                  <Icons.X size="text-lg" />
-                </button>
-              </div>
-
-              {/* Selector de comida */}
-              <div className="mb-4">
-                <h4 className="font-semibold mb-3 text-sm">Seleccionar alimento</h4>
-                <div className="space-y-3">
-                  {getFoodsByCategory().map((category) => (
-                    <div key={category.id}>
-                      <h5 className="font-medium flex items-center gap-2 text-sm mb-2">
-                        {category.icon} {category.name}
-                      </h5>
-                      <div className="grid grid-cols-2 gap-2">
-                        {category.foods.map((food) => (
-                          <button
-                            key={food.id}
-                            onClick={() => selectFood(food)}
-                            className={`px-3 py-2 text-xs border rounded-lg hover:bg-gray-50 transition-colors text-left ${
-                              selectedFood?.id === food.id ? "border-green-500 bg-green-50" : "border-gray-300"
-                            }`}
-                          >
-                            <div className="font-medium">{food.name}</div>
-                            <div className="text-gray-500">{food.calories} cal/100g</div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Selector de cantidad */}
-              {selectedFood && (
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold mb-2 text-sm">
-                    {selectedFood.name} - {selectedFood.calories} cal/100g
-                  </h4>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="number"
-                      className="flex-1 p-2 border border-gray-300 rounded-lg text-sm"
-                      placeholder="Cantidad"
-                      value={foodQuantity}
-                      onChange={(e) => setFoodQuantity(e.target.value)}
-                    />
-                    <span className="text-sm text-gray-600">gramos</span>
-                  </div>
-                  {foodQuantity && (
-                    <div className="mt-2 text-xs text-gray-600">
-                      Calorías: {Math.round((Number(selectedFood.calories) * Number(foodQuantity)) / 100)} cal
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Botones de acción */}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={addFoodToMeal}
-                  className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 text-sm"
-                  disabled={!selectedFood || !foodQuantity}
-                >
-                  Agregar
-                </button>
-                <button
-                  onClick={() => setShowMealCalculator(false)}
-                  className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
