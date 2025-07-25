@@ -59,15 +59,6 @@ const Icons = {
   Shield: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🛡️</span>,
   Menu: ({ size = "text-xl" }: { size?: string }) => <span className={size}>☰</span>,
   Close: ({ size = "text-xl" }: { size?: string }) => <span className={size}>✕</span>,
-  ChevronDown: ({ size = "text-xl" }: { size?: string }) => <span className={size}>⬇️</span>,
-  ChevronUp: ({ size = "text-xl" }: { size?: string }) => <span className={size}>⬆️</span>,
-  Info: ({ size = "text-xl" }: { size?: string }) => <span className={size}>ℹ️</span>,
-  HelpCircle: ({ size = "text-xl" }: { size?: string }) => <span className={size}>❓</span>,
-  Blend: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🥤</span>,
-  Book: ({ size = "text-xl" }: { size?: string }) => <span className={size}>📚</span>,
-  Heart: ({ size = "text-xl" }: { size?: string }) => <span className={size}>❤️</span>,
-  Bookmark: ({ size = "text-xl" }: { size?: string }) => <span className={size}>🔖</span>,
-  Profile: ({ size = "text-xl" }: { size?: string }) => <span className={size}>👤</span>,
 }
 
 // ============================================================================
@@ -80,7 +71,7 @@ const SUPABASE_ANON_KEY =
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // ============================================================================
-// TIPOS DE DATOS
+// TIPOS DE DATOS (MANTENIENDO LOS ORIGINALES)
 // ============================================================================
 interface UserProfile {
   id: string
@@ -108,6 +99,18 @@ interface DailyProgress {
   cena: number
 }
 
+interface UserFood {
+  id: string
+  user_id: string
+  name: string
+  calories: number
+  protein: number
+  carbs: number
+  fats: number
+  category: "desayuno" | "almuerzo" | "cena" | "snack"
+  created_at: string
+}
+
 interface GlobalFood {
   id: string
   name: string
@@ -122,33 +125,6 @@ interface GlobalFood {
   created_at: string
 }
 
-interface Recipe {
-  id: string
-  name: string
-  description: string
-  category: string
-  ingredients: RecipeIngredient[]
-  total_calories: number
-  total_protein: number
-  total_carbs: number
-  total_fats: number
-  serving_size: number
-  instructions?: string
-  user_id?: string
-  is_active: boolean
-  created_at: string
-}
-
-interface RecipeIngredient {
-  food_id: string
-  food_name: string
-  quantity_grams: number
-  calories: number
-  protein: number
-  carbs: number
-  fats: number
-}
-
 interface MealComposition {
   id: string
   user_id: string
@@ -161,6 +137,39 @@ interface MealComposition {
   protein_consumed: number
   carbs_consumed: number
   fats_consumed: number
+  created_at: string
+}
+
+interface GlobalTip {
+  id: string
+  category: string
+  title: string
+  content: string
+  icon: string
+  is_active: boolean
+  created_at: string
+}
+
+interface GlobalResource {
+  id: string
+  type: "mindfulness" | "nutrition" | "exercise"
+  title: string
+  description: string
+  url: string
+  image_url?: string
+  is_active: boolean
+  created_at: string
+}
+
+interface Supplement {
+  id: string
+  name: string
+  description: string
+  benefits: string[]
+  price: number
+  image_url: string
+  is_active: boolean
+  whatsapp_message?: string
   created_at: string
 }
 
@@ -180,43 +189,44 @@ interface ConsumedMacros {
   fats: number
 }
 
-interface Supplement {
+interface UserGamification {
   id: string
-  name: string
-  description: string
-  price: number
-  category: string
-  benefits: string[]
-  image_url?: string
+  user_id: string
+  total_points: number
+  current_level: number
+  streak_days: number
+  longest_streak: number
+  badges: string[]
+  weekly_points: number
+  monthly_points: number
+  experience_points: number
+  next_level_points: number
+  created_at: string
+  updated_at: string
+}
+
+interface AIRecommendation {
+  id: string
+  user_id: string
+  supplement_names: string[]
+  recommendation_type: string
+  priority: string
+  reason: string
+  sales_angle: string
+  discount_percentage: number
+  optimal_timing: string
+  confidence_score: number
+  user_patterns: string[]
   is_active: boolean
-}
-
-interface Exercise {
-  id: string
-  name: string
-  category: string
-  description: string
-  duration_minutes: number
-  calories_burned: number
-  difficulty: "beginner" | "intermediate" | "advanced"
-  instructions: string[]
-  equipment_needed: string[]
-}
-
-interface Resource {
-  id: string
-  title: string
-  type: "article" | "video" | "audio" | "guide"
-  category: string
-  content: string
-  url?: string
-  duration_minutes?: number
-  author: string
-  is_premium: boolean
+  shown_count: number
+  clicked: boolean
+  purchased: boolean
+  expires_at?: string
+  created_at: string
 }
 
 // ============================================================================
-// CONFIGURACIÓN DE DATOS
+// CONFIGURACIÓN DE DATOS (ORIGINAL)
 // ============================================================================
 const ACTIVITY_LEVELS = [
   { value: 1.2, label: "Sedentario", desc: "Poco ejercicio" },
@@ -235,6 +245,7 @@ const GOALS = [
     fats: 35,
     calAdjust: -0.2,
     type: "physical",
+    category: "physical",
   },
   {
     id: "gain_muscle",
@@ -244,6 +255,7 @@ const GOALS = [
     fats: 30,
     calAdjust: 0.15,
     type: "physical",
+    category: "physical",
   },
   {
     id: "maintain_weight",
@@ -253,6 +265,7 @@ const GOALS = [
     fats: 30,
     calAdjust: 0,
     type: "physical",
+    category: "physical",
   },
   {
     id: "reduce_stress",
@@ -262,6 +275,7 @@ const GOALS = [
     fats: 30,
     calAdjust: 0,
     type: "emotional",
+    category: "emotional",
   },
   {
     id: "find_calm",
@@ -271,6 +285,37 @@ const GOALS = [
     fats: 30,
     calAdjust: 0,
     type: "emotional",
+    category: "emotional",
+  },
+  {
+    id: "boost_confidence",
+    label: "✨ Mejorar mi autoestima",
+    protein: 25,
+    carbs: 45,
+    fats: 30,
+    calAdjust: 0,
+    type: "emotional",
+    category: "emotional",
+  },
+  {
+    id: "life_balance",
+    label: "⚡ Balancear cuerpo y mente",
+    protein: 25,
+    carbs: 45,
+    fats: 30,
+    calAdjust: 0,
+    type: "holistic",
+    category: "holistic",
+  },
+  {
+    id: "healthy_habits",
+    label: "🌱 Crear hábitos sostenibles",
+    protein: 25,
+    carbs: 45,
+    fats: 30,
+    calAdjust: 0,
+    type: "holistic",
+    category: "holistic",
   },
   {
     id: "vitalmente",
@@ -280,145 +325,33 @@ const GOALS = [
     fats: 30,
     calAdjust: 0,
     type: "holistic",
+    category: "holistic",
   },
 ]
 
-const FOOD_CATEGORIES = [
-  { id: "proteinas", name: "Proteínas", icon: "🍗", description: "Carnes, pescados, huevos, legumbres" },
-  { id: "vegetales", name: "Vegetales", icon: "🥬", description: "Verduras frescas y cocidas" },
-  { id: "frutas", name: "Frutas", icon: "🍎", description: "Frutas frescas y deshidratadas" },
-  { id: "carbohidratos", name: "Carbohidratos", icon: "🌾", description: "Cereales, tubérculos, granos" },
-  { id: "bebidas", name: "Bebidas", icon: "🥤", description: "Jugos, batidos, infusiones" },
-  { id: "lacteos", name: "Lácteos", icon: "🥛", description: "Leche, yogurt, quesos" },
-  { id: "grasas", name: "Grasas Saludables", icon: "🥑", description: "Aceites, frutos secos, semillas" },
-]
-
-const ADMIN_MODULES = [
-  { id: "dashboard", name: "Dashboard", icon: <Icons.Chart size="text-xl" />, description: "Vista general" },
-  { id: "users", name: "Usuarios", icon: <Icons.Users size="text-xl" />, description: "Gestión de usuarios" },
-  { id: "foods", name: "Alimentos", icon: <Icons.UtensilsCrossed size="text-xl" />, description: "Banco de alimentos" },
-  { id: "recipes", name: "Recetas", icon: <Icons.ChefHat size="text-xl" />, description: "Recetas globales" },
-  {
-    id: "exercises",
-    name: "Ejercicios",
-    icon: <Icons.Dumbbell size="text-xl" />,
-    description: "Biblioteca de ejercicios",
+const LEVEL_SYSTEM = {
+  levels: [
+    { level: 1, name: "Principiante", icon: "🌱", pointsRequired: 0, color: "bg-green-100 text-green-800" },
+    { level: 2, name: "Explorador", icon: "🔍", pointsRequired: 100, color: "bg-blue-100 text-blue-800" },
+    { level: 3, name: "Comprometido", icon: "💪", pointsRequired: 300, color: "bg-purple-100 text-purple-800" },
+    { level: 4, name: "Disciplinado", icon: "🎯", pointsRequired: 600, color: "bg-orange-100 text-orange-800" },
+    { level: 5, name: "Experto", icon: "⭐", pointsRequired: 1000, color: "bg-yellow-100 text-yellow-800" },
+    { level: 6, name: "Maestro", icon: "👑", pointsRequired: 1500, color: "bg-red-100 text-red-800" },
+    { level: 7, name: "Leyenda", icon: "💎", pointsRequired: 2500, color: "bg-indigo-100 text-indigo-800" },
+    { level: 8, name: "VitalMente", icon: "✨", pointsRequired: 4000, color: "bg-pink-100 text-pink-800" },
+  ],
+  pointsPerAction: {
+    water: 5,
+    exercise: 20,
+    mindfulness: 15,
+    meal: 10,
+    streak_bonus: 50,
+    challenge_complete: 100,
   },
-  {
-    id: "supplements",
-    name: "Suplementos",
-    icon: <Icons.Package size="text-xl" />,
-    description: "Catálogo de productos",
-  },
-  { id: "resources", name: "Recursos", icon: <Icons.Book size="text-xl" />, description: "Contenido educativo" },
-  {
-    id: "analytics",
-    name: "Analíticas",
-    icon: <Icons.TrendingUp size="text-xl" />,
-    description: "Estadísticas y reportes",
-  },
-  { id: "ai", name: "IA", icon: <Icons.Robot size="text-xl" />, description: "Herramientas de IA" },
-]
-
-// NUEVOS MÓDULOS PARA USUARIOS CON NAVEGACIÓN MÓVIL
-const USER_MODULES = [
-  { id: "inicio", name: "Inicio", icon: <Icons.Home size="text-xl" />, description: "Panel principal" },
-  {
-    id: "comida",
-    name: "Comida",
-    icon: <Icons.UtensilsCrossed size="text-xl" />,
-    description: "Registro de alimentos",
-  },
-  { id: "batidos", name: "Batidos", icon: <Icons.Blend size="text-xl" />, description: "Crea tus batidos" },
-  { id: "ejercicio", name: "Ejercicio", icon: <Icons.Activity size="text-xl" />, description: "Rutinas y seguimiento" },
-  { id: "recursos", name: "Recursos", icon: <Icons.Book size="text-xl" />, description: "Material educativo" },
-  { id: "suplementos", name: "Tienda", icon: <Icons.Package size="text-xl" />, description: "Suplementos y productos" },
-  { id: "perfil", name: "Perfil", icon: <Icons.Profile size="text-xl" />, description: "Tu información" },
-]
-
-// Datos de ejemplo para suplementos
-const SAMPLE_SUPPLEMENTS: Supplement[] = [
-  {
-    id: "1",
-    name: "Proteína Whey Premium",
-    description: "Proteína de suero de alta calidad para desarrollo muscular",
-    price: 89900,
-    category: "proteinas",
-    benefits: ["Desarrollo muscular", "Recuperación post-entreno", "Alto valor biológico"],
-    is_active: true,
-  },
-  {
-    id: "2",
-    name: "Omega-3 Ultra",
-    description: "Ácidos grasos esenciales para salud cardiovascular",
-    price: 45900,
-    category: "salud",
-    benefits: ["Salud cardiovascular", "Función cerebral", "Antiinflamatorio"],
-    is_active: true,
-  },
-  {
-    id: "3",
-    name: "Multivitamínico Completo",
-    description: "Complejo vitamínico y mineral para bienestar general",
-    price: 32900,
-    category: "vitaminas",
-    benefits: ["Energía", "Sistema inmune", "Bienestar general"],
-    is_active: true,
-  },
-]
-
-// Datos de ejemplo para ejercicios
-const SAMPLE_EXERCISES: Exercise[] = [
-  {
-    id: "1",
-    name: "Rutina HIIT Principiante",
-    category: "cardio",
-    description: "Entrenamiento de alta intensidad para quemar grasa",
-    duration_minutes: 20,
-    calories_burned: 200,
-    difficulty: "beginner",
-    instructions: ["Calentamiento 3 min", "4 rondas de 30s trabajo / 30s descanso", "Enfriamiento 3 min"],
-    equipment_needed: ["Ninguno"],
-  },
-  {
-    id: "2",
-    name: "Yoga Matutino",
-    category: "flexibilidad",
-    description: "Secuencia suave para empezar el día",
-    duration_minutes: 15,
-    calories_burned: 60,
-    difficulty: "beginner",
-    instructions: ["Respiración consciente", "Saludos al sol", "Posturas de estiramiento"],
-    equipment_needed: ["Mat de yoga"],
-  },
-]
-
-// Datos de ejemplo para recursos
-const SAMPLE_RESOURCES: Resource[] = [
-  {
-    id: "1",
-    title: "Guía de Alimentación Consciente",
-    type: "guide",
-    category: "nutricion",
-    content: "Aprende a desarrollar una relación saludable con la comida...",
-    duration_minutes: 30,
-    author: "Dr. VitalMente",
-    is_premium: false,
-  },
-  {
-    id: "2",
-    title: "Meditación para Reducir Estrés",
-    type: "audio",
-    category: "mindfulness",
-    content: "Sesión guiada de 10 minutos para calmar la mente...",
-    duration_minutes: 10,
-    author: "Maestra Zen",
-    is_premium: true,
-  },
-]
+}
 
 // ============================================================================
-// FUNCIONES DE BASE DE DATOS
+// FUNCIONES DE BASE DE DATOS (MANTENIENDO LAS ORIGINALES)
 // ============================================================================
 const dbFunctions = {
   async findUserByPhone(phone: string): Promise<UserProfile | null> {
@@ -489,9 +422,11 @@ const dbFunctions = {
             user_id: userId,
             date: today,
             ...progress,
+            updated_at: new Date().toISOString(),
           },
           {
             onConflict: "user_id,date",
+            ignoreDuplicates: false,
           },
         )
         .select()
@@ -502,6 +437,33 @@ const dbFunctions = {
     } catch (error) {
       console.error("Error en saveProgress:", error)
       return false
+    }
+  },
+
+  async getProgressHistory(userId: string, days = 7): Promise<DailyProgress[]> {
+    try {
+      const { data, error } = await supabase
+        .from("daily_progress")
+        .select("*")
+        .eq("user_id", userId)
+        .order("date", { ascending: false })
+        .limit(days)
+      if (error) throw error
+      return data as DailyProgress[]
+    } catch (error) {
+      console.error("Error loading progress history:", error)
+      return []
+    }
+  },
+
+  async getUserFoods(userId: string): Promise<UserFood[]> {
+    try {
+      const { data, error } = await supabase.from("user_foods").select("*").eq("user_id", userId)
+      if (error) throw error
+      return data as UserFood[]
+    } catch (error) {
+      console.error("Error loading user foods:", error)
+      return []
     }
   },
 
@@ -521,60 +483,17 @@ const dbFunctions = {
     }
   },
 
-  async getRecipes(): Promise<Recipe[]> {
-    try {
-      const { data, error } = await supabase
-        .from("recipes")
-        .select("*")
-        .eq("is_active", true)
-        .order("name", { ascending: true })
-      if (error) {
-        console.log("Recipes table doesn't exist yet")
-        return []
-      }
-      return data as Recipe[]
-    } catch (error) {
-      console.log("Recipes not available:", error)
-      return []
-    }
-  },
-
-  async getUserRecipes(userId: string): Promise<Recipe[]> {
-    try {
-      const { data, error } = await supabase
-        .from("recipes")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("is_active", true)
-        .order("created_at", { ascending: false })
-
-      if (error) {
-        console.log("User recipes not available")
-        return []
-      }
-      return data as Recipe[]
-    } catch (error) {
-      console.log("User recipes not available:", error)
-      return []
-    }
-  },
-
-  async addRecipe(recipe: Omit<Recipe, "id" | "created_at">): Promise<Recipe> {
-    try {
-      const { data, error } = await supabase
-        .from("recipes")
-        .insert({
-          ...recipe,
-          created_at: new Date().toISOString(),
-        })
-        .select()
-        .single()
-      if (error) throw new Error(error.message)
-      return data as Recipe
-    } catch (error) {
-      console.error("Error adding recipe:", error)
-      throw new Error("Error al guardar receta")
-    }
+  async addUserFood(food: Omit<UserFood, "id" | "created_at">): Promise<UserFood> {
+    const { data, error } = await supabase
+      .from("user_foods")
+      .insert({
+        ...food,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
+    if (error) throw new Error(error.message)
+    return data as UserFood
   },
 
   async getTodayMealCompositions(userId: string): Promise<MealComposition[]> {
@@ -622,71 +541,305 @@ const dbFunctions = {
     }
   },
 
-  // FUNCIONES DE ADMINISTRADOR
+  async getActiveTips(): Promise<GlobalTip[]> {
+    try {
+      const { data, error } = await supabase.from("global_tips").select("*").eq("is_active", true)
+      if (error) {
+        console.error("Error loading tips:", error)
+        return []
+      }
+      return data as GlobalTip[]
+    } catch (error) {
+      console.error("Error loading tips:", error)
+      return []
+    }
+  },
+
+  async getActiveResources(): Promise<GlobalResource[]> {
+    try {
+      const { data, error } = await supabase.from("global_resources").select("*").eq("is_active", true)
+      if (error) {
+        console.error("Error loading resources:", error)
+        return []
+      }
+      return data as GlobalResource[]
+    } catch (error) {
+      console.error("Error loading resources:", error)
+      return []
+    }
+  },
+
+  async getActiveSupplements(): Promise<Supplement[]> {
+    try {
+      const { data, error } = await supabase.from("supplements").select("*").eq("is_active", true)
+      if (error) {
+        console.error("Error loading supplements:", error)
+        return []
+      }
+      return (data || []).map((item: any) => ({
+        ...item,
+        benefits: item.benefits && typeof item.benefits === "string" ? item.benefits.split(",") : [],
+      })) as Supplement[]
+    } catch (error) {
+      console.error("Error loading supplements:", error)
+      return []
+    }
+  },
+
+  async getUserGamification(userId: string): Promise<UserGamification | null> {
+    try {
+      const { data, error } = await supabase.from("user_gamification").select("*").eq("user_id", userId).single()
+      if (error) {
+        if (error.code === "PGRST116") {
+          return await dbFunctions.initializeUserGamification(userId)
+        }
+        throw error
+      }
+      return data as UserGamification
+    } catch (error) {
+      console.error("Error loading user gamification:", error)
+      return null
+    }
+  },
+
+  async initializeUserGamification(userId: string): Promise<UserGamification> {
+    try {
+      const gamificationData = {
+        user_id: userId,
+        total_points: 0,
+        current_level: 1,
+        streak_days: 0,
+        longest_streak: 0,
+        badges: [],
+        weekly_points: 0,
+        monthly_points: 0,
+        experience_points: 0,
+        next_level_points: 100,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+      const { data, error } = await supabase.from("user_gamification").insert(gamificationData).select().single()
+      if (error) throw error
+      return data as UserGamification
+    } catch (error) {
+      console.error("Error initializing gamification:", error)
+      return {
+        id: "",
+        user_id: userId,
+        total_points: 0,
+        current_level: 1,
+        streak_days: 0,
+        longest_streak: 0,
+        badges: [],
+        weekly_points: 0,
+        monthly_points: 0,
+        experience_points: 0,
+        next_level_points: 100,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+    }
+  },
+
+  async generateAIRecommendations(userId: string): Promise<AIRecommendation[]> {
+    try {
+      const progressHistory = await dbFunctions.getProgressHistory(userId, 7)
+      const supplements = await dbFunctions.getActiveSupplements()
+      const recommendations: AIRecommendation[] = []
+
+      if (!progressHistory || progressHistory.length === 0 || !supplements || supplements.length === 0) {
+        return []
+      }
+
+      const avgWater = progressHistory.reduce((sum, day) => sum + (day.water || 0), 0) / progressHistory.length
+      const avgExercise = progressHistory.reduce((sum, day) => sum + (day.exercise || 0), 0) / progressHistory.length
+      const avgMindfulness =
+        progressHistory.reduce((sum, day) => sum + (day.mindfulness || 0), 0) / progressHistory.length
+
+      if (avgExercise < 0.5 && supplements.length > 0) {
+        const energySupplements = supplements.filter(
+          (s) =>
+            s.benefits &&
+            Array.isArray(s.benefits) &&
+            s.benefits.some((b) => b && typeof b === "string" && b.toLowerCase().includes("energía")),
+        )
+        if (energySupplements.length > 0) {
+          recommendations.push({
+            id: `${userId}_energy_rec`,
+            user_id: userId,
+            supplement_names: energySupplements.slice(0, 2).map((s) => s.name || "Suplemento"),
+            recommendation_type: "exercise_support",
+            priority: "high",
+            reason: `Hemos notado que tu actividad física ha sido baja. Estos suplementos pueden ayudarte a tener más energía.`,
+            sales_angle: "¡Recupera tu energía y vuelve a entrenar! 💪",
+            discount_percentage: 15,
+            optimal_timing: "morning",
+            confidence_score: 0.8,
+            user_patterns: ["low_exercise"],
+            is_active: true,
+            shown_count: 0,
+            clicked: false,
+            purchased: false,
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString(),
+          })
+        }
+      }
+
+      if (avgMindfulness < 0.5 && supplements.length > 0) {
+        const relaxSupplements = supplements.filter(
+          (s) =>
+            s.benefits &&
+            Array.isArray(s.benefits) &&
+            s.benefits.some(
+              (b) =>
+                b && typeof b === "string" && (b.toLowerCase().includes("estrés") || b.toLowerCase().includes("calma")),
+            ),
+        )
+        if (relaxSupplements.length > 0) {
+          recommendations.push({
+            id: `${userId}_relax_rec`,
+            user_id: userId,
+            supplement_names: relaxSupplements.slice(0, 2).map((s) => s.name || "Suplemento"),
+            recommendation_type: "stress_management",
+            priority: "medium",
+            reason: `Tu práctica de mindfulness ha sido irregular. Estos suplementos pueden ayudarte a encontrar más calma.`,
+            sales_angle: "Encuentra tu paz interior 🧘‍♀️",
+            discount_percentage: 10,
+            optimal_timing: "evening",
+            confidence_score: 0.7,
+            user_patterns: ["low_mindfulness"],
+            is_active: true,
+            shown_count: 0,
+            clicked: false,
+            purchased: false,
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString(),
+          })
+        }
+      }
+
+      return recommendations
+    } catch (error) {
+      console.error("Error generating AI recommendations:", error)
+      return []
+    }
+  },
+
   async getAllUsers(): Promise<UserProfile[]> {
     try {
       const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false })
       if (error) throw error
       return data as UserProfile[]
     } catch (error) {
-      console.error("Error loading users:", error)
+      console.error("Error loading all users:", error)
       return []
     }
   },
 
-  async addGlobalFood(food: Omit<GlobalFood, "id" | "created_at">): Promise<GlobalFood> {
+  async initializeDefaultData() {
     try {
-      const { data, error } = await supabase
-        .from("global_foods")
-        .insert({
-          ...food,
-          created_at: new Date().toISOString(),
-        })
-        .select()
-        .single()
-      if (error) throw error
-      return data as GlobalFood
-    } catch (error) {
-      console.error("Error adding global food:", error)
-      throw error
-    }
-  },
+      const { data: existingTips } = await supabase.from("global_tips").select("*")
+      if (!existingTips || existingTips.length === 0) {
+        const defaultTips = [
+          {
+            category: "Hidratación",
+            title: "Agua al despertar",
+            content:
+              "Bebe un vaso de agua tibia con limón al levantarte para activar tu metabolismo y mejorar la digestión.",
+            icon: "💧",
+            is_active: true,
+          },
+          {
+            category: "Ejercicio",
+            title: "Micro movimientos",
+            content: "Haz 10 sentadillas cada hora para mantener tu cuerpo activo durante el día laboral.",
+            icon: "🏃‍♂️",
+            is_active: true,
+          },
+          {
+            category: "Mindfulness",
+            title: "Respiración 4-7-8",
+            content: "Inhala 4 seg, mantén 7 seg, exhala 8 seg. Repite 4 veces para reducir estrés instantáneamente.",
+            icon: "🧘‍♀️",
+            is_active: true,
+          },
+        ]
+        for (const tip of defaultTips) {
+          await supabase.from("global_tips").insert(tip)
+        }
+      }
 
-  async updateGlobalFood(id: string, updates: Partial<GlobalFood>): Promise<void> {
-    try {
-      const { error } = await supabase.from("global_foods").update(updates).eq("id", id)
-      if (error) throw error
-    } catch (error) {
-      console.error("Error updating global food:", error)
-      throw error
-    }
-  },
+      const { data: existingResources } = await supabase.from("global_resources").select("*")
+      if (!existingResources || existingResources.length === 0) {
+        const defaultResources = [
+          {
+            type: "mindfulness" as const,
+            title: "Meditación guiada - Calma mental",
+            description: "Sesión de 10 minutos para reducir ansiedad",
+            url: "https://www.youtube.com/watch?v=ZToicYcHIOU",
+            is_active: true,
+          },
+          {
+            type: "nutrition" as const,
+            title: "Recetas saludables y fáciles",
+            description: "25 recetas balanceadas para toda la semana",
+            url: "https://www.habitos.mx/recetas-saludables/",
+            is_active: true,
+          },
+          {
+            type: "exercise" as const,
+            title: "Rutina de ejercicios en casa - 20 minutos",
+            description: "Entrenamiento completo sin equipamiento",
+            url: "https://www.youtube.com/watch?v=8dQKcziOQ8I",
+            is_active: true,
+          },
+        ]
+        for (const resource of defaultResources) {
+          await supabase.from("global_resources").insert(resource)
+        }
+      }
 
-  async deleteGlobalFood(id: string): Promise<void> {
-    try {
-      const { error } = await supabase.from("global_foods").update({ is_active: false }).eq("id", id)
-      if (error) throw error
-    } catch (error) {
-      console.error("Error deleting global food:", error)
-      throw error
-    }
-  },
-
-  async getUserStats(): Promise<any> {
-    try {
-      const { data: users } = await supabase.from("users").select("*")
-      const { data: progress } = await supabase.from("daily_progress").select("*")
-      const { data: meals } = await supabase.from("meal_compositions").select("*")
-
-      return {
-        totalUsers: users?.length || 0,
-        activeToday: progress?.filter((p) => p.date === new Date().toISOString().split("T")[0]).length || 0,
-        totalMeals: meals?.length || 0,
-        avgCalories: meals?.reduce((acc, m) => acc + m.calories_consumed, 0) / (meals?.length || 1) || 0,
+      const { data: existingSupplements } = await supabase.from("supplements").select("*")
+      if (!existingSupplements || existingSupplements.length === 0) {
+        const defaultSupplements = [
+          {
+            name: "VitalEnergy Plus",
+            description: "Complejo vitamínico premium para aumentar energía natural y mejorar concentración",
+            benefits: "Aumenta energía,Mejora concentración,Reduce fatiga,Apoya sistema inmune",
+            price: 89000,
+            image_url: "/placeholder.svg?height=200&width=200",
+            is_active: true,
+            whatsapp_message:
+              "Hola! Me interesa VitalEnergy Plus que vi en VitalMente. ¿Podrían darme más información sobre disponibilidad y forma de pago?",
+          },
+          {
+            name: "RelaxMind Pro",
+            description: "Suplemento natural avanzado para reducir estrés, ansiedad y mejorar calidad del sueño",
+            benefits: "Reduce ansiedad,Mejora sueño,Calma mental,Control del estrés",
+            price: 75000,
+            image_url: "/placeholder.svg?height=200&width=200",
+            is_active: true,
+            whatsapp_message:
+              "Hola! Me interesa RelaxMind Pro para mejorar mi descanso. ¿Podrían contarme más sobre sus beneficios?",
+          },
+          {
+            name: "MusclePro Elite",
+            description: "Proteína premium de alta calidad para desarrollo muscular y recuperación rápida",
+            benefits: "Desarrollo muscular,Recuperación rápida,Aumenta fuerza,Proteína completa",
+            price: 120000,
+            image_url: "/placeholder.svg?height=200&width=200",
+            is_active: true,
+            whatsapp_message:
+              "Hola! Me interesa MusclePro Elite para mi entrenamiento. ¿Qué sabores tienen disponibles?",
+          },
+        ]
+        for (const supplement of defaultSupplements) {
+          await supabase.from("supplements").insert(supplement)
+        }
       }
     } catch (error) {
-      console.error("Error getting user stats:", error)
-      return { totalUsers: 0, activeToday: 0, totalMeals: 0, avgCalories: 0 }
+      console.log("Datos por defecto ya inicializados o error menor:", error)
     }
   },
 }
@@ -694,58 +847,68 @@ const dbFunctions = {
 // ============================================================================
 // FUNCIONES AUXILIARES
 // ============================================================================
-const calculateMacros = (userData: UserProfile): MacroResult => {
-  const bmr = 10 * userData.weight + 6.25 * userData.height - 5 * userData.age + 5
-  const tdee = bmr * userData.activity_level
-  const goalData = GOALS.find((g) => g.id === userData.goal) || GOALS[3]
-  const calories = Math.round(tdee * (1 + goalData.calAdjust))
-
-  return {
-    calories,
-    protein: Math.round((calories * goalData.protein) / 100 / 4),
-    carbs: Math.round((calories * goalData.carbs) / 100 / 4),
-    fats: Math.round((calories * goalData.fats) / 100 / 9),
-    goalType: goalData.type,
-    goalLabel: goalData.label,
+const getYouTubeThumbnail = (url: string): string => {
+  const patterns = [/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/, /^([a-zA-Z0-9_-]{11})$/]
+  for (const pattern of patterns) {
+    const match = url.match(pattern)
+    if (match) {
+      const videoId = match[1]
+      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+    }
   }
+  return "/placeholder.svg?height=180&width=320&text=Video"
 }
 
-const getProgressPercentage = (progress: DailyProgress) => {
-  const targets = { water: 8, exercise: 1, mindfulness: 1, desayuno: 1, almuerzo: 1, cena: 1 }
-  let completed = 0
-  Object.entries(targets).forEach(([key, target]) => {
-    if (Number(progress[key as keyof DailyProgress]) >= target) completed++
-  })
-  return Math.round((completed / 6) * 100)
-}
-
-const getMotivationalMessage = (goal: string) => {
-  const messages: Record<string, string> = {
-    lose_weight: "¡Cada paso te acerca a tu mejor versión! 💪",
-    maintain_weight: "Mantener el equilibrio es la clave del éxito ⚖️",
-    gain_muscle: "Construyendo fuerza, construyendo futuro 🏋️",
-    reduce_stress: "Hoy es un gran día para sentirte increíble ✨",
-    find_calm: "Respira profundo, la calma está en ti 🧘",
-    vitalmente: "¡Eres la mejor versión de ti mismo! 🌟 #VitalMente",
+const getResourceThumbnail = (url: string, type: string): string => {
+  if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    return getYouTubeThumbnail(url)
   }
-  return messages[goal] || messages.reduce_stress
+  if (url.includes("spotify.com")) {
+    return "/placeholder.svg?height=180&width=320&text=🎵+Spotify"
+  }
+  if (url.toLowerCase().includes(".pdf") || url.includes("drive.google.com")) {
+    return "/placeholder.svg?height=180&width=320&text=📄+PDF"
+  }
+  const typeDefaults = {
+    mindfulness: "/placeholder.svg?height=180&width=320&text=🧘+Mindfulness",
+    nutrition: "/placeholder.svg?height=180&width=320&text=🥗+Nutrición",
+    exercise: "/placeholder.svg?height=180&width=320&text=💪+Ejercicio",
+  }
+  return typeDefaults[type as keyof typeof typeDefaults] || "/placeholder.svg?height=180&width=320&text=Recurso"
 }
 
-// Función para detectar acceso de administrador (ACCESO OCULTO RESTAURADO)
-const isAdminAccess = (phone: string, code: string): boolean => {
-  return phone === "3001234567" && code === "1234567890"
+const getResourceTypeIcon = (type: string) => {
+  switch (type) {
+    case "mindfulness":
+      return "🧘‍♀️"
+    case "nutrition":
+      return "🥗"
+    case "exercise":
+      return "💪"
+    default:
+      return "📝"
+  }
 }
 
 // ============================================================================
-// COMPONENTE PRINCIPAL
+// COMPONENTE PRINCIPAL RESPONSIVE
 // ============================================================================
 export default function VitalMenteApp() {
   // Estados principales
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null)
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    if (typeof window !== "undefined") {
+      const savedUser = localStorage.getItem("vitalmente_user")
+      return savedUser ? JSON.parse(savedUser) : null
+    }
+    return null
+  })
+
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("inicio")
   const [macroResults, setMacroResults] = useState<MacroResult | null>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [connectionStatus, setConnectionStatus] = useState("connecting")
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
+  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
 
   // Estados de progreso
   const [dailyProgress, setDailyProgress] = useState<DailyProgress>({
@@ -761,9 +924,13 @@ export default function VitalMenteApp() {
   })
 
   // Estados de datos
+  const [userFoods, setUserFoods] = useState<UserFood[]>([])
   const [globalFoods, setGlobalFoods] = useState<GlobalFood[]>([])
-  const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [userRecipes, setUserRecipes] = useState<Recipe[]>([])
+  const [progressHistory, setProgressHistory] = useState<DailyProgress[]>([])
+  const [globalTips, setGlobalTips] = useState<GlobalTip[]>([])
+  const [globalResources, setGlobalResources] = useState<GlobalResource[]>([])
+  const [supplements, setSupplements] = useState<Supplement[]>([])
+  const [currentTipIndex, setCurrentTipIndex] = useState(0)
   const [mealCompositions, setMealCompositions] = useState<MealComposition[]>([])
   const [consumedMacros, setConsumedMacros] = useState<ConsumedMacros>({
     calories: 0,
@@ -772,23 +939,20 @@ export default function VitalMenteApp() {
     fats: 0,
   })
 
-  // Estados de UI móvil (NUEVOS)
+  // Estados de UI móvil
   const [showMealCalculator, setShowMealCalculator] = useState(false)
   const [selectedMealType, setSelectedMealType] = useState<"desayuno" | "almuerzo" | "cena">("desayuno")
-  const [selectedFood, setSelectedFood] = useState<GlobalFood | Recipe | null>(null)
+  const [selectedFood, setSelectedFood] = useState<UserFood | GlobalFood | null>(null)
   const [foodQuantity, setFoodQuantity] = useState<string>("100")
+  const [showFloatingMenu, setShowFloatingMenu] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
 
-  // Estados para creador de batidos (NUEVO)
-  const [showRecipeCreator, setShowRecipeCreator] = useState(false)
-  const [recipeIngredients, setRecipeIngredients] = useState<RecipeIngredient[]>([])
-  const [newRecipe, setNewRecipe] = useState({
-    name: "",
-    description: "",
-    category: "batidos",
-    instructions: "",
-    serving_size: 1,
-  })
+  // Estados de administración
+  const [logoClicks, setLogoClicks] = useState(0)
+  const [showAdminLogin, setShowAdminLogin] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [adminCode, setAdminCode] = useState("")
+  const [activeAdminTab, setActiveAdminTab] = useState("dashboard")
 
   // Estados de formularios
   const [loginForm, setLoginForm] = useState({ phone: "", accessCode: "" })
@@ -805,65 +969,49 @@ export default function VitalMenteApp() {
   })
   const [showRegister, setShowRegister] = useState(false)
 
-  // Estados para acceso oculto de administrador (NUEVO)
-  const [logoClicks, setLogoClicks] = useState(0)
-  const [showAdminAccess, setShowAdminAccess] = useState(false)
-  const [adminCode, setAdminCode] = useState("")
-
-  // Estados de administrador (RESTAURADOS)
+  // Estados de gamificación y IA
+  const [userGamification, setUserGamification] = useState<UserGamification | null>(null)
+  const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>([])
   const [allUsers, setAllUsers] = useState<UserProfile[]>([])
-  const [userStats, setUserStats] = useState<any>({})
-  const [showAddFoodModal, setShowAddFoodModal] = useState(false)
-  const [showAddRecipeModal, setShowAddRecipeModal] = useState(false)
-  const [showAddSupplementModal, setShowAddSupplementModal] = useState(false)
-  const [showAddExerciseModal, setShowAddExerciseModal] = useState(false)
-  const [showAddResourceModal, setShowAddResourceModal] = useState(false)
-  const [newFood, setNewFood] = useState({
-    name: "",
-    calories: "",
-    protein: "",
-    carbs: "",
-    fats: "",
-    category: "proteinas",
-    common_portion_size: "",
-    common_portion_name: "",
-  })
-
-  // Estados para datos de ejemplo (RESTAURADOS)
-  const [supplements] = useState<Supplement[]>(SAMPLE_SUPPLEMENTS)
-  const [exercises] = useState<Exercise[]>(SAMPLE_EXERCISES)
-  const [resources] = useState<Resource[]>(SAMPLE_RESOURCES)
-
-  // Estados para IA y analíticas (RESTAURADOS)
-  const [aiQuery, setAiQuery] = useState("")
-  const [aiResponse, setAiResponse] = useState("")
-  const [isAiLoading, setIsAiLoading] = useState(false)
 
   // ============================================================================
   // EFECTOS Y INICIALIZACIÓN
   // ============================================================================
   useEffect(() => {
-    loadGlobalContent()
+    initializeApp()
   }, [])
 
   useEffect(() => {
     if (currentUser && currentUser.id) {
       loadUserData(currentUser.id)
-      setMacroResults(calculateMacros(currentUser))
-
-      // Si es admin, cargar datos de admin
-      if (isAdmin) {
-        loadAdminData()
-      }
+      calculateMacros(currentUser)
     }
-  }, [currentUser, isAdmin])
+  }, [currentUser])
+
+  const initializeApp = async () => {
+    try {
+      setConnectionStatus("connecting")
+      await dbFunctions.initializeDefaultData()
+      await loadGlobalContent()
+      setConnectionStatus("connected")
+    } catch (error) {
+      console.error("Error initializing app:", error)
+      setConnectionStatus("error")
+    }
+  }
 
   const loadGlobalContent = async () => {
     try {
-      const [globalFoodsList, recipesList] = await Promise.all([dbFunctions.getGlobalFoods(), dbFunctions.getRecipes()])
-
+      const [tips, resources, activeSupplements, globalFoodsList] = await Promise.all([
+        dbFunctions.getActiveTips(),
+        dbFunctions.getActiveResources(),
+        dbFunctions.getActiveSupplements(),
+        dbFunctions.getGlobalFoods(),
+      ])
+      setGlobalTips(tips)
+      setGlobalResources(resources)
+      setSupplements(activeSupplements)
       setGlobalFoods(globalFoodsList)
-      setRecipes(recipesList)
     } catch (error) {
       console.error("Error loading global content:", error)
     }
@@ -878,26 +1026,22 @@ export default function VitalMenteApp() {
         setDailyProgress((prev) => ({ ...prev, user_id: userId }))
       }
 
-      const [compositions, userRecipesList] = await Promise.all([
+      const [foods, history, compositions, gamification, recommendations] = await Promise.all([
+        dbFunctions.getUserFoods(userId),
+        dbFunctions.getProgressHistory(userId),
         dbFunctions.getTodayMealCompositions(userId),
-        dbFunctions.getUserRecipes(userId),
+        dbFunctions.getUserGamification(userId),
+        dbFunctions.generateAIRecommendations(userId),
       ])
 
+      setUserFoods(foods)
+      setProgressHistory(history)
       setMealCompositions(compositions)
       calculateConsumedMacros(compositions)
-      setUserRecipes(userRecipesList)
+      setUserGamification(gamification)
+      setAiRecommendations(recommendations)
     } catch (error) {
       console.error("Error loading user data:", error)
-    }
-  }
-
-  const loadAdminData = async () => {
-    try {
-      const [users, stats] = await Promise.all([dbFunctions.getAllUsers(), dbFunctions.getUserStats()])
-      setAllUsers(users)
-      setUserStats(stats)
-    } catch (error) {
-      console.error("Error loading admin data:", error)
     }
   }
 
@@ -914,55 +1058,23 @@ export default function VitalMenteApp() {
     setConsumedMacros(totals)
   }
 
-  // ============================================================================
-  // FUNCIONES PARA ACCESO OCULTO DE ADMINISTRADOR (NUEVO)
-  // ============================================================================
-  const handleLogoClick = () => {
-    const newClicks = logoClicks + 1
-    setLogoClicks(newClicks)
-    
-    if (newClicks === 5) {
-      setShowAdminAccess(true)
-      setTimeout(() => {
-        setLogoClicks(0)
-        if (!showAdminAccess) {
-          setShowAdminAccess(false)
-          setAdminCode("")
-        }
-      }, 30000) // 30 segundos para ingresar el código
-    } else if (newClicks > 5) {
-      setLogoClicks(0)
-    }
-  }
-
-  const handleAdminAccess = () => {
-    if (adminCode === "1098648820") {
-      setIsAdmin(true)
-      setCurrentUser({
-        id: "admin",
-        phone: "admin-secret",
-        access_code: adminCode,
-        name: "Administrador VitalMente",
-        age: 30,
-        weight: 70,
-        height: 170,
-        activity_level: 1.55,
-        goal: "vitalmente",
-        created_at: new Date().toISOString(),
-        last_login: new Date().toISOString(),
-      })
-      setActiveTab("dashboard")
-      setShowAdminAccess(false)
-      setAdminCode("")
-      setLogoClicks(0)
-    } else {
-      alert("Código incorrecto")
-      setAdminCode("")
-    }
+  const calculateMacros = (userData: UserProfile) => {
+    const bmr = 10 * userData.weight + 6.25 * userData.height - 5 * userData.age + 5
+    const tdee = bmr * userData.activity_level
+    const goalData = GOALS.find((g) => g.id === userData.goal) || GOALS[3]
+    const calories = Math.round(tdee * (1 + goalData.calAdjust))
+    setMacroResults({
+      calories,
+      protein: Math.round((calories * goalData.protein) / 100 / 4),
+      carbs: Math.round((calories * goalData.carbs) / 100 / 4),
+      fats: Math.round((calories * goalData.fats) / 100 / 9),
+      goalType: goalData.type,
+      goalLabel: goalData.label,
+    })
   }
 
   // ============================================================================
-  // FUNCIONES DE AUTENTICACIÓN (RESTAURADAS CON ACCESO ADMIN)
+  // FUNCIONES DE AUTENTICACIÓN
   // ============================================================================
   const handleLogin = async () => {
     if (!loginForm.phone || !loginForm.accessCode) {
@@ -971,27 +1083,6 @@ export default function VitalMenteApp() {
     }
     setIsLoading(true)
     try {
-      // Verificar acceso de administrador (ACCESO OCULTO RESTAURADO)
-      if (isAdminAccess(loginForm.phone, loginForm.accessCode)) {
-        setIsAdmin(true)
-        setCurrentUser({
-          id: "admin",
-          phone: loginForm.phone,
-          access_code: loginForm.accessCode,
-          name: "Administrador VitalMente",
-          age: 30,
-          weight: 70,
-          height: 170,
-          activity_level: 1.55,
-          goal: "vitalmente",
-          created_at: new Date().toISOString(),
-          last_login: new Date().toISOString(),
-        })
-        setActiveTab("dashboard")
-        setLoginForm({ phone: "", accessCode: "" })
-        return
-      }
-
       const user = await dbFunctions.findUserByPhone(loginForm.phone)
       if (!user || user.access_code !== loginForm.accessCode) {
         alert("Número o código incorrecto")
@@ -999,6 +1090,9 @@ export default function VitalMenteApp() {
       }
       await dbFunctions.updateUserLastLogin(user.id)
       setCurrentUser(user)
+      localStorage.setItem("vitalmente_user", JSON.stringify(user))
+      await loadUserData(user.id)
+      calculateMacros(user)
       setLoginForm({ phone: "", accessCode: "" })
     } catch (error: any) {
       console.error("Error en login:", error)
@@ -1048,6 +1142,9 @@ export default function VitalMenteApp() {
       }
       const newUser = await dbFunctions.createUser(userData)
       setCurrentUser(newUser)
+      localStorage.setItem("vitalmente_user", JSON.stringify(newUser))
+      setDailyProgress((prev) => ({ ...prev, user_id: newUser.id }))
+      calculateMacros(newUser)
       setRegisterForm({
         phone: "",
         accessCode: "",
@@ -1069,7 +1166,7 @@ export default function VitalMenteApp() {
 
   const handleLogout = () => {
     setCurrentUser(null)
-    setIsAdmin(false)
+    localStorage.removeItem("vitalmente_user")
     setDailyProgress({
       id: "",
       user_id: "",
@@ -1081,13 +1178,16 @@ export default function VitalMenteApp() {
       almuerzo: 0,
       cena: 0,
     })
+    setUserFoods([])
+    setProgressHistory([])
     setMacroResults(null)
     setActiveTab("inicio")
     setMealCompositions([])
     setConsumedMacros({ calories: 0, protein: 0, carbs: 0, fats: 0 })
-    setUserRecipes([])
-    setAllUsers([])
-    setUserStats({})
+    setSaveStatus("idle")
+    setLastSaveTime(null)
+    setUserGamification(null)
+    setAiRecommendations([])
   }
 
   // ============================================================================
@@ -1100,8 +1200,9 @@ export default function VitalMenteApp() {
       [field]: Math.max(0, (dailyProgress as any)[field] + increment),
     }
     setDailyProgress(newProgress)
+    setSaveStatus("saving")
     try {
-      await dbFunctions.saveProgress(currentUser.id, {
+      const success = await dbFunctions.saveProgress(currentUser.id, {
         water: newProgress.water,
         exercise: newProgress.exercise,
         mindfulness: newProgress.mindfulness,
@@ -1109,105 +1210,82 @@ export default function VitalMenteApp() {
         almuerzo: newProgress.almuerzo,
         cena: newProgress.cena,
       })
+      if (success) {
+        setSaveStatus("saved")
+        setLastSaveTime(new Date())
+        setTimeout(() => setSaveStatus("idle"), 2000)
+      } else {
+        throw new Error("Error al guardar progreso")
+      }
     } catch (error) {
       console.error("Error guardando progreso:", error)
+      setSaveStatus("error")
       setDailyProgress(dailyProgress)
       alert("Error al guardar progreso. Por favor intenta de nuevo.")
+      setTimeout(() => setSaveStatus("idle"), 3000)
     }
   }
 
-  // ============================================================================
-  // FUNCIONES PARA BATIDOS Y RECETAS (NUEVAS)
-  // ============================================================================
-  const addIngredientToRecipe = (food: GlobalFood) => {
-    const quantity = 50
-    const ratio = quantity / 100
-    const ingredient: RecipeIngredient = {
-      food_id: food.id,
-      food_name: food.name,
-      quantity_grams: quantity,
-      calories: Math.round(food.calories * ratio),
-      protein: Math.round(food.protein * ratio),
-      carbs: Math.round(food.carbs * ratio),
-      fats: Math.round(food.fats * ratio),
+  const handleQuickProgress = async (type: "water" | "exercise" | "mindfulness") => {
+    await updateProgress(type, 1)
+    setShowFloatingMenu(false)
+  }
+
+  const getProgressPercentage = () => {
+    const targets = { water: 8, exercise: 1, mindfulness: 1, desayuno: 1, almuerzo: 1, cena: 1 }
+    let completed = 0
+    Object.entries(targets).forEach(([key, target]) => {
+      if (Number(dailyProgress[key as keyof DailyProgress]) >= target) completed++
+    })
+    return Math.round((completed / 6) * 100)
+  }
+
+  const getMotivationalMessage = (goal: string) => {
+    const messages: Record<string, string> = {
+      lose_weight: "¡Cada paso te acerca a tu mejor versión! 💪",
+      maintain_weight: "Mantener el equilibrio es la clave del éxito ⚖️",
+      gain_muscle: "Construyendo fuerza, construyendo futuro 🏋️",
+      reduce_stress: "Hoy es un gran día para sentirte increíble ✨",
+      find_calm: "Respira profundo, la calma está en ti 🧘",
+      life_balance: "El equilibrio perfecto entre cuerpo y mente ⚡",
+      vitalmente: "¡Eres la mejor versión de ti mismo! 🌟 #VitalMente",
     }
-    setRecipeIngredients([...recipeIngredients, ingredient])
+    return messages[goal] || messages.reduce_stress
   }
 
-  const removeIngredientFromRecipe = (index: number) => {
-    setRecipeIngredients(recipeIngredients.filter((_, i) => i !== index))
-  }
-
-  const updateIngredientQuantity = (index: number, newQuantity: number) => {
-    const updatedIngredients = [...recipeIngredients]
-    const ingredient = updatedIngredients[index]
-    const food = globalFoods.find((f) => f.id === ingredient.food_id)
-    if (food) {
-      const ratio = newQuantity / 100
-      updatedIngredients[index] = {
-        ...ingredient,
-        quantity_grams: newQuantity,
-        calories: Math.round(food.calories * ratio),
-        protein: Math.round(food.protein * ratio),
-        carbs: Math.round(food.carbs * ratio),
-        fats: Math.round(food.fats * ratio),
+  // ============================================================================
+  // FUNCIONES DE ADMINISTRACIÓN
+  // ============================================================================
+  const handleLogoClick = () => {
+    setLogoClicks((prev) => {
+      const newCount = prev + 1
+      if (newCount === 5) {
+        setShowAdminLogin(true)
+        return 0
       }
-      setRecipeIngredients(updatedIngredients)
+      return newCount
+    })
+  }
+
+  const handleAdminLogin = () => {
+    if (adminCode === "1098648820") {
+      setIsAdmin(true)
+      setShowAdminLogin(false)
+      setAdminCode("")
+      loadAdminData()
+      alert("¡Acceso de administrador activado!")
+    } else {
+      alert("Código incorrecto")
+      setAdminCode("")
     }
   }
 
-  const calculateRecipeTotals = () => {
-    return recipeIngredients.reduce(
-      (totals, ingredient) => ({
-        calories: totals.calories + ingredient.calories,
-        protein: totals.protein + ingredient.protein,
-        carbs: totals.carbs + ingredient.carbs,
-        fats: totals.fats + ingredient.fats,
-      }),
-      { calories: 0, protein: 0, carbs: 0, fats: 0 },
-    )
-  }
-
-  const saveRecipe = async () => {
-    if (!currentUser) return
-    if (!newRecipe.name || recipeIngredients.length === 0) {
-      alert("Por favor completa el nombre y agrega al menos un ingrediente")
-      return
-    }
-
+  const loadAdminData = async () => {
     try {
-      const totals = calculateRecipeTotals()
-      const recipe: Omit<Recipe, "id" | "created_at"> = {
-        name: newRecipe.name,
-        description: newRecipe.description,
-        category: newRecipe.category,
-        ingredients: recipeIngredients,
-        total_calories: totals.calories,
-        total_protein: totals.protein,
-        total_carbs: totals.carbs,
-        total_fats: totals.fats,
-        serving_size: newRecipe.serving_size,
-        instructions: newRecipe.instructions,
-        user_id: currentUser.id,
-        is_active: true,
-      }
-
-      const savedRecipe = await dbFunctions.addRecipe(recipe)
-      setUserRecipes([savedRecipe, ...userRecipes])
-
-      setNewRecipe({
-        name: "",
-        description: "",
-        category: "batidos",
-        instructions: "",
-        serving_size: 1,
-      })
-      setRecipeIngredients([])
-      setShowRecipeCreator(false)
-      alert("¡Batido creado exitosamente!")
-    } catch (error: any) {
-      console.error("Error saving recipe:", error)
-      alert("Error al guardar el batido: " + error.message)
+      const users = await dbFunctions.getAllUsers()
+      setAllUsers(users)
+    } catch (error) {
+      console.error("Error loading admin data:", error)
     }
   }
 
@@ -1221,7 +1299,7 @@ export default function VitalMenteApp() {
     setFoodQuantity("100")
   }
 
-  const selectFood = (food: GlobalFood | Recipe) => {
+  const selectFood = (food: GlobalFood | UserFood) => {
     setSelectedFood(food)
   }
 
@@ -1229,40 +1307,19 @@ export default function VitalMenteApp() {
     if (!selectedFood || !currentUser || !foodQuantity) return
     try {
       const quantity = Number.parseInt(foodQuantity)
-      let composition: Omit<MealComposition, "id" | "created_at">
-
-      if ("ingredients" in selectedFood) {
-        // Es una receta
-        const ratio = quantity / selectedFood.serving_size
-        composition = {
-          user_id: currentUser.id,
-          date: new Date().toISOString().split("T")[0],
-          meal_type: selectedMealType,
-          food_id: selectedFood.id,
-          food_name: `${selectedFood.name} (Batido)`,
-          quantity_grams: quantity,
-          calories_consumed: Math.round(selectedFood.total_calories * ratio),
-          protein_consumed: Math.round(selectedFood.total_protein * ratio),
-          carbs_consumed: Math.round(selectedFood.total_carbs * ratio),
-          fats_consumed: Math.round(selectedFood.total_fats * ratio),
-        }
-      } else {
-        // Es un alimento normal
-        const ratio = quantity / 100
-        composition = {
-          user_id: currentUser.id,
-          date: new Date().toISOString().split("T")[0],
-          meal_type: selectedMealType,
-          food_id: selectedFood.id,
-          food_name: selectedFood.name,
-          quantity_grams: quantity,
-          calories_consumed: Math.round(Number(selectedFood.calories) * ratio),
-          protein_consumed: Math.round(Number(selectedFood.protein) * ratio),
-          carbs_consumed: Math.round(Number(selectedFood.carbs) * ratio),
-          fats_consumed: Math.round(Number(selectedFood.fats) * ratio),
-        }
+      const ratio = quantity / 100
+      const composition: Omit<MealComposition, "id" | "created_at"> = {
+        user_id: currentUser.id,
+        date: new Date().toISOString().split("T")[0],
+        meal_type: selectedMealType,
+        food_id: selectedFood.id,
+        food_name: selectedFood.name,
+        quantity_grams: quantity,
+        calories_consumed: Math.round(Number(selectedFood.calories) * ratio),
+        protein_consumed: Math.round(Number(selectedFood.protein) * ratio),
+        carbs_consumed: Math.round(Number(selectedFood.carbs) * ratio),
+        fats_consumed: Math.round(Number(selectedFood.fats) * ratio),
       }
-
       const newComposition = await dbFunctions.addMealComposition(composition)
       setMealCompositions((prev) => [...prev, newComposition])
       calculateConsumedMacros([...mealCompositions, newComposition])
@@ -1277,7 +1334,13 @@ export default function VitalMenteApp() {
   }
 
   const getFoodsByCategory = () => {
-    return FOOD_CATEGORIES.map((category) => ({
+    const categories = [
+      { id: "proteinas", name: "Proteínas", icon: "🍗" },
+      { id: "vegetales", name: "Vegetales", icon: "🥬" },
+      { id: "frutas", name: "Frutas", icon: "🍎" },
+      { id: "carbohidratos", name: "Carbohidratos", icon: "🌾" },
+    ]
+    return categories.map((category) => ({
       ...category,
       foods: globalFoods.filter((food) => food.category === category.id),
     }))
@@ -1306,458 +1369,950 @@ export default function VitalMenteApp() {
     }
   }
 
-  // ============================================================================
-  // FUNCIONES DE ADMINISTRADOR (RESTAURADAS)
-  // ============================================================================
-  const handleAddFood = async () => {
-    if (!newFood.name || !newFood.calories || !newFood.protein || !newFood.carbs || !newFood.fats) {
-      alert("Por favor completa todos los campos obligatorios")
-      return
-    }
+  const handleSupplementContact = (supplement: Supplement) => {
+    const defaultMessage = `Hola! Me interesa el suplemento ${supplement.name} que vi en VitalMente. ¿Podrían darme más información sobre disponibilidad y forma de pago?
 
-    try {
-      const foodData = {
-        name: newFood.name,
-        calories: Number(newFood.calories),
-        protein: Number(newFood.protein),
-        carbs: Number(newFood.carbs),
-        fats: Number(newFood.fats),
-        category: newFood.category,
-        common_portion_size: Number(newFood.common_portion_size) || 100,
-        common_portion_name: newFood.common_portion_name || "gramos",
-        is_active: true,
-      }
+Precio mostrado: $${supplement.price.toLocaleString()}
+Beneficios: ${supplement.benefits.join(", ")}
 
-      const savedFood = await dbFunctions.addGlobalFood(foodData)
-      setGlobalFoods([...globalFoods, savedFood])
-      setNewFood({
-        name: "",
-        calories: "",
-        protein: "",
-        carbs: "",
-        fats: "",
-        category: "proteinas",
-        common_portion_size: "",
-        common_portion_name: "",
-      })
-      setShowAddFoodModal(false)
-      alert("Alimento agregado exitosamente")
-    } catch (error: any) {
-      console.error("Error adding food:", error)
-      alert("Error al agregar alimento: " + error.message)
-    }
-  }
-
-  // Función de IA simulada (RESTAURADA)
-  const handleAiQuery = async () => {
-    if (!aiQuery.trim()) return
-    setIsAiLoading(true)
-    try {
-      // Simulación de respuesta de IA
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      const responses = [
-        "Basándome en los datos de tus usuarios, recomiendo enfocar las estrategias nutricionales en proteínas magras y carbohidratos complejos.",
-        "Los patrones de actividad muestran que los usuarios son más consistentes con ejercicios de 15-20 minutos.",
-        "Para mejorar la retención, sugiero implementar recordatorios personalizados basados en los horarios de cada usuario.",
-        "Los datos indican que los usuarios con objetivos de bienestar emocional responden mejor a contenido de mindfulness.",
-      ]
-      setAiResponse(responses[Math.floor(Math.random() * responses.length)])
-    } catch (error) {
-      setAiResponse("Error al procesar la consulta. Intenta de nuevo.")
-    } finally {
-      setIsAiLoading(false)
-    }
+Gracias!`
+    const message = supplement.whatsapp_message || defaultMessage
+    const whatsappUrl = `https://wa.me/573134852878?text=${encodeURIComponent(message)}`
+    window.open(whatsappUrl, "_blank")
   }
 
   // ============================================================================
-  // COMPONENTES DE NAVEGACIÓN MÓVIL (NUEVOS)
+  // COMPONENTES DE UI RESPONSIVOS
   // ============================================================================
-  const MobileNavigation = () => {
-    if (isAdmin) return null // No mostrar navegación móvil para admin
+  const SaveStatusIndicator = () => {
+    if (saveStatus === "idle") return null
+    const statusConfig = {
+      saving: { icon: <Icons.Loader2 size="text-sm" />, text: "Guardando...", color: "text-blue-600 bg-blue-50" },
+      saved: { icon: <Icons.CheckCircle size="text-sm" />, text: "Guardado", color: "text-green-600 bg-green-50" },
+      error: { icon: <Icons.AlertCircle size="text-sm" />, text: "Error", color: "text-red-600 bg-red-50" },
+    }
+    const config = statusConfig[saveStatus]
+    return (
+      <div
+        className={`fixed top-4 right-4 z-50 px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 ${config.color} text-xs sm:text-sm`}
+      >
+        {config.icon}
+        <span className="font-medium">{config.text}</span>
+        {lastSaveTime && saveStatus === "saved" && (
+          <span className="opacity-75 hidden sm:inline">{lastSaveTime.toLocaleTimeString()}</span>
+        )}
+      </div>
+    )
+  }
+
+  const FloatingActionButtons = () => {
+    return (
+      <div className="fixed bottom-20 right-4 z-40">
+        {showFloatingMenu && (
+          <div className="flex flex-col gap-2 mb-3 animate-in slide-in-from-bottom">
+            <button
+              onClick={() => handleQuickProgress("water")}
+              className="bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors flex items-center gap-2 min-w-max text-sm"
+            >
+              <Icons.Droplets size="text-lg" />
+              <span className="hidden sm:inline">Agua +1</span>
+            </button>
+            <button
+              onClick={() => handleQuickProgress("exercise")}
+              className="bg-green-500 text-white p-3 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center gap-2 min-w-max text-sm"
+            >
+              <Icons.Activity size="text-lg" />
+              <span className="hidden sm:inline">Ejercicio +1</span>
+            </button>
+            <button
+              onClick={() => handleQuickProgress("mindfulness")}
+              className="bg-purple-500 text-white p-3 rounded-full shadow-lg hover:bg-purple-600 transition-colors flex items-center gap-2 min-w-max text-sm"
+            >
+              <Icons.Brain size="text-lg" />
+              <span className="hidden sm:inline">Mindfulness +1</span>
+            </button>
+          </div>
+        )}
+        <button
+          onClick={() => setShowFloatingMenu(!showFloatingMenu)}
+          className={`bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-all duration-200 ${
+            showFloatingMenu ? "rotate-45" : "rotate-0"
+          }`}
+        >
+          <Icons.Plus size="text-xl" />
+        </button>
+      </div>
+    )
+  }
+
+  const GamificationPanel = () => {
+    if (!userGamification) return null
+    const currentLevelInfo =
+      LEVEL_SYSTEM.levels.find((l) => l.level === userGamification.current_level) || LEVEL_SYSTEM.levels[0]
+    const nextLevelInfo = LEVEL_SYSTEM.levels.find((l) => l.level === userGamification.current_level + 1)
+    const progressToNext = nextLevelInfo
+      ? ((userGamification.total_points - currentLevelInfo.pointsRequired) /
+          (nextLevelInfo.pointsRequired - currentLevelInfo.pointsRequired)) *
+        100
+      : 100
 
     return (
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-40 px-2 py-1">
-        <div className="flex justify-around">
-          {USER_MODULES.map((module) => (
-            <button
-              key={module.id}
-              onClick={() => setActiveTab(module.id)}
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg ${
-                activeTab === module.id ? "text-green-600" : "text-gray-500"
-              }`}
-            >
-              <div className={activeTab === module.id ? "text-xl" : "text-lg"}>{module.icon}</div>
-              <span className="text-[10px] mt-1">{module.name}</span>
-            </button>
-          ))}
+      <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl sm:text-3xl">{currentLevelInfo.icon}</span>
+            <div>
+              <h3 className="font-bold text-base sm:text-lg">{currentLevelInfo.name}</h3>
+              <p className="text-xs sm:text-sm opacity-90">Nivel {userGamification.current_level}</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xl sm:text-2xl font-bold">{userGamification.total_points}</div>
+            <div className="text-xs opacity-75">puntos</div>
+          </div>
+        </div>
+        {nextLevelInfo && (
+          <div className="mb-3">
+            <div className="flex justify-between text-xs mb-1">
+              <span>Siguiente nivel</span>
+              <span>{Math.round(progressToNext)}%</span>
+            </div>
+            <div className="w-full bg-white/20 rounded-full h-2">
+              <div
+                className="bg-white h-2 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min(progressToNext, 100)}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
+        <div className="grid grid-cols-3 gap-2 text-center text-xs sm:text-sm">
+          <div>
+            <div className="font-bold">{userGamification.streak_days}</div>
+            <div className="opacity-75">Racha</div>
+          </div>
+          <div>
+            <div className="font-bold">{userGamification.weekly_points}</div>
+            <div className="opacity-75">Semana</div>
+          </div>
+          <div>
+            <div className="font-bold">{userGamification.monthly_points}</div>
+            <div className="opacity-75">Mes</div>
+          </div>
         </div>
       </div>
     )
   }
 
-  const MobileHeader = () => {
-    if (isAdmin) return null // No mostrar header móvil para admin
+  // Panel de administración responsive
+  // Después de la línea del AdminPanel, reemplazar toda la función AdminPanel con la versión completa:
+
+  const AdminPanel = () => {
+    const [showAddResource, setShowAddResource] = useState(false)
+    const [newResource, setNewResource] = useState({
+      type: "mindfulness" as "mindfulness" | "nutrition" | "exercise",
+      title: "",
+      description: "",
+      url: "",
+      image_url: "",
+    })
+
+    // 🆕 Estados para agregar tips
+    const [showAddTip, setShowAddTip] = useState(false)
+    const [newTip, setNewTip] = useState({
+      category: "",
+      title: "",
+      content: "",
+      icon: "💡",
+    })
+
+    // 🆕 Estados para agregar suplementos
+    const [showAddSupplement, setShowAddSupplement] = useState(false)
+    const [newSupplement, setNewSupplement] = useState({
+      name: "",
+      description: "",
+      benefits: "",
+      price: "",
+      image_url: "",
+      whatsapp_message: "",
+    })
+
+    // 🆕 Función para agregar recursos
+    const addResource = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("global_resources")
+          .insert({
+            ...newResource,
+            is_active: true,
+            created_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+        if (error) throw error
+        setGlobalResources((prev) => [...prev, data])
+        setNewResource({
+          type: "mindfulness",
+          title: "",
+          description: "",
+          url: "",
+          image_url: "",
+        })
+        setShowAddResource(false)
+        alert("✅ Recurso agregado exitosamente!")
+        await loadGlobalContent()
+      } catch (error) {
+        console.error("Error adding resource:", error)
+        alert("❌ Error al agregar recurso")
+      }
+    }
+
+    // 🆕 Función para agregar tips
+    const addTip = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("global_tips")
+          .insert({
+            ...newTip,
+            is_active: true,
+            created_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+        if (error) throw error
+        setGlobalTips((prev) => [...prev, data])
+        setNewTip({
+          category: "",
+          title: "",
+          content: "",
+          icon: "💡",
+        })
+        setShowAddTip(false)
+        alert("✅ Tip agregado exitosamente!")
+        await loadGlobalContent()
+      } catch (error) {
+        console.error("Error adding tip:", error)
+        alert("❌ Error al agregar tip")
+      }
+    }
+
+    // 🆕 Función para agregar suplementos
+    const addSupplement = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("supplements")
+          .insert({
+            ...newSupplement,
+            price: Number.parseInt(newSupplement.price) || 0,
+            is_active: true,
+            created_at: new Date().toISOString(),
+          })
+          .select()
+          .single()
+        if (error) throw error
+        setSupplements((prev) => [...prev, { ...data, benefits: data.benefits ? data.benefits.split(",") : [] }])
+        setNewSupplement({
+          name: "",
+          description: "",
+          benefits: "",
+          price: "",
+          image_url: "",
+          whatsapp_message: "",
+        })
+        setShowAddSupplement(false)
+        alert("✅ Suplemento agregado exitosamente!")
+        await loadGlobalContent()
+      } catch (error) {
+        console.error("Error adding supplement:", error)
+        alert("❌ Error al agregar suplemento")
+      }
+    }
 
     return (
-      <div className="bg-white border-b shadow-sm">
-        <div className="px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">✨</span>
-            <h1 className="text-lg font-bold">VitalMente</h1>
-          </div>
-          {currentUser && (
-            <div className="flex items-center gap-3">
-              <div className="text-xs text-right">
-                <div className="font-medium">{currentUser.name.split(" ")[0]}</div>
-                <div className="text-gray-500">{getProgressPercentage(dailyProgress)}% completado</div>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header móvil de administración */}
+        <div className="bg-white border-b shadow-sm">
+          <div className="px-4 py-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <Icons.Shield size="text-xl sm:text-2xl" />
+                  <span className="hidden sm:inline">Panel de Administración Maestro</span>
+                  <span className="sm:hidden">Admin Maestro</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  Análisis de patrones y gestión de suplementación inteligente
+                </p>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                    🌐 Conectado a Supabase
+                  </span>
+                  <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA Activa</span>
+                  <span className="inline-block px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded">
+                    🚀 Desplegado en Vercel
+                  </span>
+                </div>
               </div>
-              <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="p-2 rounded-full hover:bg-gray-100">
-                <Icons.Menu size="text-xl" />
+              <button
+                onClick={() => setIsAdmin(false)}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+              >
+                <Icons.LogOut size="text-sm" />
+                <span className="hidden sm:inline">Salir</span>
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Navegación de tabs responsive */}
+        <div className="bg-white border-b overflow-x-auto">
+          <div className="px-4">
+            <div className="flex space-x-4 sm:space-x-8 min-w-max">
+              {[
+                { id: "dashboard", name: "Dashboard", icon: <Icons.Chart size="text-sm" /> },
+                { id: "users", name: "Usuarios", icon: <Icons.Users size="text-sm" /> },
+                { id: "ia-patterns", name: "IA Patterns", icon: <Icons.Robot size="text-sm" /> },
+                { id: "resources", name: "Recursos", icon: <Icons.Link size="text-sm" /> },
+                { id: "supplements", name: "Suplementos", icon: <Icons.Package size="text-sm" /> },
+                { id: "analytics", name: "Analytics", icon: <Icons.TrendingUp size="text-sm" /> },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveAdminTab(tab.id)}
+                  className={`py-3 px-2 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap ${
+                    activeAdminTab === tab.id
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Contenido de administración */}
+        <div className="px-4 py-6">
+          {/* TAB DASHBOARD */}
+          {activeAdminTab === "dashboard" && (
+            <div className="space-y-4">
+              {/* Métricas principales */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">Usuarios Totales</p>
+                      <p className="text-xl sm:text-2xl font-bold text-blue-600">{allUsers.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        +
+                        {
+                          allUsers.filter(
+                            (u) => new Date(u.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                          ).length
+                        }{" "}
+                        esta semana
+                      </p>
+                    </div>
+                    <Icons.Users size="text-2xl" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">Suplementos Activos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-purple-600">{supplements.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Catálogo completo</p>
+                    </div>
+                    <Icons.Package size="text-2xl" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">Tips Activos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-green-600">{globalTips.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Contenido educativo</p>
+                    </div>
+                    <Icons.Lightbulb size="text-2xl" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-gray-600">Recursos Activos</p>
+                      <p className="text-xl sm:text-2xl font-bold text-orange-600">{globalResources.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Videos, PDFs, Enlaces</p>
+                    </div>
+                    <Icons.Link size="text-2xl" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Estado del sistema */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Database size="text-lg" />
+                  Estado del Sistema
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl mb-2">✅</div>
+                    <div className="font-semibold text-green-800 text-sm">Supabase</div>
+                    <div className="text-xs text-green-600">Conectado y funcionando</div>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl mb-2">🚀</div>
+                    <div className="font-semibold text-blue-800 text-sm">Vercel</div>
+                    <div className="text-xs text-blue-600">Desplegado y activo</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl mb-2">🤖</div>
+                    <div className="font-semibold text-purple-800 text-sm">IA Engine</div>
+                    <div className="text-xs text-purple-600">Generando recomendaciones</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB USUARIOS */}
+          {activeAdminTab === "users" && (
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold text-sm sm:text-base flex items-center gap-2">
+                  <Icons.Users size="text-lg" />
+                  Lista de Usuarios Registrados ({allUsers.length})
+                </h3>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                {allUsers.map((user) => (
+                  <div key={user.id} className="p-4 border-b hover:bg-gray-50 transition-colors">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm">{user.name}</p>
+                        <p className="text-xs text-gray-600">{user.phone}</p>
+                        <p className="text-xs text-gray-500">
+                          Registrado: {new Date(user.created_at).toLocaleDateString()}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Último acceso: {new Date(user.last_login).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded mb-1 block">
+                          {GOALS.find((g) => g.id === user.goal)?.label || user.goal}
+                        </span>
+                        <div className="text-xs text-gray-500">
+                          {user.age} años | {user.weight}kg | {user.height}cm
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Actividad: {ACTIVITY_LEVELS.find((a) => a.value === user.activity_level)?.label}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 🆕 TAB IA PATTERNS - RESTAURADO COMPLETO */}
+          {activeAdminTab === "ia-patterns" && (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Explicación del sistema IA */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Robot size="text-lg" />
+                  Sistema de Análisis Inteligente
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">🧠</div>
+                    <div className="font-semibold text-sm">Análisis de Comportamiento</div>
+                    <div className="text-xs text-gray-600">
+                      Detecta patrones en hidratación, ejercicio y mindfulness
+                    </div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">🎯</div>
+                    <div className="font-semibold text-sm">Recomendaciones Personalizadas</div>
+                    <div className="text-xs text-gray-600">Sugiere suplementos basados en déficits detectados</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">📊</div>
+                    <div className="font-semibold text-sm">Scoring de Confianza</div>
+                    <div className="text-xs text-gray-600">Evalúa la precisión de cada recomendación</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl sm:text-3xl mb-2">⚡</div>
+                    <div className="font-semibold text-sm">Optimización Temporal</div>
+                    <div className="text-xs text-gray-600">Determina el mejor momento para cada suplemento</div>
+                  </div>
+                </div>
+
+                {/* Algoritmos activos */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">🔬 Algoritmos Activos</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-white rounded border">
+                      <div>
+                        <span className="font-medium text-sm">Detector de Déficit de Ejercicio</span>
+                        <p className="text-xs text-gray-600">
+                          Si ejercicio promedio {"<"} 0.5 sesiones/día → Recomienda energéticos
+                        </p>
+                      </div>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Activo</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white rounded border">
+                      <div>
+                        <span className="font-medium text-sm">Detector de Estrés/Ansiedad</span>
+                        <p className="text-xs text-gray-600">
+                          Si mindfulness {"<"} 0.5 sesiones/día → Recomienda relajantes
+                        </p>
+                      </div>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Activo</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white rounded border">
+                      <div>
+                        <span className="font-medium text-sm">Detector de Deshidratación</span>
+                        <p className="text-xs text-gray-600">Si agua {"<"} 6 vasos/día → Recomienda electrolitos</p>
+                      </div>
+                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">En desarrollo</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Métricas de IA */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4">📈 Métricas de IA</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-blue-600">
+                      {allUsers.length > 0 ? Math.round((aiRecommendations.length / allUsers.length) * 100) : 0}%
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Usuarios con recomendaciones activas</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-green-600">85%</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Precisión promedio del algoritmo</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-purple-600">12%</div>
+                    <div className="text-xs sm:text-sm text-gray-600">Tasa de conversión estimada</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB RECURSOS */}
+          {activeAdminTab === "resources" && (
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                  <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+                    <Icons.Link size="text-lg" />
+                    Gestión de Recursos ({globalResources.length})
+                  </h3>
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => setShowAddResource(true)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm justify-center"
+                    >
+                      <Icons.Plus size="text-sm" />
+                      Agregar Recurso
+                    </button>
+                    <button
+                      onClick={() => setShowAddTip(true)}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 text-sm justify-center"
+                    >
+                      <Icons.Plus size="text-sm" />
+                      Agregar Tip
+                    </button>
+                  </div>
+                </div>
+
+                {/* Lista de recursos existentes */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {globalResources.map((resource) => (
+                    <div key={resource.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">{getResourceTypeIcon(resource.type)}</span>
+                        <span className="text-xs sm:text-sm font-medium capitalize">{resource.type}</span>
+                      </div>
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600 mb-2">{resource.description}</p>
+                      <a
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-600 hover:text-blue-800 break-all"
+                      >
+                        {resource.url}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Lista de tips */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Lightbulb size="text-lg" />
+                  Tips Activos ({globalTips.length})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {globalTips.map((tip) => (
+                    <div key={tip.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">{tip.icon}</span>
+                        <span className="text-xs sm:text-sm font-medium">{tip.category}</span>
+                      </div>
+                      <h4 className="font-semibold text-sm mb-1">{tip.title}</h4>
+                      <p className="text-xs text-gray-600">{tip.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB SUPLEMENTOS */}
+          {activeAdminTab === "supplements" && (
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+                  <Icons.Package size="text-lg" />
+                  Gestión de Suplementos ({supplements.length})
+                </h3>
+                <button
+                  onClick={() => setShowAddSupplement(true)}
+                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center gap-2 text-sm w-full sm:w-auto justify-center"
+                >
+                  <Icons.Plus size="text-sm" />
+                  Agregar Suplemento
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {supplements.map((supplement) => (
+                  <div key={supplement.id} className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-sm mb-1">{supplement.name}</h4>
+                    <p className="text-xs text-gray-600 mb-2">{supplement.description}</p>
+                    <p className="text-sm sm:text-base font-bold text-green-600 mb-2">
+                      ${supplement.price.toLocaleString()}
+                    </p>
+                    <div className="text-xs text-gray-500">
+                      <p>Beneficios: {supplement.benefits.join(", ")}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 🆕 TAB ANALYTICS - RESTAURADO COMPLETO */}
+          {activeAdminTab === "analytics" && (
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icons.TrendingUp size="text-lg" />
+                  Analytics Avanzados
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3 text-sm sm:text-base">📊 Distribución de Objetivos</h4>
+                    <div className="space-y-2">
+                      {GOALS.map((goal) => {
+                        const count = allUsers.filter((u) => u.goal === goal.id).length
+                        const percentage = allUsers.length > 0 ? Math.round((count / allUsers.length) * 100) : 0
+                        return (
+                          <div key={goal.id} className="flex items-center justify-between">
+                            <span className="text-xs sm:text-sm truncate flex-1 mr-2">{goal.label}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-16 sm:w-20 bg-gray-200 rounded-full h-2">
+                                <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${percentage}%` }}></div>
+                              </div>
+                              <span className="text-xs text-gray-500 w-6 text-right">{count}</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-3 text-sm sm:text-base">⚡ Actividad Reciente</h4>
+                    <div className="space-y-2">
+                      {allUsers.slice(0, 5).map((user) => (
+                        <div key={user.id} className="flex items-center justify-between text-xs sm:text-sm">
+                          <span className="truncate flex-1 mr-2">{user.name}</span>
+                          <span className="text-gray-500 text-xs">
+                            {new Date(user.last_login).toLocaleDateString()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Métricas adicionales de analytics */}
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+                <h3 className="text-base sm:text-lg font-semibold mb-4">📈 Métricas de Engagement</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-blue-600">
+                      {
+                        allUsers.filter((u) => new Date(u.last_login) > new Date(Date.now() - 24 * 60 * 60 * 1000))
+                          .length
+                      }
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Usuarios activos hoy</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-green-600">
+                      {
+                        allUsers.filter((u) => new Date(u.last_login) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+                          .length
+                      }
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Usuarios activos esta semana</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-purple-600">
+                      {Math.round((globalResources.length + globalTips.length + supplements.length) / 3)}
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Contenido promedio por categoría</div>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-xl sm:text-2xl font-bold text-orange-600">
+                      {allUsers.length > 0 ? Math.round((aiRecommendations.length / allUsers.length) * 100) : 0}%
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600">Cobertura de recomendaciones IA</div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
-      </div>
-    )
-  }
 
-  const MobileMenu = () => {
-    if (!showMobileMenu || isAdmin) return null
-
-    return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50" onClick={() => setShowMobileMenu(false)}>
-        <div className="absolute right-0 top-0 bottom-0 w-64 bg-white shadow-lg" onClick={(e) => e.stopPropagation()}>
-          <div className="p-4 border-b">
-            <div className="flex justify-between items-center">
-              <h2 className="font-bold">Menú</h2>
-              <button onClick={() => setShowMobileMenu(false)} className="p-2">
-                <Icons.X size="text-lg" />
-              </button>
-            </div>
-          </div>
-          <div className="p-4">
-            <div className="mb-4">
-              <div className="font-medium mb-1">{currentUser?.name}</div>
-              <div className="text-sm text-gray-600">{currentUser?.phone}</div>
-            </div>
-            <div className="space-y-2">
-              {USER_MODULES.map((module) => (
-                <button
-                  key={module.id}
-                  onClick={() => {
-                    setActiveTab(module.id)
-                    setShowMobileMenu(false)
-                  }}
-                  className={`flex items-center gap-3 w-full p-2 rounded-lg ${
-                    activeTab === module.id ? "bg-green-50 text-green-600" : "hover:bg-gray-50"
-                  }`}
-                >
-                  {module.icon}
-                  <span>{module.name}</span>
-                </button>
-              ))}
-              <div className="border-t my-2 pt-2">
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-3 w-full p-2 rounded-lg text-red-600 hover:bg-red-50"
-                >
-                  <Icons.LogOut size="text-lg" />
-                  <span>Cerrar sesión</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // ============================================================================
-  // COMPONENTES DE MÓDULOS PRINCIPALES (USUARIOS)
-  // ============================================================================
-  const HomeModule = () => {
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        {/* Bienvenida personalizada */}
-        <div className="bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-bold mb-2">¡Hola, {currentUser?.name.split(" ")[0]}!</h2>
-          <p className="text-sm sm:text-base opacity-90 mb-3">{getMotivationalMessage(currentUser?.goal || "")}</p>
-          <div className="flex items-center gap-2 text-xs sm:text-sm bg-white/20 p-2 rounded-lg">
-            <Icons.Calendar size="text-lg" />
-            <span>{new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}</span>
-          </div>
-        </div>
-
-        {/* Progreso diario */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold mb-4">Tu progreso de hoy</h3>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="relative inline-block">
-                <svg className="w-16 h-16 sm:w-20 sm:h-20" viewBox="0 0 36 36">
-                  <path
-                    className="stroke-current text-gray-200"
-                    fill="none"
-                    strokeWidth="3"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="stroke-current text-blue-500"
-                    fill="none"
-                    strokeWidth="3"
-                    strokeDasharray={`${dailyProgress.water * 12.5}, 100`}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <text
-                    x="18"
-                    y="20.5"
-                    className="fill-current text-blue-500 font-semibold text-xs"
-                    textAnchor="middle"
+        {/* 🆕 MODALES COMPLETOS - RESPONSIVE */}
+        {/* Modal para agregar recurso */}
+        {showAddResource && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Agregar Nuevo Recurso</h3>
+                  <button onClick={() => setShowAddResource(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                    <Icons.X size="text-lg" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    value={newResource.type}
+                    onChange={(e) => setNewResource((prev) => ({ ...prev, type: e.target.value as any }))}
                   >
-                    {dailyProgress.water}/8
-                  </text>
-                </svg>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl">
-                  <Icons.Droplets size="text-xl" />
+                    <option value="mindfulness">🧘‍♀️ Mindfulness</option>
+                    <option value="nutrition">🥗 Nutrición</option>
+                    <option value="exercise">💪 Ejercicio</option>
+                  </select>
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Título del recurso"
+                    value={newResource.title}
+                    onChange={(e) => setNewResource((prev) => ({ ...prev, title: e.target.value }))}
+                  />
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Descripción"
+                    rows={3}
+                    value={newResource.description}
+                    onChange={(e) => setNewResource((prev) => ({ ...prev, description: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="URL (YouTube, PDF, Spotify, etc.)"
+                    value={newResource.url}
+                    onChange={(e) => setNewResource((prev) => ({ ...prev, url: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="URL de imagen (opcional)"
+                    value={newResource.image_url}
+                    onChange={(e) => setNewResource((prev) => ({ ...prev, image_url: e.target.value }))}
+                  />
                 </div>
-              </div>
-              <h4 className="text-sm font-medium mt-2">Agua</h4>
-              <div className="flex justify-center gap-2 mt-1">
-                <button
-                  onClick={() => updateProgress("water", -1)}
-                  className="p-1 bg-gray-100 rounded hover:bg-gray-200"
-                  disabled={dailyProgress.water <= 0}
-                >
-                  <Icons.Minus size="text-xs" />
-                </button>
-                <button
-                  onClick={() => updateProgress("water", 1)}
-                  className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
-                >
-                  <Icons.Plus size="text-xs" />
-                </button>
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="relative inline-block">
-                <svg className="w-16 h-16 sm:w-20 sm:h-20" viewBox="0 0 36 36">
-                  <path
-                    className="stroke-current text-gray-200"
-                    fill="none"
-                    strokeWidth="3"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="stroke-current text-green-500"
-                    fill="none"
-                    strokeWidth="3"
-                    strokeDasharray={`${dailyProgress.exercise * 100}, 100`}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <text
-                    x="18"
-                    y="20.5"
-                    className="fill-current text-green-500 font-semibold text-xs"
-                    textAnchor="middle"
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                  <button
+                    onClick={addResource}
+                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 text-sm"
                   >
-                    {dailyProgress.exercise}/1
-                  </text>
-                </svg>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl">
-                  <Icons.Activity size="text-xl" />
-                </div>
-              </div>
-              <h4 className="text-sm font-medium mt-2">Ejercicio</h4>
-              <div className="flex justify-center gap-2 mt-1">
-                <button
-                  onClick={() => updateProgress("exercise", -1)}
-                  className="p-1 bg-gray-100 rounded hover:bg-gray-200"
-                  disabled={dailyProgress.exercise <= 0}
-                >
-                  <Icons.Minus size="text-xs" />
-                </button>
-                <button
-                  onClick={() => updateProgress("exercise", 1)}
-                  className="p-1 bg-green-100 text-green-600 rounded hover:bg-green-200"
-                >
-                  <Icons.Plus size="text-xs" />
-                </button>
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="relative inline-block">
-                <svg className="w-16 h-16 sm:w-20 sm:h-20" viewBox="0 0 36 36">
-                  <path
-                    className="stroke-current text-gray-200"
-                    fill="none"
-                    strokeWidth="3"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="stroke-current text-purple-500"
-                    fill="none"
-                    strokeWidth="3"
-                    strokeDasharray={`${dailyProgress.mindfulness * 100}, 100`}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <text
-                    x="18"
-                    y="20.5"
-                    className="fill-current text-purple-500 font-semibold text-xs"
-                    textAnchor="middle"
+                    Agregar Recurso
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddResource(false)
+                      setNewResource({
+                        type: "mindfulness",
+                        title: "",
+                        description: "",
+                        url: "",
+                        image_url: "",
+                      })
+                    }}
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
                   >
-                    {dailyProgress.mindfulness}/1
-                  </text>
-                </svg>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl">
-                  <Icons.Brain size="text-xl" />
+                    Cancelar
+                  </button>
                 </div>
-              </div>
-              <h4 className="text-sm font-medium mt-2">Mindfulness</h4>
-              <div className="flex justify-center gap-2 mt-1">
-                <button
-                  onClick={() => updateProgress("mindfulness", -1)}
-                  className="p-1 bg-gray-100 rounded hover:bg-gray-200"
-                  disabled={dailyProgress.mindfulness <= 0}
-                >
-                  <Icons.Minus size="text-xs" />
-                </button>
-                <button
-                  onClick={() => updateProgress("mindfulness", 1)}
-                  className="p-1 bg-purple-100 text-purple-600 rounded hover:bg-purple-200"
-                >
-                  <Icons.Plus size="text-xs" />
-                </button>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Comidas del día */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold mb-4">Comidas de hoy</h3>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="relative inline-block">
-                <svg className="w-16 h-16 sm:w-20 sm:h-20" viewBox="0 0 36 36">
-                  <path
-                    className="stroke-current text-gray-200"
-                    fill="none"
-                    strokeWidth="3"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+        {/* Modal para agregar tip */}
+        {showAddTip && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Agregar Nuevo Tip</h3>
+                  <button onClick={() => setShowAddTip(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                    <Icons.X size="text-lg" />
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Categoría (ej: Hidratación, Ejercicio)"
+                    value={newTip.category}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, category: e.target.value }))}
                   />
-                  <path
-                    className="stroke-current text-amber-500"
-                    fill="none"
-                    strokeWidth="3"
-                    strokeDasharray={`${dailyProgress.desayuno * 100}, 100`}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Título del tip"
+                    value={newTip.title}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, title: e.target.value }))}
                   />
-                </svg>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl">🍳</div>
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Contenido del tip"
+                    rows={4}
+                    value={newTip.content}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, content: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Emoji/Icono (ej: 💧, 🏃‍♂️, 🧘‍♀️)"
+                    value={newTip.icon}
+                    onChange={(e) => setNewTip((prev) => ({ ...prev, icon: e.target.value }))}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                  <button
+                    onClick={addTip}
+                    className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 text-sm"
+                  >
+                    Agregar Tip
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddTip(false)
+                      setNewTip({
+                        category: "",
+                        title: "",
+                        content: "",
+                        icon: "💡",
+                      })
+                    }}
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
               </div>
-              <h4 className="text-sm font-medium mt-2">Desayuno</h4>
-              <button
-                onClick={() => openMealCalculator("desayuno")}
-                className="mt-1 text-xs bg-amber-100 text-amber-600 px-2 py-1 rounded hover:bg-amber-200"
-              >
-                {dailyProgress.desayuno > 0 ? "Editar" : "Agregar"}
-              </button>
-            </div>
-            <div className="text-center">
-              <div className="relative inline-block">
-                <svg className="w-16 h-16 sm:w-20 sm:h-20" viewBox="0 0 36 36">
-                  <path
-                    className="stroke-current text-gray-200"
-                    fill="none"
-                    strokeWidth="3"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="stroke-current text-orange-500"
-                    fill="none"
-                    strokeWidth="3"
-                    strokeDasharray={`${dailyProgress.almuerzo * 100}, 100`}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                </svg>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl">🍲</div>
-              </div>
-              <h4 className="text-sm font-medium mt-2">Almuerzo</h4>
-              <button
-                onClick={() => openMealCalculator("almuerzo")}
-                className="mt-1 text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded hover:bg-orange-200"
-              >
-                {dailyProgress.almuerzo > 0 ? "Editar" : "Agregar"}
-              </button>
-            </div>
-            <div className="text-center">
-              <div className="relative inline-block">
-                <svg className="w-16 h-16 sm:w-20 sm:h-20" viewBox="0 0 36 36">
-                  <path
-                    className="stroke-current text-gray-200"
-                    fill="none"
-                    strokeWidth="3"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    className="stroke-current text-indigo-500"
-                    fill="none"
-                    strokeWidth="3"
-                    strokeDasharray={`${dailyProgress.cena * 100}, 100`}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                </svg>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl">🌙</div>
-              </div>
-              <h4 className="text-sm font-medium mt-2">Cena</h4>
-              <button
-                onClick={() => openMealCalculator("cena")}
-                className="mt-1 text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-200"
-              >
-                {dailyProgress.cena > 0 ? "Editar" : "Agregar"}
-              </button>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Progreso de calorías */}
-        {macroResults && (
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold mb-4">Progreso Nutricional</h3>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Calorías</span>
-                  <span>
-                    {consumedMacros.calories}/{macroResults.calories}
-                  </span>
+        {/* 🆕 Modal para agregar suplemento - COMPLETO */}
+        {showAddSupplement && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-medium text-gray-900">Agregar Nuevo Suplemento</h3>
+                  <button onClick={() => setShowAddSupplement(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                    <Icons.X size="text-lg" />
+                  </button>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(getCaloriesProgress().percentage, 100)}%` }}
-                  ></div>
+                <div className="space-y-4">
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Nombre del suplemento"
+                    value={newSupplement.name}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, name: e.target.value }))}
+                  />
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Descripción"
+                    rows={3}
+                    value={newSupplement.description}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, description: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Beneficios (separados por comas)"
+                    value={newSupplement.benefits}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, benefits: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Precio (solo números)"
+                    type="number"
+                    value={newSupplement.price}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, price: e.target.value }))}
+                  />
+                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="URL de imagen"
+                    value={newSupplement.image_url}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, image_url: e.target.value }))}
+                  />
+                  <textarea
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Mensaje personalizado de WhatsApp (opcional)"
+                    rows={3}
+                    value={newSupplement.whatsapp_message}
+                    onChange={(e) => setNewSupplement((prev) => ({ ...prev, whatsapp_message: e.target.value }))}
+                  />
                 </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 text-center text-sm">
-                <div>
-                  <div className="font-medium">Proteínas</div>
-                  <div className="text-xs text-gray-600">
-                    {consumedMacros.protein}g / {macroResults.protein}g
-                  </div>
-                </div>
-                <div>
-                  <div className="font-medium">Carbohidratos</div>
-                  <div className="text-xs text-gray-600">
-                    {consumedMacros.carbs}g / {macroResults.carbs}g
-                  </div>
-                </div>
-                <div>
-                  <div className="font-medium">Grasas</div>
-                  <div className="text-xs text-gray-600">
-                    {consumedMacros.fats}g / {macroResults.fats}g
-                  </div>
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                  <button
+                    onClick={addSupplement}
+                    className="bg-purple-500 text-white p-3 rounded-lg hover:bg-purple-600 text-sm"
+                  >
+                    Agregar Suplemento
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddSupplement(false)
+                      setNewSupplement({
+                        name: "",
+                        description: "",
+                        benefits: "",
+                        price: "",
+                        image_url: "",
+                        whatsapp_message: "",
+                      })
+                    }}
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                  >
+                    Cancelar
+                  </button>
                 </div>
               </div>
             </div>
@@ -1767,1307 +2322,164 @@ export default function VitalMenteApp() {
     )
   }
 
-  const ComidaModule = () => {
+  // ============================================================================
+  // RENDERIZADO CONDICIONAL PARA ADMIN
+  // ============================================================================
+  if (isAdmin) {
+    return <AdminPanel />
+  }
+
+  // ============================================================================
+  // ESTADOS DE CARGA Y ERROR
+  // ============================================================================
+  if (connectionStatus === "connecting") {
     return (
-      <div className="space-y-4 sm:space-y-6">
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold mb-4">Registro de Comidas</h3>
-
-          {/* Comidas consumidas hoy */}
-          {mealCompositions.length > 0 && (
-            <div className="mb-6">
-              <h4 className="font-medium mb-3">Comidas de hoy:</h4>
-              <div className="space-y-2">
-                {mealCompositions.map((meal) => (
-                  <div key={meal.id} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
-                    <div>
-                      <div className="font-medium text-sm">{meal.food_name}</div>
-                      <div className="text-xs text-gray-600">
-                        {meal.meal_type} - {meal.quantity_grams}g - {meal.calories_consumed} cal
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => removeFoodFromMeal(meal.id)}
-                      className="text-red-600 hover:bg-red-50 p-1 rounded"
-                    >
-                      <Icons.Trash2 size="text-sm" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Botones para agregar comidas */}
-          <div className="grid grid-cols-3 gap-4">
-            <button
-              onClick={() => openMealCalculator("desayuno")}
-              className="bg-amber-100 text-amber-700 p-4 rounded-lg hover:bg-amber-200 transition-colors"
-            >
-              <div className="text-2xl mb-2">🍳</div>
-              <div className="font-medium">Desayuno</div>
-            </button>
-            <button
-              onClick={() => openMealCalculator("almuerzo")}
-              className="bg-orange-100 text-orange-700 p-4 rounded-lg hover:bg-orange-200 transition-colors"
-            >
-              <div className="text-2xl mb-2">🍲</div>
-              <div className="font-medium">Almuerzo</div>
-            </button>
-            <button
-              onClick={() => openMealCalculator("cena")}
-              className="bg-indigo-100 text-indigo-700 p-4 rounded-lg hover:bg-indigo-200 transition-colors"
-            >
-              <div className="text-2xl mb-2">🌙</div>
-              <div className="font-medium">Cena</div>
-            </button>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+          <div className="text-3xl mb-4">
+            <Icons.Loader2 size="text-3xl" />
           </div>
+          <h3 className="text-lg font-semibold mb-2">Conectando</h3>
+          <p className="text-gray-600 text-sm">Inicializando base de datos...</p>
         </div>
       </div>
     )
   }
 
-  const BatidosModule = () => {
+  if (connectionStatus === "error") {
     return (
-      <div className="space-y-4 sm:space-y-6">
-        {/* Header con botón crear */}
-        <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-lg p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-bold mb-2">🥤 Creador de Batidos</h2>
-          <p className="text-sm sm:text-base opacity-90 mb-4">
-            Crea batidos personalizados con ingredientes del banco de alimentos
-          </p>
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+          <div className="text-3xl mb-4 text-red-500">
+            <Icons.X size="text-3xl" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">Error de conexión</h3>
+          <p className="text-gray-600 mb-4 text-sm">No se pudo conectar con la base de datos</p>
           <button
-            onClick={() => setShowRecipeCreator(true)}
-            className="bg-white text-green-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+            onClick={() => window.location.reload()}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm"
           >
-            <Icons.Plus size="text-sm" /> Crear Nuevo Batido
+            Reintentar
           </button>
-        </div>
-
-        {/* Mis batidos */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold mb-4">Mis Batidos ({userRecipes.length})</h3>
-          {userRecipes.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Icons.Blend size="text-3xl" />
-              <p className="mt-2">No has creado batidos aún</p>
-              <p className="text-sm mt-1">¡Crea tu primer batido personalizado!</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {userRecipes.map((recipe) => (
-                <div key={recipe.id} className="border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-medium mb-2">{recipe.name}</h4>
-                  <p className="text-sm text-gray-600 mb-3">{recipe.description}</p>
-                  <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                    <div className="bg-gray-50 p-2 rounded">
-                      <span className="font-medium">Calorías:</span> {recipe.total_calories}
-                    </div>
-                    <div className="bg-gray-50 p-2 rounded">
-                      <span className="font-medium">Proteínas:</span> {recipe.total_protein}g
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => selectFood(recipe)}
-                    className="w-full bg-green-100 text-green-700 py-2 rounded hover:bg-green-200 transition-colors text-sm"
-                  >
-                    Agregar a Comida
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Batidos populares */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold mb-4">Batidos Populares ({recipes.length})</h3>
-          {recipes.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No hay batidos populares disponibles</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {recipes.map((recipe) => (
-                <div key={recipe.id} className="border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-medium mb-2">{recipe.name}</h4>
-                  <p className="text-sm text-gray-600 mb-3">{recipe.description}</p>
-                  <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                    <div className="bg-gray-50 p-2 rounded">
-                      <span className="font-medium">Calorías:</span> {recipe.total_calories}
-                    </div>
-                    <div className="bg-gray-50 p-2 rounded">
-                      <span className="font-medium">Proteínas:</span> {recipe.total_protein}g
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => selectFood(recipe)}
-                    className="w-full bg-blue-100 text-blue-700 py-2 rounded hover:bg-blue-200 transition-colors text-sm"
-                  >
-                    Agregar a Comida
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  const EjercicioModule = () => {
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold mb-4">Biblioteca de Ejercicios</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {exercises.map((exercise) => (
-              <div key={exercise.id} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium">{exercise.name}</h4>
-                  <span
-                    className={`px-2 py-1 text-xs rounded ${
-                      exercise.difficulty === "beginner"
-                        ? "bg-green-100 text-green-700"
-                        : exercise.difficulty === "intermediate"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {exercise.difficulty}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mb-3">{exercise.description}</p>
-                <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                  <div className="bg-gray-50 p-2 rounded">
-                    <span className="font-medium">Duración:</span> {exercise.duration_minutes} min
-                  </div>
-                  <div className="bg-gray-50 p-2 rounded">
-                    <span className="font-medium">Calorías:</span> {exercise.calories_burned}
-                  </div>
-                </div>
-                <button
-                  onClick={() => updateProgress("exercise", 1)}
-                  className="w-full bg-green-100 text-green-700 py-2 rounded hover:bg-green-200 transition-colors text-sm"
-                >
-                  <Icons.Play size="text-sm" /> Iniciar Ejercicio
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const RecursosModule = () => {
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold mb-4">Recursos Educativos</h3>
-          <div className="grid grid-cols-1 gap-4">
-            {resources.map((resource) => (
-              <div key={resource.id} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium">{resource.title}</h4>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`px-2 py-1 text-xs rounded ${
-                        resource.type === "article"
-                          ? "bg-blue-100 text-blue-700"
-                          : resource.type === "video"
-                            ? "bg-purple-100 text-purple-700"
-                            : resource.type === "audio"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {resource.type}
-                    </span>
-                    {resource.is_premium && (
-                      <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded">
-                        <Icons.Crown size="text-xs" /> Premium
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600 mb-3">{resource.content}</p>
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-gray-500">
-                    Por {resource.author} • {resource.duration_minutes} min
-                  </div>
-                  <button className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200 transition-colors">
-                    <Icons.Play size="text-xs" /> Ver
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const SuplementosModule = () => {
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-bold mb-2">🛒 Tienda VitalMente</h2>
-          <p className="text-sm sm:text-base opacity-90">
-            Suplementos premium seleccionados para potenciar tu bienestar
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold mb-4">Productos Destacados</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {supplements.map((supplement) => (
-              <div key={supplement.id} className="border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium mb-2">{supplement.name}</h4>
-                <p className="text-sm text-gray-600 mb-3">{supplement.description}</p>
-                <div className="mb-3">
-                  <div className="text-xs text-gray-500 mb-1">Beneficios:</div>
-                  <div className="flex flex-wrap gap-1">
-                    {supplement.benefits.map((benefit, index) => (
-                      <span key={index} className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
-                        {benefit}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-lg font-bold text-green-600">${supplement.price.toLocaleString()}</div>
-                  <button className="bg-purple-100 text-purple-700 px-4 py-2 rounded hover:bg-purple-200 transition-colors text-sm">
-                    <Icons.Package size="text-sm" /> Comprar
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const PerfilModule = () => {
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold mb-4">Mi Perfil</h3>
-          {currentUser && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                <div className="mt-1 text-sm text-gray-900">{currentUser.name}</div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Teléfono</label>
-                <div className="mt-1 text-sm text-gray-900">{currentUser.phone}</div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Edad</label>
-                  <div className="mt-1 text-sm text-gray-900">{currentUser.age} años</div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Peso</label>
-                  <div className="mt-1 text-sm text-gray-900">{currentUser.weight} kg</div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Altura</label>
-                  <div className="mt-1 text-sm text-gray-900">{currentUser.height} cm</div>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Objetivo</label>
-                <div className="mt-1 text-sm text-gray-900">
-                  {GOALS.find((g) => g.id === currentUser.goal)?.label || currentUser.goal}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nivel de Actividad</label>
-                <div className="mt-1 text-sm text-gray-900">
-                  {ACTIVITY_LEVELS.find((a) => a.value === currentUser.activity_level)?.label}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     )
   }
 
   // ============================================================================
-  // COMPONENTE CREADOR DE BATIDOS (NUEVO)
-  // ============================================================================
-  const RecipeCreatorModal = () => {
-    if (!showRecipeCreator) return null
-
-    const totals = calculateRecipeTotals()
-
-    return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-        <div className="relative top-4 mx-auto border w-full max-w-3xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
-                <Icons.Blend size="text-xl" />
-                Creador de Batidos
-              </h3>
-              <button onClick={() => setShowRecipeCreator(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                <Icons.X size="text-lg" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Columna izquierda: Información del batido */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del batido</label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                    placeholder="Ej: Batido Energético de Banano"
-                    value={newRecipe.name}
-                    onChange={(e) => setNewRecipe((prev) => ({ ...prev, name: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descripción (opcional)</label>
-                  <textarea
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                    placeholder="Describe brevemente tu batido..."
-                    rows={2}
-                    value={newRecipe.description}
-                    onChange={(e) => setNewRecipe((prev) => ({ ...prev, description: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Instrucciones (opcional)</label>
-                  <textarea
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                    placeholder="Ej: Mezclar todos los ingredientes en la licuadora por 1 minuto..."
-                    rows={3}
-                    value={newRecipe.instructions}
-                    onChange={(e) => setNewRecipe((prev) => ({ ...prev, instructions: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Porciones</label>
-                  <input
-                    type="number"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                    min="1"
-                    value={newRecipe.serving_size}
-                    onChange={(e) => setNewRecipe((prev) => ({ ...prev, serving_size: Number(e.target.value) || 1 }))}
-                  />
-                </div>
-
-                {/* Resumen nutricional */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <h4 className="font-medium text-sm mb-2">Información Nutricional</h4>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="bg-white p-2 rounded border">
-                      <span className="font-medium">Calorías:</span> {totals.calories}
-                    </div>
-                    <div className="bg-white p-2 rounded border">
-                      <span className="font-medium">Proteínas:</span> {totals.protein}g
-                    </div>
-                    <div className="bg-white p-2 rounded border">
-                      <span className="font-medium">Carbohidratos:</span> {totals.carbs}g
-                    </div>
-                    <div className="bg-white p-2 rounded border">
-                      <span className="font-medium">Grasas:</span> {totals.fats}g
-                    </div>
-                  </div>
-                </div>
-
-                {/* Ingredientes seleccionados */}
-                <div>
-                  <h4 className="font-medium text-sm mb-2">Ingredientes seleccionados ({recipeIngredients.length})</h4>
-                  {recipeIngredients.length === 0 ? (
-                    <div className="text-center py-4 bg-gray-50 rounded-lg text-sm text-gray-500">
-                      Selecciona ingredientes de la lista
-                    </div>
-                  ) : (
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {recipeIngredients.map((ingredient, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{ingredient.food_name}</p>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="number"
-                                className="w-16 p-1 text-xs border rounded"
-                                value={ingredient.quantity_grams}
-                                onChange={(e) => updateIngredientQuantity(index, Number(e.target.value) || 0)}
-                                min="1"
-                              />
-                              <span className="text-xs text-gray-500">gramos</span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => removeIngredientFromRecipe(index)}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
-                          >
-                            <Icons.Trash2 size="text-xs" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Columna derecha: Selección de ingredientes */}
-              <div>
-                <h4 className="font-medium text-sm mb-2">Selecciona ingredientes</h4>
-                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                  {getFoodsByCategory().map((category) => (
-                    <div key={category.id} className="border border-gray-200 rounded-lg p-3">
-                      <h5 className="font-medium text-sm mb-2 flex items-center gap-1">
-                        <span>{category.icon}</span> {category.name}
-                      </h5>
-                      <div className="grid grid-cols-2 gap-2">
-                        {category.foods.map((food) => (
-                          <button
-                            key={food.id}
-                            onClick={() => addIngredientToRecipe(food)}
-                            className="text-left p-2 border border-gray-200 rounded hover:bg-gray-50 text-xs"
-                          >
-                            <p className="font-medium">{food.name}</p>
-                            <p className="text-gray-500">{food.calories} cal/100g</p>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={saveRecipe}
-                disabled={!newRecipe.name || recipeIngredients.length === 0}
-                className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-              >
-                Guardar Batido
-              </button>
-              <button
-                onClick={() => setShowRecipeCreator(false)}
-                className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // ============================================================================
-  // COMPONENTE CALCULADORA DE COMIDAS
-  // ============================================================================
-  const MealCalculatorModal = () => {
-    if (!showMealCalculator) return null
-
-    return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
-        <div className="relative top-4 mx-auto border w-full max-w-2xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900">Agregar {selectedMealType}</h3>
-              <button onClick={() => setShowMealCalculator(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                <Icons.X size="text-lg" />
-              </button>
-            </div>
-
-            {selectedFood ? (
-              <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">{selectedFood.name}</h4>
-                  {"ingredients" in selectedFood ? (
-                    <div>
-                      <p className="text-sm text-gray-600 mb-2">Batido personalizado</p>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>Calorías: {selectedFood.total_calories}</div>
-                        <div>Proteínas: {selectedFood.total_protein}g</div>
-                        <div>Carbohidratos: {selectedFood.total_carbs}g</div>
-                        <div>Grasas: {selectedFood.total_fats}g</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>Calorías: {selectedFood.calories}/100g</div>
-                      <div>Proteínas: {selectedFood.protein}g/100g</div>
-                      <div>Carbohidratos: {selectedFood.carbs}g/100g</div>
-                      <div>Grasas: {selectedFood.fats}g/100g</div>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Cantidad {"ingredients" in selectedFood ? "(porciones)" : "(gramos)"}
-                  </label>
-                  <input
-                    type="number"
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                    value={foodQuantity}
-                    onChange={(e) => setFoodQuantity(e.target.value)}
-                    min="1"
-                  />
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={addFoodToMeal}
-                    className="flex-1 bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition-colors"
-                  >
-                    Agregar a {selectedMealType}
-                  </button>
-                  <button
-                    onClick={() => setSelectedFood(null)}
-                    className="flex-1 bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 transition-colors"
-                  >
-                    Volver
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Mis batidos */}
-                {userRecipes.length > 0 && (
-                  <div>
-                    <h4 className="font-medium mb-2">Mis Batidos</h4>
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                      {userRecipes.map((recipe) => (
-                        <button
-                          key={recipe.id}
-                          onClick={() => selectFood(recipe)}
-                          className="text-left p-2 border border-gray-200 rounded hover:bg-gray-50"
-                        >
-                          <p className="font-medium text-sm">{recipe.name}</p>
-                          <p className="text-xs text-gray-500">{recipe.total_calories} cal</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Alimentos por categoría */}
-                <div className="space-y-4 max-h-[400px] overflow-y-auto">
-                  {getFoodsByCategory().map((category) => (
-                    <div key={category.id} className="border border-gray-200 rounded-lg p-3">
-                      <h5 className="font-medium text-sm mb-2 flex items-center gap-1">
-                        <span>{category.icon}</span> {category.name}
-                      </h5>
-                      <div className="grid grid-cols-2 gap-2">
-                        {category.foods.map((food) => (
-                          <button
-                            key={food.id}
-                            onClick={() => selectFood(food)}
-                            className="text-left p-2 border border-gray-200 rounded hover:bg-gray-50 text-xs"
-                          >
-                            <p className="font-medium">{food.name}</p>
-                            <p className="text-gray-500">{food.calories} cal/100g</p>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // ============================================================================
-  // COMPONENTES DE ADMINISTRADOR (RESTAURADOS COMPLETOS)
-  // ============================================================================
-  const AdminDashboard = () => {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <div className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-6">
-              <div className="flex items-center">
-                <h1 className="text-3xl font-bold text-gray-900">Panel de Administración VitalMente</h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-500">Bienvenido, {currentUser?.name}</span>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                >
-                  Cerrar Sesión
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          {/* Navegación de administrador */}
-          <div className="mb-8">
-            <div className="border-b border-gray-200">
-              <nav className="-mb-px flex space-x-8">
-                {ADMIN_MODULES.map((module) => (
-                  <button
-                    key={module.id}
-                    onClick={() => setActiveTab(module.id)}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === module.id
-                        ? "border-green-500 text-green-600"
-                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      {module.icon}
-                      {module.name}
-                    </div>
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </div>
-
-          {/* Contenido del módulo activo */}
-          <div className="px-4 py-6 sm:px-0">
-            {activeTab === "dashboard" && <AdminDashboardContent />}
-            {activeTab === "users" && <AdminUsersContent />}
-            {activeTab === "foods" && <AdminFoodsContent />}
-            {activeTab === "recipes" && <AdminRecipesContent />}
-            {activeTab === "exercises" && <AdminExercisesContent />}
-            {activeTab === "supplements" && <AdminSupplementsContent />}
-            {activeTab === "resources" && <AdminResourcesContent />}
-            {activeTab === "analytics" && <AdminAnalyticsContent />}
-            {activeTab === "ai" && <AdminAIContent />}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const AdminDashboardContent = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Icons.Users size="text-2xl" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">Total Usuarios</dt>
-                <dd className="text-lg font-medium text-gray-900">{userStats.totalUsers || allUsers.length}</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Icons.Activity size="text-2xl" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">Activos Hoy</dt>
-                <dd className="text-lg font-medium text-gray-900">{userStats.activeToday || 0}</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Icons.UtensilsCrossed size="text-2xl" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">Alimentos</dt>
-                <dd className="text-lg font-medium text-gray-900">{globalFoods.length}</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white overflow-hidden shadow rounded-lg">
-        <div className="p-5">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Icons.Blend size="text-2xl" />
-            </div>
-            <div className="ml-5 w-0 flex-1">
-              <dl>
-                <dt className="text-sm font-medium text-gray-500 truncate">Recetas</dt>
-                <dd className="text-lg font-medium text-gray-900">{recipes.length}</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const AdminUsersContent = () => (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Usuarios Registrados</h3>
-        <div className="max-h-96 overflow-y-auto">
-          <div className="space-y-3">
-            {allUsers.map((user) => (
-              <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                  <p className="text-sm text-gray-500">{user.phone}</p>
-                  <p className="text-xs text-gray-400">Registrado: {new Date(user.created_at).toLocaleDateString()}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-600">{user.age} años</p>
-                  <p className="text-xs text-gray-500">
-                    {user.weight}kg - {user.height}cm
-                  </p>
-                  <p className="text-xs text-gray-400">{GOALS.find((g) => g.id === user.goal)?.label || user.goal}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const AdminFoodsContent = () => (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Banco de Alimentos</h3>
-          <button
-            onClick={() => setShowAddFoodModal(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            <Icons.Plus size="text-sm" /> Agregar Alimento
-          </button>
-        </div>
-        <div className="max-h-96 overflow-y-auto">
-          <div className="space-y-2">
-            {globalFoods.map((food) => (
-              <div key={food.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{food.name}</p>
-                  <p className="text-xs text-gray-500">
-                    {food.calories} cal - {food.protein}g prot - {food.category}
-                  </p>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => dbFunctions.deleteGlobalFood(food.id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <Icons.Trash2 size="text-sm" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const AdminRecipesContent = () => (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Recetas Globales</h3>
-          <button
-            onClick={() => setShowAddRecipeModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            <Icons.Plus size="text-sm" /> Agregar Receta
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {recipes.map((recipe) => (
-            <div key={recipe.id} className="border border-gray-200 rounded-lg p-4">
-              <h4 className="font-medium mb-2">{recipe.name}</h4>
-              <p className="text-sm text-gray-600 mb-2">{recipe.description}</p>
-              <div className="text-xs text-gray-500">
-                {recipe.total_calories} cal - {recipe.total_protein}g prot
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-
-  const AdminExercisesContent = () => (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Biblioteca de Ejercicios</h3>
-          <button
-            onClick={() => setShowAddExerciseModal(true)}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            <Icons.Plus size="text-sm" /> Agregar Ejercicio
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {exercises.map((exercise) => (
-            <div key={exercise.id} className="border border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h4 className="font-medium">{exercise.name}</h4>
-                <span
-                  className={`px-2 py-1 text-xs rounded ${
-                    exercise.difficulty === "beginner"
-                      ? "bg-green-100 text-green-700"
-                      : exercise.difficulty === "intermediate"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {exercise.difficulty}
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mb-2">{exercise.description}</p>
-              <div className="text-xs text-gray-500">
-                {exercise.duration_minutes} min - {exercise.calories_burned} cal
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-
-  const AdminSupplementsContent = () => (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Catálogo de Suplementos</h3>
-          <button
-            onClick={() => setShowAddSupplementModal(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            <Icons.Plus size="text-sm" /> Agregar Suplemento
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {supplements.map((supplement) => (
-            <div key={supplement.id} className="border border-gray-200 rounded-lg p-4">
-              <h4 className="font-medium mb-2">{supplement.name}</h4>
-              <p className="text-sm text-gray-600 mb-2">{supplement.description}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-bold text-green-600">${supplement.price.toLocaleString()}</span>
-                <span className="text-xs text-gray-500">{supplement.category}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-
-  const AdminResourcesContent = () => (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">Recursos Educativos</h3>
-          <button
-            onClick={() => setShowAddResourceModal(true)}
-            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            <Icons.Plus size="text-sm" /> Agregar Recurso
-          </button>
-        </div>
-        <div className="space-y-4">
-          {resources.map((resource) => (
-            <div key={resource.id} className="border border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-start mb-2">
-                <h4 className="font-medium">{resource.title}</h4>
-                <div className="flex gap-2">
-                  <span
-                    className={`px-2 py-1 text-xs rounded ${
-                      resource.type === "article"
-                        ? "bg-blue-100 text-blue-700"
-                        : resource.type === "video"
-                          ? "bg-purple-100 text-purple-700"
-                          : resource.type === "audio"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {resource.type}
-                  </span>
-                  {resource.is_premium && (
-                    <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded">Premium</span>
-                  )}
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 mb-2">{resource.content}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-gray-500">
-                  Por {resource.author} • {resource.duration_minutes} min
-                </span>
-                <span className="text-xs text-gray-500">{resource.category}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-
-  const AdminAnalyticsContent = () => (
-    <div className="space-y-6">
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Estadísticas Generales</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">{userStats.totalUsers || allUsers.length}</div>
-              <div className="text-sm text-gray-500">Usuarios Totales</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">{userStats.activeToday || 0}</div>
-              <div className="text-sm text-gray-500">Activos Hoy</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">{Math.round(userStats.avgCalories || 0)}</div>
-              <div className="text-sm text-gray-500">Calorías Promedio</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Distribución de Objetivos</h3>
-          <div className="space-y-3">
-            {GOALS.map((goal) => {
-              const count = allUsers.filter((user) => user.goal === goal.id).length
-              const percentage = allUsers.length > 0 ? Math.round((count / allUsers.length) * 100) : 0
-              return (
-                <div key={goal.id} className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{goal.label}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-32 bg-gray-200 rounded-full h-2">
-                      <div className="bg-green-500 h-2 rounded-full" style={{ width: `${percentage}%` }}></div>
-                    </div>
-                    <span className="text-sm text-gray-500 w-12">
-                      {count} ({percentage}%)
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const AdminAIContent = () => (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-          <Icons.Robot size="text-xl" /> Asistente de IA para Administradores
-        </h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Consulta a la IA sobre datos de usuarios y tendencias
-            </label>
-            <textarea
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              rows={3}
-              placeholder="Ej: ¿Cuáles son las tendencias nutricionales de mis usuarios? ¿Qué recomendaciones puedes darme para mejorar la retención?"
-              value={aiQuery}
-              onChange={(e) => setAiQuery(e.target.value)}
-            />
-          </div>
-          <button
-            onClick={handleAiQuery}
-            disabled={isAiLoading || !aiQuery.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium"
-          >
-            {isAiLoading ? (
-              <>
-                <Icons.Loader2 size="text-sm" /> Analizando...
-              </>
-            ) : (
-              <>
-                <Icons.Zap size="text-sm" /> Consultar IA
-              </>
-            )}
-          </button>
-
-          {aiResponse && (
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">Respuesta de la IA:</h4>
-              <p className="text-blue-800">{aiResponse}</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-
-  // Modal para agregar alimento (RESTAURADO)
-  const AddFoodModal = () => {
-    if (!showAddFoodModal) return null
-
-    return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-          <div className="mt-3">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Agregar Nuevo Alimento</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                  value={newFood.name}
-                  onChange={(e) => setNewFood({ ...newFood, name: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Calorías (por 100g)</label>
-                  <input
-                    type="number"
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    value={newFood.calories}
-                    onChange={(e) => setNewFood({ ...newFood, calories: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Proteínas (g)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    value={newFood.protein}
-                    onChange={(e) => setNewFood({ ...newFood, protein: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Carbohidratos (g)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    value={newFood.carbs}
-                    onChange={(e) => setNewFood({ ...newFood, carbs: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Grasas (g)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    value={newFood.fats}
-                    onChange={(e) => setNewFood({ ...newFood, fats: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Categoría</label>
-                <select
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                  value={newFood.category}
-                  onChange={(e) => setNewFood({ ...newFood, category: e.target.value })}
-                >
-                  {FOOD_CATEGORIES.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="flex justify-end space-x-3 mt-6">
-              <button
-                onClick={() => setShowAddFoodModal(false)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleAddFood}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-              >
-                Agregar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // ============================================================================
-  // RENDERIZADO PRINCIPAL
+  // PANTALLA DE LOGIN/REGISTRO RESPONSIVE
   // ============================================================================
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
           <div className="text-center mb-6">
-            <h1 
-              className="text-2xl font-bold text-gray-900 mb-2 cursor-pointer select-none"
-              onClick={handleLogoClick}
-            >
-              ✨ VitalMente
-            </h1>
-            <p className="text-gray-600">Tu compañero de bienestar integral</p>
-            {logoClicks > 0 && logoClicks < 5 && (
-              <div className="text-xs text-gray-400 mt-1">
-                {logoClicks}/5
+            <div onClick={handleLogoClick} className="cursor-pointer">
+              <h1 className="text-xl sm:text-2xl font-bold text-green-600">VitalMente</h1>
+              <p className="text-gray-600 text-sm">Tu compañero de bienestar personalizado</p>
+              <div className="flex justify-center gap-2 mt-2 flex-wrap">
+                <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded">🌐 Conectado</span>
+                <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA Activa</span>
               </div>
-            )}
+              {logoClicks > 0 && <div className="mt-2 text-xs text-gray-400">Clics: {logoClicks}/5</div>}
+            </div>
           </div>
 
-          {/* Input especial para código de administrador */}
-          {showAdminAccess && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <h3 className="text-sm font-medium text-red-900 mb-2">Acceso de Administrador</h3>
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  className="flex-1 p-2 border border-red-300 rounded text-sm"
-                  placeholder="Código de administrador"
-                  value={adminCode}
-                  onChange={(e) => setAdminCode(e.target.value)}
-                  maxLength={10}
-                />
-                <button
-                  onClick={handleAdminAccess}
-                  className="px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700"
-                >
-                  Acceder
-                </button>
-              </div>
-              <p className="text-xs text-red-600 mt-1">Tienes 30 segundos para ingresar el código</p>
+          <div className="space-y-6">
+            {/* Botones de navegación */}
+            <div className="flex rounded-lg bg-gray-100 p-1">
+              <button
+                onClick={() => setShowRegister(false)}
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
+                  !showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600"
+                }`}
+              >
+                Ingresar
+              </button>
+              <button
+                onClick={() => setShowRegister(true)}
+                className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
+                  showRegister ? "bg-white text-green-600 shadow-sm" : "text-gray-600"
+                }`}
+              >
+                Crear Cuenta
+              </button>
             </div>
-          )}
 
-          {!showRegister ? (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">Iniciar Sesión</h2>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Número de teléfono</label>
+            {!showRegister ? (
+              <div className="space-y-4">
                 <input
-                  type="tel"
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="Ej: 3001234567"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  placeholder="+57 300 123 4567"
                   value={loginForm.phone}
                   onChange={(e) => setLoginForm((prev) => ({ ...prev, phone: e.target.value }))}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Código de acceso</label>
                 <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   type="password"
-                  className="w-full p-3 border border-gray-300 rounded-lg"
-                  placeholder="Tu código de 10 dígitos"
+                  placeholder="Código de 10 dígitos"
+                  maxLength={10}
                   value={loginForm.accessCode}
                   onChange={(e) => setLoginForm((prev) => ({ ...prev, accessCode: e.target.value }))}
                 />
-              </div>
-              <button
-                onClick={handleLogin}
-                disabled={isLoading}
-                className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
-              >
-                {isLoading ? "Ingresando..." : "Ingresar"}
-              </button>
-              <div className="text-center">
-                <button onClick={() => setShowRegister(true)} className="text-green-600 hover:text-green-700 text-sm">
-                  ¿No tienes cuenta? Regístrate aquí
+                <button
+                  onClick={handleLogin}
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors text-sm"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Icons.Loader2 size="text-sm" />
+                      Ingresando...
+                    </>
+                  ) : (
+                    "Ingresar"
+                  )}
                 </button>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">Crear Cuenta</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+            ) : (
+              <div className="space-y-4">
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  placeholder="Número de teléfono"
+                  value={registerForm.phone}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
+                />
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  placeholder="Nombre completo"
+                  value={registerForm.name}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, name: e.target.value }))}
+                />
+                <div className="grid grid-cols-2 gap-4">
                   <input
-                    type="tel"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                    value={registerForm.phone}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                    value={registerForm.name}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, name: e.target.value }))}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Edad</label>
-                  <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                    placeholder="Edad"
                     type="number"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                     value={registerForm.age}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, age: e.target.value }))}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
                   <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                    placeholder="Peso (kg)"
                     type="number"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                     value={registerForm.weight}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, weight: e.target.value }))}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Altura (cm)</label>
-                  <input
-                    type="number"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                    value={registerForm.height}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, height: e.target.value }))}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nivel de actividad</label>
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                  placeholder="Altura (cm)"
+                  type="number"
+                  value={registerForm.height}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, height: e.target.value }))}
+                />
                 <select
-                  className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   value={registerForm.activityLevel}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, activityLevel: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setRegisterForm((prev) => ({ ...prev, activityLevel: Number.parseFloat(e.target.value) }))
+                  }
                 >
                   {ACTIVITY_LEVELS.map((level) => (
                     <option key={level.value} value={level.value}>
@@ -3075,91 +2487,748 @@ export default function VitalMenteApp() {
                     </option>
                   ))}
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Objetivo principal</label>
                 <select
-                  className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   value={registerForm.goal}
                   onChange={(e) => setRegisterForm((prev) => ({ ...prev, goal: e.target.value }))}
                 >
-                  {GOALS.map((goal) => (
-                    <option key={goal.id} value={goal.id}>
-                      {goal.label}
-                    </option>
-                  ))}
+                  <optgroup label="🎯 TRANSFORMACIÓN FÍSICA">
+                    {GOALS.filter((goal) => goal.category === "physical").map((goal) => (
+                      <option key={goal.id} value={goal.id}>
+                        {goal.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="💫 BIENESTAR EMOCIONAL">
+                    {GOALS.filter((goal) => goal.category === "emotional").map((goal) => (
+                      <option key={goal.id} value={goal.id}>
+                        {goal.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="⚖️ EQUILIBRIO TOTAL">
+                    {GOALS.filter((goal) => goal.category === "holistic").map((goal) => (
+                      <option key={goal.id} value={goal.id}>
+                        {goal.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Código de acceso</label>
+                <div className="space-y-4">
                   <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     type="password"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                    placeholder="10 dígitos"
+                    placeholder="Código de acceso (10 dígitos)"
+                    maxLength={10}
                     value={registerForm.accessCode}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, accessCode: e.target.value }))}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar código</label>
                   <input
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     type="password"
-                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                    placeholder="Repetir código"
+                    placeholder="Confirmar código"
+                    maxLength={10}
                     value={registerForm.confirmCode}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, confirmCode: e.target.value }))}
                   />
                 </div>
+                <button
+                  onClick={handleRegister}
+                  className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center gap-2 transition-colors text-sm"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Icons.Loader2 size="text-sm" />
+                      Creando cuenta...
+                    </>
+                  ) : (
+                    "Crear cuenta"
+                  )}
+                </button>
               </div>
+            )}
+          </div>
+        </div>
+
+        {/* Modal de acceso administrador */}
+        {showAdminLogin && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+            <div className="relative top-20 mx-auto border w-full max-w-sm shadow-lg rounded-md bg-white">
+              <div className="p-5">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Acceso Administrador</h3>
+                <input
+                  className="w-full p-3 border border-gray-300 rounded-lg mb-4 text-sm"
+                  type="password"
+                  placeholder="Código de acceso"
+                  value={adminCode}
+                  onChange={(e) => setAdminCode(e.target.value)}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handleAdminLogin}
+                    className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 text-sm"
+                  >
+                    Ingresar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAdminLogin(false)
+                      setAdminCode("")
+                      setLogoClicks(0)
+                    }}
+                    className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // APLICACIÓN PRINCIPAL RESPONSIVE
+  // ============================================================================
+  const activeTips = globalTips.filter((tip) => tip.is_active)
+  const mindfulnessResources = globalResources.filter((r) => r.type === "mindfulness" && r.is_active)
+  const nutritionResources = globalResources.filter((r) => r.type === "nutrition" && r.is_active)
+  const exerciseResources = globalResources.filter((r) => r.type === "exercise" && r.is_active)
+  const caloriesProgress = getCaloriesProgress()
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 pb-20">
+      <SaveStatusIndicator />
+      <FloatingActionButtons />
+
+      {/* Header responsive */}
+      <header className="bg-white border-b shadow-sm sticky top-0 z-30">
+        <div className="px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-2xl font-bold text-green-600">VitalMente</h1>
+              <span className="hidden sm:inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">🤖 IA</span>
+            </div>
+            <div className="flex items-center gap-2">
               <button
-                onClick={handleRegister}
-                disabled={isLoading}
-                className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="sm:hidden p-2 rounded-lg hover:bg-gray-100"
               >
-                {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
+                <Icons.Menu size="text-xl" />
               </button>
-              <div className="text-center">
-                <button onClick={() => setShowRegister(false)} className="text-green-600 hover:text-green-700 text-sm">
-                  ¿Ya tienes cuenta? Inicia sesión
+              <button
+                onClick={handleLogout}
+                className="hidden sm:flex px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 items-center gap-2 text-sm"
+              >
+                <Icons.LogOut size="text-sm" />
+                Salir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Menú móvil desplegable */}
+        {showMobileMenu && (
+          <div className="sm:hidden bg-white border-t p-4">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50 rounded-lg text-sm"
+            >
+              <Icons.LogOut size="text-sm" />
+              Cerrar Sesión
+            </button>
+          </div>
+        )}
+      </header>
+
+      {/* Contenido principal */}
+      <main className="px-4 py-6">
+        {activeTab === "inicio" && (
+          <div className="space-y-4">
+            {/* Bienvenida */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="text-base sm:text-lg font-semibold mb-2 flex items-center gap-2">
+                ¡Hola, {currentUser?.name}! <Icons.Magic size="text-lg" />
+              </h2>
+              <p className="text-gray-600 text-sm">{getMotivationalMessage(currentUser?.goal || "reduce_stress")}</p>
+            </div>
+
+            {/* Panel de gamificación */}
+            <GamificationPanel />
+
+            {/* Progreso diario */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold flex items-center gap-2">
+                  <Icons.Target size="text-lg" />
+                  Progreso Diario
+                </h3>
+                <span className="text-xs text-gray-600">
+                  {getProgressPercentage()}% <Icons.CheckCircle size="text-sm" />
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Agua */}
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                  <Icons.Droplets size="text-2xl" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Agua</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button
+                        onClick={() => updateProgress("water", -1)}
+                        className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                      >
+                        <Icons.Minus size="text-sm" />
+                      </button>
+                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.water}</span>
+                      <button
+                        onClick={() => updateProgress("water", 1)}
+                        className="p-1 rounded-full hover:bg-blue-100 transition-colors"
+                      >
+                        <Icons.Plus size="text-sm" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ejercicio */}
+                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                  <Icons.Activity size="text-2xl" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Ejercicio</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button
+                        onClick={() => updateProgress("exercise", -1)}
+                        className="p-1 rounded-full hover:bg-green-100 transition-colors"
+                      >
+                        <Icons.Minus size="text-sm" />
+                      </button>
+                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.exercise}</span>
+                      <button
+                        onClick={() => updateProgress("exercise", 1)}
+                        className="p-1 rounded-full hover:bg-green-100 transition-colors"
+                      >
+                        <Icons.Plus size="text-sm" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mindfulness */}
+                <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                  <Icons.Brain size="text-2xl" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Mindfulness</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button
+                        onClick={() => updateProgress("mindfulness", -1)}
+                        className="p-1 rounded-full hover:bg-purple-100 transition-colors"
+                      >
+                        <Icons.Minus size="text-sm" />
+                      </button>
+                      <span className="text-lg font-bold min-w-[2rem] text-center">{dailyProgress.mindfulness}</span>
+                      <button
+                        onClick={() => updateProgress("mindfulness", 1)}
+                        className="p-1 rounded-full hover:bg-purple-100 transition-colors"
+                      >
+                        <Icons.Plus size="text-sm" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tips del día */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Lightbulb size="text-lg" />
+                Tip del día
+              </h3>
+              {activeTips.length > 0 ? (
+                <>
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xl">{activeTips[currentTipIndex].icon}</span>
+                      <span className="font-medium text-sm">{activeTips[currentTipIndex].category}</span>
+                    </div>
+                    <h4 className="font-semibold text-sm mb-1">{activeTips[currentTipIndex].title}</h4>
+                    <p className="text-gray-600 text-sm">{activeTips[currentTipIndex].content}</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <button
+                      onClick={() => setCurrentTipIndex((prev) => (prev === 0 ? activeTips.length - 1 : prev - 1))}
+                      className="px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg flex items-center gap-1"
+                    >
+                      <Icons.ChevronLeft size="text-sm" /> Anterior
+                    </button>
+                    <button
+                      onClick={() => setCurrentTipIndex((prev) => (prev === activeTips.length - 1 ? 0 : prev + 1))}
+                      className="px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 rounded-lg flex items-center gap-1"
+                    >
+                      Siguiente <Icons.ChevronRight size="text-sm" />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-500 text-sm">No hay tips disponibles.</p>
+              )}
+            </div>
+
+            {/* Recomendaciones IA */}
+            {aiRecommendations.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-4">
+                <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                  <Icons.Robot size="text-lg" />
+                  Recomendaciones IA
+                </h3>
+                {aiRecommendations.map((rec) => (
+                  <div key={rec.id} className="border border-gray-200 rounded-lg p-3 mb-3">
+                    <h4 className="font-semibold text-sm mb-1">{rec.reason}</h4>
+                    <p className="text-xs text-gray-600 mb-2">Suplementos: {rec.supplement_names.join(", ")}</p>
+                    <button
+                      onClick={() => setActiveTab("suplementos")}
+                      className="px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
+                    >
+                      Ver más <Icons.ExternalLink size="text-xs" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "comida" && (
+          <div className="space-y-4">
+            {/* Resumen de calorías */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.UtensilsCrossed size="text-lg" />
+                Resumen Nutricional
+              </h3>
+              {macroResults ? (
+                <>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-medium">Calorías</p>
+                    <p className="text-lg font-bold">
+                      {caloriesProgress.consumed} / {caloriesProgress.target}
+                    </p>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                    <div
+                      className="bg-green-500 h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${caloriesProgress.percentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="p-2 bg-red-50 rounded-lg">
+                      <p className="text-xs font-medium">Proteína</p>
+                      <p className="text-sm font-bold">{consumedMacros.protein}g</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((consumedMacros.protein / macroResults.protein) * 100)}%
+                      </p>
+                    </div>
+                    <div className="p-2 bg-yellow-50 rounded-lg">
+                      <p className="text-xs font-medium">Carbos</p>
+                      <p className="text-sm font-bold">{consumedMacros.carbs}g</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((consumedMacros.carbs / macroResults.carbs) * 100)}%
+                      </p>
+                    </div>
+                    <div className="p-2 bg-blue-50 rounded-lg">
+                      <p className="text-xs font-medium">Grasas</p>
+                      <p className="text-sm font-bold">{consumedMacros.fats}g</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((consumedMacros.fats / macroResults.fats) * 100)}%
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <p className="text-gray-500 text-sm">Calculando macros...</p>
+              )}
+            </div>
+
+            {/* Comidas del día */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.ChefHat size="text-lg" />
+                Comidas de Hoy
+              </h3>
+              <div className="space-y-4">
+                {/* Desayuno */}
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                      <Icons.UtensilsCrossed size="text-sm" /> Desayuno
+                    </h4>
+                    <button
+                      onClick={() => openMealCalculator("desayuno")}
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
+                    >
+                      <Icons.Plus size="text-xs" /> Agregar
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {mealCompositions
+                      .filter((c) => c.meal_type === "desayuno")
+                      .map((composition) => (
+                        <div key={composition.id} className="flex items-center justify-between text-xs">
+                          <div>
+                            <p className="font-medium">{composition.food_name}</p>
+                            <p className="text-gray-500">
+                              {composition.quantity_grams}g - {composition.calories_consumed} cal
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => removeFoodFromMeal(composition.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Icons.Trash2 size="text-xs" />
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Almuerzo */}
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                      <Icons.UtensilsCrossed size="text-sm" /> Almuerzo
+                    </h4>
+                    <button
+                      onClick={() => openMealCalculator("almuerzo")}
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
+                    >
+                      <Icons.Plus size="text-xs" /> Agregar
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {mealCompositions
+                      .filter((c) => c.meal_type === "almuerzo")
+                      .map((composition) => (
+                        <div key={composition.id} className="flex items-center justify-between text-xs">
+                          <div>
+                            <p className="font-medium">{composition.food_name}</p>
+                            <p className="text-gray-500">
+                              {composition.quantity_grams}g - {composition.calories_consumed} cal
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => removeFoodFromMeal(composition.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Icons.Trash2 size="text-xs" />
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Cena */}
+                <div className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                      <Icons.UtensilsCrossed size="text-sm" /> Cena
+                    </h4>
+                    <button
+                      onClick={() => openMealCalculator("cena")}
+                      className="px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
+                    >
+                      <Icons.Plus size="text-xs" /> Agregar
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {mealCompositions
+                      .filter((c) => c.meal_type === "cena")
+                      .map((composition) => (
+                        <div key={composition.id} className="flex items-center justify-between text-xs">
+                          <div>
+                            <p className="font-medium">{composition.food_name}</p>
+                            <p className="text-gray-500">
+                              {composition.quantity_grams}g - {composition.calories_consumed} cal
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => removeFoodFromMeal(composition.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          >
+                            <Icons.Trash2 size="text-xs" />
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "recursos" && (
+          <div className="space-y-4">
+            {/* Recursos de mindfulness */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Brain size="text-lg" />
+                Mindfulness
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {mindfulnessResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Recursos de nutrición */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.UtensilsCrossed size="text-lg" />
+                Nutrición
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {nutritionResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Recursos de ejercicio */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Dumbbell size="text-lg" />
+                Ejercicio
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {exerciseResources.map((resource) => (
+                  <a
+                    key={resource.id}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={resource.image_url || getResourceThumbnail(resource.url, resource.type)}
+                      alt={resource.title}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{resource.title}</h4>
+                      <p className="text-xs text-gray-600">{resource.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "suplementos" && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
+                <Icons.Package size="text-lg" />
+                Suplementos
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {supplements.map((supplement) => (
+                  <div key={supplement.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                    <img
+                      src={supplement.image_url || "/placeholder.svg?height=200&width=200"}
+                      alt={supplement.name}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="p-3">
+                      <h4 className="font-semibold text-sm mb-1">{supplement.name}</h4>
+                      <p className="text-xs text-gray-600 mb-2">{supplement.description}</p>
+                      <p className="text-sm font-medium text-green-600 mb-2">${supplement.price.toLocaleString()}</p>
+                      <ul className="text-xs text-gray-500 mb-3 space-y-1">
+                        {supplement.benefits.slice(0, 3).map((benefit, index) => (
+                          <li key={index}>• {benefit}</li>
+                        ))}
+                      </ul>
+                      <button
+                        onClick={() => handleSupplementContact(supplement)}
+                        className="w-full px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm"
+                      >
+                        <Icons.MessageSquare size="text-sm" />
+                        Contactar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Navegación inferior fija */}
+      <nav className="bg-white border-t shadow-lg fixed bottom-0 left-0 w-full z-30">
+        <div className="px-4">
+          <div className="h-16 flex justify-between">
+            <button
+              onClick={() => setActiveTab("inicio")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "inicio" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <Icons.Home size="text-xl" />
+              <span className="text-xs mt-1">Inicio</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("comida")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "comida" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <Icons.UtensilsCrossed size="text-xl" />
+              <span className="text-xs mt-1">Comida</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("recursos")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "recursos" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <Icons.Link size="text-xl" />
+              <span className="text-xs mt-1">Recursos</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("suplementos")}
+              className={`flex-1 flex flex-col items-center justify-center hover:bg-gray-50 transition-colors ${
+                activeTab === "suplementos" ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              <Icons.Package size="text-xl" />
+              <span className="text-xs mt-1">Tienda</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Modal de calculadora de comida - Responsive */}
+      {showMealCalculator && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+          <div className="relative top-4 mx-auto border w-full max-w-md shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Agregar a {selectedMealType}</h3>
+                <button onClick={() => setShowMealCalculator(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                  <Icons.X size="text-lg" />
+                </button>
+              </div>
+
+              {/* Selector de comida */}
+              <div className="mb-4">
+                <h4 className="font-semibold mb-3 text-sm">Seleccionar alimento</h4>
+                <div className="space-y-3">
+                  {getFoodsByCategory().map((category) => (
+                    <div key={category.id}>
+                      <h5 className="font-medium flex items-center gap-2 text-sm mb-2">
+                        {category.icon} {category.name}
+                      </h5>
+                      <div className="grid grid-cols-2 gap-2">
+                        {category.foods.map((food) => (
+                          <button
+                            key={food.id}
+                            onClick={() => selectFood(food)}
+                            className={`px-3 py-2 text-xs border rounded-lg hover:bg-gray-50 transition-colors text-left ${
+                              selectedFood?.id === food.id ? "border-green-500 bg-green-50" : "border-gray-300"
+                            }`}
+                          >
+                            <div className="font-medium">{food.name}</div>
+                            <div className="text-gray-500">{food.calories} cal/100g</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Selector de cantidad */}
+              {selectedFood && (
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <h4 className="font-semibold mb-2 text-sm">
+                    {selectedFood.name} - {selectedFood.calories} cal/100g
+                  </h4>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      className="flex-1 p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Cantidad"
+                      value={foodQuantity}
+                      onChange={(e) => setFoodQuantity(e.target.value)}
+                    />
+                    <span className="text-sm text-gray-600">gramos</span>
+                  </div>
+                  {foodQuantity && (
+                    <div className="mt-2 text-xs text-gray-600">
+                      Calorías: {Math.round((Number(selectedFood.calories) * Number(foodQuantity)) / 100)} cal
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Botones de acción */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={addFoodToMeal}
+                  className="bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 disabled:bg-gray-400 text-sm"
+                  disabled={!selectedFood || !foodQuantity}
+                >
+                  Agregar
+                </button>
+                <button
+                  onClick={() => setShowMealCalculator(false)}
+                  className="bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 text-sm"
+                >
+                  Cancelar
                 </button>
               </div>
             </div>
-          )}
+          </div>
         </div>
-      </div>
-    )
-  }
-
-  // Si es administrador, mostrar panel de admin (RESTAURADO)
-  if (isAdmin) {
-    return (
-      <>
-        <AdminDashboard />
-        <AddFoodModal />
-      </>
-    )
-  }
-
-  // Si es usuario normal, mostrar interfaz móvil (CON NAVEGACIÓN NUEVA)
-  return (
-    <div className="min-h-screen bg-gray-50 pb-16">
-      <MobileHeader />
-
-      <div className="px-4 py-6">
-        {activeTab === "inicio" && <HomeModule />}
-        {activeTab === "comida" && <ComidaModule />}
-        {activeTab === "batidos" && <BatidosModule />}
-        {activeTab === "ejercicio" && <EjercicioModule />}
-        {activeTab === "recursos" && <RecursosModule />}
-        {activeTab === "suplementos" && <SuplementosModule />}
-        {activeTab === "perfil" && <PerfilModule />}
-      </div>
-
-      <MobileNavigation />
-      <MobileMenu />
-      <RecipeCreatorModal />
-      <MealCalculatorModal />
+      )}
     </div>
   )
 }
